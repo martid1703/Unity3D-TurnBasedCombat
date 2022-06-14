@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Spine.Unity;
 using TMPro;
 using UnfrozenTestWork;
 using UnityEngine;
@@ -14,12 +13,8 @@ public class Unit : MonoBehaviour
     public BoxCollider2D BoxCollider2d { get; private set; }
     private TextMeshPro _unitInfo;
     private HealthBar _healthBar;
-    private GameObject _popupPrefab;
-
-
 
     private InitiativeBar _initiativeBar;
-    private SkeletonAnimation _skeletonAnimation;
 
     public bool IsAlive => UnitData.Health > 0;
     public bool IsSelected { get; private set; }
@@ -29,11 +24,9 @@ public class Unit : MonoBehaviour
         _unitController = GetComponent<UnitController>();
         BoxCollider2d = GetComponentInChildren<BoxCollider2D>();
         _unitInfo = transform.GetComponentInChildren<TextMeshPro>();
-        _skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
         _healthBar = GetComponentInChildren<HealthBar>();
         _initiativeBar = GetComponentInChildren<InitiativeBar>();
         _unitSelectionDisplayer = GetComponentInChildren<UnitSelectionDisplayer>();
-        _popupPrefab = (GameObject)Resources.Load("Prefabs/DamagePopup");
     }
 
     void Start() { }
@@ -174,36 +167,13 @@ public class Unit : MonoBehaviour
 
     public IEnumerator TakeDamage(int damage)
     {
-        yield return _unitController.TakeDamage();
-
-        _healthBar.TakeDamage(damage);
-        var popup = Instantiate(_popupPrefab, transform.position, Quaternion.identity);
-
-        if (IsCriticalDamage(damage))
-        {
-            Debug.Log($"Taking CRITICAL damage: {damage}. Current HP: {UnitData.Health}. Health remaining: {UnitData.Health - damage}.");
-            popup.GetComponent<DamagePopup>().CriticalPopup(damage, transform.position);
-        }
-        else
-        {
-            Debug.Log($"Taking damage: {damage}. Current HP: {UnitData.Health}. Health remaining: {UnitData.Health - damage}");
-            popup.GetComponent<DamagePopup>().RegularPopup(damage, transform.position);
-        }
+        yield return _unitController.TakeDamage(damage, UnitData);
 
         var newUnitData = UnitData.TakeDamage(damage);
         UpdateUnitData(newUnitData);
 
         Deselect();
         _unitController.Idle();
-    }
-
-    private bool IsCriticalDamage(float damage)
-    {
-        if (damage > UnitData.Health / 2)
-        {
-            return true;
-        }
-        return false;
     }
 
     private IEnumerator MoveToTarget(

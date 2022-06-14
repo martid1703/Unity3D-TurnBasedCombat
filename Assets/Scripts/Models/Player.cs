@@ -79,7 +79,7 @@ namespace UnfrozenTestWork
                     yield break;
                 }
 
-                yield return new WaitForSecondsRealtime(0.1f);
+                yield return null;
             }
         }
 

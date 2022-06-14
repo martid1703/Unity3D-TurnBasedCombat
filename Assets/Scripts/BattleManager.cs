@@ -179,7 +179,7 @@ namespace UnfrozenTestWork
                 if (_battleManagerstate != state)
                 {
                     Debug.Log($"BattleManagerState waits to enter free state.");
-                    yield return new WaitForSeconds(5f);
+                    yield return new WaitForSeconds(0.5f);
                 }
                 else
                 {
@@ -215,7 +215,7 @@ namespace UnfrozenTestWork
 
         private bool IsUnitSelectable(Unit unit)
         {
-            if (_attackingUnit == null || unit.UnitData.Type == _attackingUnit.UnitData.Type)
+            if (_attackingUnit == null || unit.UnitData.Type == _attackingUnit.UnitData.Type || unit.IsSelected)
             {
                 return false;
             }
