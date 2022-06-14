@@ -1,0 +1,7 @@
+/*
+!/README.md
+!/Assets
+/Assets/*
+!/Assets/Scripts
+/Assets/Scripts/*.meta
+!/.gitignore
