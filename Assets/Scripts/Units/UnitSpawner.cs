@@ -63,7 +63,8 @@ namespace UnfrozenTestWork
 
             for (int i = 0; i < _playerUnitPrefabs.Length; i++)
             {
-                units.Add(SpawnUnit(UnitType.Player, startPosition, _playerUnitPrefabs[i], rnd));
+                var spawnedUnit = SpawnUnit(UnitType.Player, startPosition, _playerUnitPrefabs[i], rnd);
+                units.Add(spawnedUnit);
             }
 
             return units.ToArray();
@@ -75,7 +76,8 @@ namespace UnfrozenTestWork
 
             for (int i = 0; i < _enemyUnitPrefabs.Length; i++)
             {
-                units.Add(SpawnUnit(UnitType.Enemy, startPosition, _enemyUnitPrefabs[i], rnd));
+                Unit spawnedUnit = SpawnUnit(UnitType.Enemy, startPosition, _enemyUnitPrefabs[i], rnd);
+                units.Add(spawnedUnit);
             }
 
             return units.ToArray();

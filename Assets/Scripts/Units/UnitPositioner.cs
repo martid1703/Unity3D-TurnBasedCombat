@@ -1,26 +1,54 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace UnfrozenTestWork
 {
-    public class UnitPositioner
+    public class UnitPositioner : SingletonBase<UnitPositioner>
     {
-        public void PositionUnits(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
+        Dictionary<Unit, Vector3> _playerUnitPositions;
+        Dictionary<Unit, Vector3> _enemyUnitPositions;
+
+        public void PositionUnitsBattle(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
+        {
+            PositionUnits(playerUnits, enemyUnits, fitInto);
+        }
+
+        public void PositionUnitsOverview(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
+        {
+            if (_playerUnitPositions != null && _enemyUnitPositions != null)
+            {
+                RestorePositions();
+                return;
+            }
+            PositionUnits(playerUnits, enemyUnits, fitInto);
+        }
+
+        private void RestorePositions()
+        {
+            foreach (var item in _playerUnitPositions)
+            {
+                item.Key.transform.position = item.Value;
+            }
+        }
+
+        private void PositionUnits(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
         {
             Vector3 initialOffsetX = GetInitialUnitOffset(playerUnits, enemyUnits, fitInto);
 
-            Vector3[] playerUnitPositions = GetPositions(
+            _playerUnitPositions = GetPositions(
                 playerUnits,
                 fitInto.position,
                 initialOffsetX
             );
-            PlaceUnits(playerUnits, playerUnitPositions);
+            PlaceUnits(playerUnits, _playerUnitPositions.Values.ToArray());
 
-            Vector3[] enemyUnitPositions = GetPositions(
+            _enemyUnitPositions = GetPositions(
                 enemyUnits,
                 fitInto.position,
                 initialOffsetX
             );
-            PlaceUnits(enemyUnits, enemyUnitPositions);
+            PlaceUnits(enemyUnits, _enemyUnitPositions.Values.ToArray());
         }
 
         public void ChangeSortingLayer(Unit[] units, string layerName)
@@ -33,24 +61,22 @@ namespace UnfrozenTestWork
 
         private Vector3 GetInitialUnitOffset(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
         {
-            Unit playerBiggestUnit = FindWidestUnit(playerUnits);
-            Unit enemyBiggestUnit = FindWidestUnit(enemyUnits);
-            var playerBox = playerBiggestUnit.GetComponent<BoxCollider2D>();
-            var enemyBox = enemyBiggestUnit.GetComponent<BoxCollider2D>();
+            Unit playerWidestUnit = FindWidestUnit(playerUnits);
+            Unit enemyWidestUnit = FindWidestUnit(enemyUnits);
+            var playerBox = playerWidestUnit.GetComponent<BoxCollider2D>();
+            var enemyBox = enemyWidestUnit.GetComponent<BoxCollider2D>();
             float initialOffsetX = playerBox.size.x > enemyBox.size.x ? playerBox.size.x : enemyBox.size.x;
             return new Vector3(initialOffsetX, fitInto.rect.height / 2);
         }
 
-        private static Vector3[] GetPositions(Unit[] units, Vector3 startPosition, Vector3 initialOffset)
+        private static Dictionary<Unit, Vector3> GetPositions(Unit[] units, Vector3 startPosition, Vector3 initialOffset)
         {
-            var unitsPositions = new Vector3[units.Length];
+            var unitsPositions = new Dictionary<Unit, Vector3>();
             var lastUnitPosition = startPosition;
             for (int i = 0; i < units.Length; i++)
             {
                 // use boxCollider and not meshRenderer.bounds, because some units have attack mesh included in their mesh, which makes it very big
                 var boxCollider = units[i].GetComponentInChildren<BoxCollider2D>();
-                Vector3 diffInTransforms = boxCollider.transform.position - units[i].transform.position;
-                float unitRectHeight = boxCollider.bounds.size.y;
 
                 float offsetX;
                 if (i == 0) // first unit offset is fixed no matter what
@@ -64,8 +90,8 @@ namespace UnfrozenTestWork
 
                 offsetX = units[i].UnitData.Type == UnitType.Player ? offsetX * (-1) : offsetX;
                 Vector3 position = new Vector3(lastUnitPosition.x + offsetX, startPosition.y - initialOffset.y);
-                unitsPositions[i] = position;// - diffInTransforms;
-                lastUnitPosition = unitsPositions[i];
+                unitsPositions.Add(units[i], position);// - diffInTransforms;
+                lastUnitPosition = position;
             }
             return unitsPositions;
         }

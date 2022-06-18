@@ -129,29 +129,19 @@ namespace UnfrozenTestWork
 
         public void SwitchToBattle(Unit attackingUnit, Unit attackedUnit)
         {
-            if (_battleState == BattleState.Battle)
-            {
-                return;
-            }
-
             _battleState = BattleState.Battle;
             SetupCamera();
 
-            var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray());
+            var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur);
             stateSwitcher.SwitchToBattle(attackingUnit, attackedUnit);
         }
 
         public void SwitchToOverview()
         {
-            if (_battleState == BattleState.Overview)
-            {
-                return;
-            }
-
             _battleState = BattleState.Overview;
             SetupCamera();
 
-            var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray());
+            var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur);
             stateSwitcher.SwitchToOverview();
         }
 
@@ -192,7 +182,7 @@ namespace UnfrozenTestWork
                 if (_battleManagerstate != state)
                 {
                     Debug.Log($"BattleManagerState waits to enter free state.");
-                    yield return null;
+                    yield return new WaitForSeconds(0.1f);
                 }
                 else
                 {

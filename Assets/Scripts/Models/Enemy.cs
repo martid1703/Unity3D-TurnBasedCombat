@@ -7,7 +7,10 @@ namespace UnfrozenTestWork
         protected override IEnumerator WaitPlayerDecision()
         {
             Unit[] attackedUnits = BattleManager.PlayerUnits.ToArray();
-            var _attackedUnit = SelectAttackedUnit(attackedUnits);
+            _attackedUnit = SelectAttackedUnit(attackedUnits);
+
+            // TODO: add some AI or rnd here, to choose between attack and skip
+            SetState(PlayerState.Attack);
 
             if (State == PlayerState.Attack && _attackedUnit != null && _attackedUnit.UnitData.Type != UnitType.Enemy)
             {

@@ -9,7 +9,7 @@ namespace UnfrozenTestWork
             var attackedUnits = BattleManager.EnemyUnits.ToArray();
             while (true)
             {
-                var _attackedUnit = BattleManager.GetAttackedUnit();
+                _attackedUnit = BattleManager.GetAttackedUnit();
 
                 if (State == PlayerState.Attack && _attackedUnit != null && _attackedUnit.UnitData.Type != UnitType.Player)
                 {

@@ -6,8 +6,8 @@ namespace UnfrozenTestWork
 {
     public abstract class PlayerBase : MonoBehaviour
     {
-        private Unit _attackingUnit;
-        private Unit _attackedUnit;
+        protected Unit _attackingUnit;
+        protected Unit _attackedUnit;
 
         protected PlayerState State { get; private set; }
         protected BattleManager BattleManager { get; private set; }
@@ -19,8 +19,6 @@ namespace UnfrozenTestWork
             State = PlayerState.Neutral;
             BattleManager = BattleManager.Instance;
             UnitSelector = new UnitSelector();
-            _attackingUnit = BattleManager.AttackingUnit;
-            _attackedUnit = BattleManager.AttackedUnit;
         }
 
         public void SetState(PlayerState state)
@@ -30,6 +28,7 @@ namespace UnfrozenTestWork
 
         public IEnumerator TakeTurn()
         {
+            _attackingUnit = BattleManager.AttackingUnit;
             UnitSelector.DeselectUnits(BattleManager.PlayerUnits.ToArray(), _attackingUnit);
 
             yield return WaitPlayerDecision();
@@ -49,6 +48,7 @@ namespace UnfrozenTestWork
             }
 
             SetState(PlayerState.Neutral);
+            BattleManager.SwitchToOverview();
             BattleManager.SetBattleManagerState(BattleManagerState.Free);
         }
 
@@ -64,7 +64,6 @@ namespace UnfrozenTestWork
         {
             Debug.Log($"Player skips his turn.");
             StopCoroutine(PerformTurn());
-            BattleManager.SwitchToOverview();
             yield return _attackingUnit.SkipTurn();
         }
     }

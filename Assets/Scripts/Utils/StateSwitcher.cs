@@ -12,21 +12,22 @@ namespace UnfrozenTestWork
 
         private readonly UnitPositioner _unitPositioner;
 
-        public StateSwitcher(Transform overviewSpace, Transform battleSpace, Unit[] playerUnits, Unit[] enemyUnits)
+        public StateSwitcher(Transform overviewSpace, Transform battleSpace, Unit[] playerUnits, Unit[] enemyUnits, Transform blur)
         {
-            _overviewSpace = overviewSpace;
-            _battleSpace = battleSpace;
-            _playerUnits = playerUnits;
-            _enemyUnits = enemyUnits;
+            _overviewSpace = overviewSpace ?? throw new System.ArgumentNullException(nameof(overviewSpace));
+            _battleSpace = battleSpace ?? throw new System.ArgumentNullException(nameof(battleSpace));
+            _playerUnits = playerUnits ?? throw new System.ArgumentNullException(nameof(playerUnits));
+            _enemyUnits = enemyUnits ?? throw new System.ArgumentNullException(nameof(enemyUnits));
+            _blur = blur ?? throw new System.ArgumentNullException(nameof(blur));
 
             _unitPositioner = new UnitPositioner();
         }
 
         public void SwitchToOverview()
         {
-            _unitPositioner.PositionUnits(_playerUnits, _enemyUnits, _overviewSpace.GetComponent<RectTransform>());
             _unitPositioner.ChangeSortingLayer(_playerUnits, "UnitsOverview");
             _unitPositioner.ChangeSortingLayer(_enemyUnits, "UnitsOverview");
+            _unitPositioner.PositionUnitsOverview(_playerUnits, _enemyUnits, _overviewSpace.GetComponent<RectTransform>());
             _blur.gameObject.SetActive(false);
         }
 
@@ -42,9 +43,9 @@ namespace UnfrozenTestWork
                 _playerUnits = new Unit[] { attackedUnit };
                 _enemyUnits = new Unit[] { attackingUnit };
             }
-            //_unitPositioner.PositionUnits(_playerUnits, _enemyUnits, _battleSpace.GetComponent<RectTransform>());
             _unitPositioner.ChangeSortingLayer(_playerUnits, "UnitsBattle");
             _unitPositioner.ChangeSortingLayer(_enemyUnits, "UnitsBattle");
+            _unitPositioner.PositionUnitsBattle(_playerUnits, _enemyUnits, _battleSpace.GetComponent<RectTransform>());
             _blur.gameObject.SetActive(true);
         }
     }
