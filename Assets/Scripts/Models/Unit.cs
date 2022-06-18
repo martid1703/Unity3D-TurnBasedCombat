@@ -9,20 +9,19 @@ public class Unit : MonoBehaviour
 {
     private UnitController _unitController;
     private UnitSelectionDisplayer _unitSelectionDisplayer;
-    public UnitData UnitData { get; private set; }
-    public BoxCollider2D BoxCollider2d { get; private set; }
+    private BoxCollider2D _boxCollider2d;
     private TextMeshPro _unitInfo;
     private HealthBar _healthBar;
-
     private InitiativeBar _initiativeBar;
 
+    public UnitData UnitData { get; private set; }
     public bool IsAlive => UnitData.Health > 0;
     public bool IsSelected { get; private set; }
 
     void Awake()
     {
         _unitController = GetComponent<UnitController>();
-        BoxCollider2d = GetComponentInChildren<BoxCollider2D>();
+        _boxCollider2d = GetComponentInChildren<BoxCollider2D>();
         _unitInfo = transform.GetComponentInChildren<TextMeshPro>();
         _healthBar = GetComponentInChildren<HealthBar>();
         _initiativeBar = GetComponentInChildren<InitiativeBar>();
@@ -139,8 +138,8 @@ public class Unit : MonoBehaviour
 
     private Vector3 GetTargetPosition(Unit attackedUnit)
     {
-        float selfThickness = BoxCollider2d.bounds.extents.x;
-        float targetThickness = attackedUnit.BoxCollider2d.bounds.extents.x;
+        float selfThickness = _boxCollider2d.bounds.extents.x;
+        float targetThickness = attackedUnit._boxCollider2d.bounds.extents.x;
         Vector3 targetPosition;
         if (IsTargetToTheLeft(attackedUnit))
         {

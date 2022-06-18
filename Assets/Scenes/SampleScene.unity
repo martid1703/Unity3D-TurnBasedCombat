@@ -233,15 +233,15 @@ RectTransform:
   m_GameObject: {fileID: 47108923}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2105227, y: 1.5212944, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.024999619, y: 0.010000229}
-  m_SizeDelta: {x: 33.1084, y: 13.287}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 20, y: 15}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &110773227
 PrefabInstance:
@@ -792,6 +792,7 @@ MonoBehaviour:
   _enemyUnitPrefabs:
   - {fileID: 760052318354370734, guid: 437436912fbd08a43ad0db13c9892dbd, type: 3}
   - {fileID: 760052318354370734, guid: 437436912fbd08a43ad0db13c9892dbd, type: 3}
+  _blur: {fileID: 681714192}
   _battleSpace: {fileID: 47108924}
   _overviewSpace: {fileID: 1742941187}
   _unitsContainer: {fileID: 1176752639}
@@ -1729,7 +1730,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1742941186}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -20.95}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1737,8 +1738,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.125, y: 0}
-  m_SizeDelta: {x: 60.1688, y: 20.3376}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 50, y: 15}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2123671644
 GameObject:

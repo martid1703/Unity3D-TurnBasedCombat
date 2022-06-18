@@ -1,58 +1,34 @@
-using System;
 using System.Collections;
-using System.Linq;
-using UnityEngine;
 
 namespace UnfrozenTestWork
 {
-    public class Enemy : MonoBehaviour
+    public class Enemy : PlayerBase
     {
-        private Unit[] _playerUnits;
-        private Unit[] _enemyUnits;
-        Action<BattleState> _ChangeBattleState;
-        Unit _attackingUnit;
-        Unit _attackedUnit;
-        Action<BattleManagerState> _changeBattleManagerState;
-        private UnitSelector _unitSelector;
-
-        private void Awake()
+        protected override IEnumerator WaitPlayerDecision()
         {
-            _unitSelector = new UnitSelector();
+            Unit[] attackedUnits = BattleManager.PlayerUnits.ToArray();
+            var _attackedUnit = SelectAttackedUnit(attackedUnits);
+
+            if (State == PlayerState.Attack && _attackedUnit != null && _attackedUnit.UnitData.Type != UnitType.Enemy)
+            {
+                UnitSelector.DeselectUnits(attackedUnits, _attackedUnit);
+                yield break;
+            }
+
+            if (State == PlayerState.Skip)
+            {
+                UnitSelector.DeselectUnits(attackedUnits);
+                yield break;
+            }
         }
 
-        public IEnumerator TakeTurn(
-            Unit[] playerUnits,
-            Unit[] enemyUnits,
-            Unit attackingUnit,
-            Action<BattleState> changeBattleState,
-            Action<BattleManagerState> changeBattleManagerState)
-        {
-            _playerUnits = playerUnits ?? throw new ArgumentNullException(nameof(playerUnits));
-            _enemyUnits = enemyUnits ?? throw new ArgumentNullException(nameof(enemyUnits));
-            _attackingUnit = attackingUnit ?? throw new ArgumentNullException(nameof(attackingUnit));
-            _ChangeBattleState = changeBattleState ?? throw new ArgumentNullException(nameof(changeBattleState));
-            _changeBattleManagerState = changeBattleManagerState ?? throw new ArgumentNullException(nameof(changeBattleManagerState));
-
-            _unitSelector.DeselectUnits(_enemyUnits.ToArray(), exceptSelected: _attackingUnit);
-            yield return EnemyTakeTurn();
-            _changeBattleManagerState(BattleManagerState.Free);
-        }
-
-        private IEnumerator EnemyTakeTurn()
-        {
-            yield return SelectAttackedUnit(_playerUnits);
-            _ChangeBattleState(BattleState.Battle);
-            _unitSelector.DeselectUnits(_enemyUnits.ToArray(), exceptSelected: _attackedUnit);
-            yield return _attackingUnit.TakeTurn(_attackedUnit);
-        }
-
-        private IEnumerator SelectAttackedUnit(Unit[] units)
+        private Unit SelectAttackedUnit(Unit[] units)
         {
             var random = new System.Random();
             var rnd = random.Next(0, units.Length);
-            _attackedUnit = units[rnd];
+            var _attackedUnit = units[rnd];
             _attackedUnit.SelectAsTarget();
-            yield return null;
+            return _attackedUnit;
         }
     }
 }
