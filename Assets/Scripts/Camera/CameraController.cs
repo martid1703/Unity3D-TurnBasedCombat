@@ -22,7 +22,8 @@ namespace UnfrozenTestWork
         public IEnumerator FitBattle(Transform target, float speed = 5f)
         {
             var rect = target.GetComponent<RectTransform>().rect;
-            yield return ScaleAndFit(rect.height / 2f, target, speed);
+            float correction = 1.3f;
+            yield return ScaleAndFit((rect.height / 2f) * correction, target, speed);
         }
 
         private IEnumerator ScaleAndFit(float targetOrthographicSize, Transform target, float speed = 10f)

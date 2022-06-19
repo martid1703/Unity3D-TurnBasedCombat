@@ -45,14 +45,14 @@ namespace UnfrozenTestWork
                 fitInto.position,
                 initialOffsetX
             );
-            PlaceUnits(playerUnits, playerUnitPositions.Values.ToArray());
+            PlaceUnits(playerUnits, playerUnitPositions);
 
             enemyUnitPositions = GetPositions(
                 enemyUnits,
                 fitInto.position,
                 initialOffsetX
             );
-            PlaceUnits(enemyUnits, enemyUnitPositions.Values.ToArray());
+            PlaceUnits(enemyUnits, enemyUnitPositions);
         }
 
         public void ChangeSortingLayer(Unit[] units, string layerName)
@@ -83,33 +83,31 @@ namespace UnfrozenTestWork
             var lastUnitPosition = startPosition;
             for (int i = 0; i < units.Length; i++)
             {
-                // use boxCollider and not meshRenderer.bounds, because some units have attack mesh included in their mesh, which makes it very big
-                var boxCollider = units[i].GetComponentInChildren<BoxCollider2D>();
-
                 float offsetX;
-                if (i == 0) // first unit offset is fixed no matter what
+                if (i == 0)
                 {
                     offsetX = initialOffset.x;
                 }
                 else
                 {
+                    var boxCollider = units[i].GetComponentInChildren<BoxCollider2D>();
                     var boxColliderPrevious = units[i - 1].GetComponentInChildren<BoxCollider2D>();
-                    offsetX = boxColliderPrevious.bounds.size.x/2 + boxCollider.bounds.size.x/2f;
+                    offsetX = boxColliderPrevious.bounds.size.x / 2 + boxCollider.bounds.size.x / 2f;
                 }
 
-                offsetX = units[i].UnitData.Type == UnitType.Player ? offsetX * (-1) : offsetX;
+                offsetX = units[i].UnitData.Type == UnitType.Player ? -offsetX : offsetX;
                 Vector3 position = new Vector3(lastUnitPosition.x + offsetX, startPosition.y - initialOffset.y);
-                unitsPositions.Add(units[i], position);// - diffInTransforms;
+                unitsPositions.Add(units[i], position);
                 lastUnitPosition = position;
             }
             return unitsPositions;
         }
 
-        private void PlaceUnits(Unit[] units, Vector3[] positions)
+        private void PlaceUnits(Unit[] units, Dictionary<Unit, Vector3> positions)
         {
             for (int i = 0; i < units.Length; i++)
             {
-                units[i].transform.position = positions[i];
+                units[i].transform.position = positions[units[i]];
             }
         }
 

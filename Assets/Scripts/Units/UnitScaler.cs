@@ -15,11 +15,15 @@ namespace UnfrozenTestWork
 
             for (int i = 0; i < units.Length; i++)
             {
-                Vector3 unitLocalScale = units[i].transform.localScale;
-                units[i].transform.localScale = new Vector3(
-                    unitLocalScale.x * minScale,
-                    unitLocalScale.y * minScale
-                );
+                units[i].transform.localScale *= minScale;
+                var collider = units[i].GetComponentInChildren<BoxCollider2D>();
+                collider.size *= minScale;
+                var hpBar = units[i].GetComponentInChildren<HealthBar>();
+                hpBar.transform.localScale *= minScale;
+                var initiativeBar = units[i].GetComponentInChildren<InitiativeBar>();
+                initiativeBar.transform.localScale *= minScale;
+                var selection = units[i].GetComponentInChildren<UnitSelectionDisplayer>();
+                selection.transform.localScale *= minScale;
             }
         }
 
