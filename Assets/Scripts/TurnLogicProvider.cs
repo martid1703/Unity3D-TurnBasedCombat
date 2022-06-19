@@ -113,7 +113,6 @@ namespace UnfrozenTestWork
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Type));
             }
-            //unit.PlayDeadAnimation();
             unit.DestroySelf();
         }
 

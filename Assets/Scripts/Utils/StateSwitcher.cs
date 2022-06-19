@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace UnfrozenTestWork
@@ -7,28 +8,54 @@ namespace UnfrozenTestWork
         private readonly Transform _overviewSpace;
         private readonly Transform _battleSpace;
         private readonly Transform _blur;
+        private readonly InGameUI _inGameUI;
         private Unit[] _playerUnits;
         private Unit[] _enemyUnits;
 
         private readonly UnitPositioner _unitPositioner;
+        private readonly UnitScaler _unitScaler;
 
-        public StateSwitcher(Transform overviewSpace, Transform battleSpace, Unit[] playerUnits, Unit[] enemyUnits, Transform blur)
+        public StateSwitcher(Transform overviewSpace, Transform battleSpace, Unit[] playerUnits, Unit[] enemyUnits, Transform blur, InGameUI inGameUI)
         {
+            _unitPositioner = new UnitPositioner();
+            _unitScaler = new UnitScaler();
+
             _overviewSpace = overviewSpace ?? throw new System.ArgumentNullException(nameof(overviewSpace));
             _battleSpace = battleSpace ?? throw new System.ArgumentNullException(nameof(battleSpace));
             _playerUnits = playerUnits ?? throw new System.ArgumentNullException(nameof(playerUnits));
             _enemyUnits = enemyUnits ?? throw new System.ArgumentNullException(nameof(enemyUnits));
             _blur = blur ?? throw new System.ArgumentNullException(nameof(blur));
-
-            _unitPositioner = new UnitPositioner();
+            _inGameUI = inGameUI ?? throw new System.ArgumentNullException(nameof(inGameUI));
         }
 
         public void SwitchToOverview()
         {
             _unitPositioner.ChangeSortingLayer(_playerUnits, "UnitsOverview");
             _unitPositioner.ChangeSortingLayer(_enemyUnits, "UnitsOverview");
-            _unitPositioner.PositionUnitsOverview(_playerUnits, _enemyUnits, _overviewSpace.GetComponent<RectTransform>());
+            RectTransform fitInto = _overviewSpace.GetComponent<RectTransform>();
+
+            _unitPositioner.PositionUnitsOverview(_playerUnits, _enemyUnits, fitInto);
+
+            var units = new Unit[_playerUnits.Length + _enemyUnits.Length];
+            Array.Copy(_playerUnits, 0, units, 0, _playerUnits.Length);
+            Array.Copy(_enemyUnits, 0, units, _playerUnits.Length, _enemyUnits.Length);
+
+            _unitScaler.ScaleUnits(units, fitInto.rect);
+
+            _unitPositioner.PositionUnitsOverview(_playerUnits, _enemyUnits, fitInto);
+
             _blur.gameObject.SetActive(false);
+            _inGameUI.gameObject.SetActive(true);
+        }
+
+        public void RestoreUnitPositions(Unit attackingUnit, Unit atteckedUnit)
+        {
+            _unitPositioner.ChangeSortingLayer(_playerUnits, "UnitsOverview");
+            _unitPositioner.ChangeSortingLayer(_enemyUnits, "UnitsOverview");
+            _unitPositioner.RestoreUnitsPositions(attackingUnit, atteckedUnit);
+
+            _blur.gameObject.SetActive(false);
+            _inGameUI.gameObject.SetActive(true);
         }
 
         public void SwitchToBattle(Unit attackingUnit, Unit attackedUnit)
@@ -47,6 +74,7 @@ namespace UnfrozenTestWork
             _unitPositioner.ChangeSortingLayer(_enemyUnits, "UnitsBattle");
             _unitPositioner.PositionUnitsBattle(_playerUnits, _enemyUnits, _battleSpace.GetComponent<RectTransform>());
             _blur.gameObject.SetActive(true);
+            _inGameUI.gameObject.SetActive(false);
         }
     }
 }

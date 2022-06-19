@@ -4,21 +4,7 @@ namespace UnfrozenTestWork
 {
     public class ObjectScaler : SingletonBase<ObjectScaler>
     {
-        public float GetScaleCoefficient(Transform objToScale, Transform scaleTo)
-        {
-            var scaleWhatRect = objToScale.GetComponent<RectTransform>().rect;
-            var scaleToRect = scaleTo.GetComponent<RectTransform>().rect;
-
-            return ScaleTwoRectangles(objToScale.transform, scaleWhatRect, scaleToRect);
-        }
-
-        private float ScaleTwoRectangles(Transform objToScale, Rect scaleWhatRect, Rect scaleToRect)
-        {
-            float scale = FindScaleCoefficientBetweenRectangles(scaleWhatRect, scaleToRect);
-            return scale;
-        }
-
-        private float FindScaleCoefficientBetweenRectangles(Rect scaleWhat, Rect scaleTo)
+        public float FindScaleCoefficientBetweenRectangles(Rect scaleWhat, Rect scaleTo)
         {
             float scaleX = scaleWhat.width / scaleTo.width;
             float scaleY = scaleWhat.height / scaleTo.height;

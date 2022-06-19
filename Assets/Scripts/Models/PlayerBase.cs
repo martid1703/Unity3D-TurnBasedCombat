@@ -48,7 +48,7 @@ namespace UnfrozenTestWork
             }
 
             SetState(PlayerState.Neutral);
-            BattleManager.SwitchToOverview();
+            yield return BattleManager.RestoreUnitPositions();
             BattleManager.SetBattleManagerState(BattleManagerState.Free);
         }
 
@@ -56,7 +56,7 @@ namespace UnfrozenTestWork
 
         protected IEnumerator PerformTurn()
         {
-            BattleManager.SwitchToBattle(_attackingUnit, _attackedUnit);
+            yield return BattleManager.SwitchToBattle(_attackingUnit, _attackedUnit);
             yield return _attackingUnit.TakeTurn(_attackedUnit);
         }
 

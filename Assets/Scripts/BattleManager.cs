@@ -56,7 +56,7 @@ namespace UnfrozenTestWork
         private Scene _activeScene;
         private bool _gameOver;
         private UnitSelector _unitSelector;
-
+        private StateSwitcher _stateSwitcher;
 
         public List<Unit> PlayerUnits { get; private set; }
         public List<Unit> EnemyUnits { get; private set; }
@@ -80,7 +80,7 @@ namespace UnfrozenTestWork
             _enemy = GetComponent<Enemy>();
 
             SetupUI();
-            Restart();
+            StartCoroutine(Restart());
         }
 
         private void Update()
@@ -112,37 +112,40 @@ namespace UnfrozenTestWork
             });
         }
 
-        private void SetupCamera()
+        private IEnumerator SetupCamera()
         {
             switch (_battleState)
             {
                 case BattleState.Overview:
-                    _cameraController.Fit(_overviewSpace.transform);
+                  yield return _cameraController.FitOverview(_overviewSpace);
                     break;
                 case BattleState.Battle:
-                    _cameraController.Fit(_battleSpace.transform);
+                   yield return _cameraController.FitBattle(_battleSpace);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(_battleState));
             }
         }
 
-        public void SwitchToBattle(Unit attackingUnit, Unit attackedUnit)
+        public IEnumerator SwitchToBattle(Unit attackingUnit, Unit attackedUnit)
         {
             _battleState = BattleState.Battle;
-            SetupCamera();
-
-            var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur);
-            stateSwitcher.SwitchToBattle(attackingUnit, attackedUnit);
+            _stateSwitcher.SwitchToBattle(attackingUnit, attackedUnit);
+            yield return SetupCamera();
         }
 
-        public void SwitchToOverview()
+        public IEnumerator SwitchToOverview()
         {
             _battleState = BattleState.Overview;
-            SetupCamera();
+            _stateSwitcher.SwitchToOverview();
+            yield return SetupCamera();
+        }
 
-            var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur);
-            stateSwitcher.SwitchToOverview();
+        public IEnumerator RestoreUnitPositions()
+        {
+            _battleState = BattleState.Overview;
+            _stateSwitcher.RestoreUnitPositions(AttackingUnit, AttackedUnit);
+            yield return SetupCamera();
         }
 
         private IEnumerator StartGameCycle()
@@ -177,15 +180,16 @@ namespace UnfrozenTestWork
 
         private IEnumerator WaitBattleManagerState(BattleManagerState state)
         {
+            Debug.Log($"BattleManagerState waits to enter free state.");
             while (true)
             {
                 if (_battleManagerstate != state)
                 {
-                    Debug.Log($"BattleManagerState waits to enter free state.");
                     yield return new WaitForSeconds(0.1f);
                 }
                 else
                 {
+                    Debug.Log($"BattleManagerState is free now.");
                     yield break;
                 }
             }
@@ -261,14 +265,15 @@ namespace UnfrozenTestWork
             _inGameUI.gameObject.SetActive(false);
         }
 
-        public void Restart()
+        public IEnumerator Restart()
         {
             _gameOver = false;
 
             DestroyAllUnits();
             SpawnUnits();
+            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI);
 
-            SwitchToOverview();
+            yield return SwitchToOverview();
 
             SetBattleManagerState(BattleManagerState.Free);
 

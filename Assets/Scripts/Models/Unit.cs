@@ -89,12 +89,6 @@ public class Unit : MonoBehaviour
         _healthBar.Initialize(unitData.Health);
         _initiativeBar.Initialize(unitData.Initiative);
         UpdateUnitData(unitData);
-    }
-
-    private void UpdateUnitData(UnitData unitData)
-    {
-        UnitData = unitData;
-        _unitInfo.text = ToString();
         if (UnitData.Type == UnitType.Player)
         {
             transform.localScale = new Vector3(1f, 1f);
@@ -104,6 +98,12 @@ public class Unit : MonoBehaviour
         {
             transform.localScale = new Vector3(-1f, 1f);
         }
+    }
+
+    private void UpdateUnitData(UnitData unitData)
+    {
+        UnitData = unitData;
+        _unitInfo.text = ToString();
     }
 
     public IEnumerator TakeTurn(Unit target)

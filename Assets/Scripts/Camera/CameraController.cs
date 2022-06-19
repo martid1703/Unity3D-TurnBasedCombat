@@ -6,30 +6,28 @@ namespace UnfrozenTestWork
     public class CameraController : MonoBehaviour
     {
         private Camera _camera;
+        private float _overviewSize;
 
         private void Start()
         {
             _camera = GetComponent<Camera>();
+            _overviewSize = _camera.orthographicSize;
         }
 
-        public Transform GetTransform()
+        public IEnumerator FitOverview(Transform target, float speed = 5f)
         {
-            return _camera.transform;
+            yield return ScaleAndFit(_overviewSize, target, speed);
         }
 
-        public void Fit(Transform go)
+        public IEnumerator FitBattle(Transform target, float speed = 5f)
         {
-            if (_camera.orthographic)
-            {
-                FitOrthographicCamera(go.transform);
-            }
+            var rect = target.GetComponent<RectTransform>().rect;
+            yield return ScaleAndFit(rect.height / 2f, target, speed);
         }
 
-        private IEnumerator FitOrthographicCamera(Transform target, float speed = 5f)
+        private IEnumerator ScaleAndFit(float targetOrthographicSize, Transform target, float speed = 10f)
         {
-            var scale = ObjectScaler.Instance.GetScaleCoefficient(transform, target);
-
-            while (Mathf.Abs(scale - 1f) > 0.05f || transform.position != target.position)
+            while (Mathf.Abs(_camera.orthographicSize - targetOrthographicSize) > 0.01f && transform.position != target.position)
             {
                 float xTarget = target.position.x;
                 float yTarget = target.position.y;
@@ -37,12 +35,8 @@ namespace UnfrozenTestWork
                 float yNew = Mathf.Lerp(transform.position.y, yTarget, Time.deltaTime * speed);
                 transform.position = new Vector3(xNew, yNew, transform.position.z);
 
-                var rect = target.GetComponent<RectTransform>().rect;
-                float orthographicSize = rect.height / 2;
-                _camera.orthographicSize = orthographicSize;
-                _camera.orthographicSize = Mathf.Lerp(_camera.orthographicSize, orthographicSize, Time.deltaTime * speed);
+                _camera.orthographicSize = Mathf.Lerp(_camera.orthographicSize, targetOrthographicSize, Time.deltaTime * speed);
 
-                scale = ObjectScaler.Instance.GetScaleCoefficient(transform, target);
                 yield return null;
             }
         }

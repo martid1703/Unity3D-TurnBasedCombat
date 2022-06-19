@@ -13,7 +13,7 @@ namespace UnfrozenTestWork
         private void Awake()
         {
             _spriteRenderer = GetComponent<SpriteRenderer>();
-            _target = _spriteRenderer.color;
+            _target = Color.red;
             _highlighted = Color.yellow;
             _attacker = Color.blue;
         }
