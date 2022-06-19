@@ -48,11 +48,11 @@ namespace UnfrozenTestWork
             _inGameUI.gameObject.SetActive(true);
         }
 
-        public void RestoreUnitPositions(Unit attackingUnit, Unit atteckedUnit)
+        public void RestoreUnitPositions(Unit attackingUnit, Unit attackedUnit)
         {
-            _unitPositioner.ChangeSortingLayer(_playerUnits, "UnitsOverview");
-            _unitPositioner.ChangeSortingLayer(_enemyUnits, "UnitsOverview");
-            _unitPositioner.RestoreUnitsPositions(attackingUnit, atteckedUnit);
+            _unitPositioner.ChangeSortingLayer(new Unit[] { attackingUnit }, "UnitsOverview");
+            _unitPositioner.ChangeSortingLayer(new Unit[] { attackedUnit }, "UnitsOverview");
+            _unitPositioner.RestoreUnitsPositions(attackingUnit, attackedUnit);
 
             _blur.gameObject.SetActive(false);
             _inGameUI.gameObject.SetActive(true);

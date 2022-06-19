@@ -43,6 +43,12 @@ namespace UnfrozenTestWork
         [SerializeField]
         private Button _btnSkip;
 
+        [SerializeField]
+        private Button _btnAutoBattle;
+
+        [SerializeField]
+        private Transform _gameStatus;
+
         private RootUI _rootUI;
         private InGameUI _inGameUI;
         private GameOverUI _gameOverUI;
@@ -76,11 +82,15 @@ namespace UnfrozenTestWork
             PlayerUnits = new List<Unit>();
             EnemyUnits = new List<Unit>();
 
-            _player = GetComponent<Player>();
-            _enemy = GetComponent<Enemy>();
-
+            SetupPlayers();
             SetupUI();
             StartCoroutine(Restart());
+        }
+
+        private void SetupPlayers()
+        {
+            _player = GetComponent<Player>();
+            _enemy = GetComponent<Enemy>();
         }
 
         private void Update()
@@ -100,7 +110,7 @@ namespace UnfrozenTestWork
             });
             _btnRestart.onClick.AddListener(() =>
             {
-                Restart();
+                StartCoroutine(Restart());
             });
             _btnAttack.onClick.AddListener(() =>
             {
@@ -110,6 +120,20 @@ namespace UnfrozenTestWork
             {
                 _player.SetState(PlayerState.Skip);
             });
+            _btnAutoBattle.onClick.AddListener(() =>
+            {
+                _player.IsHuman = !_player.IsHuman;
+                if (_player.IsHuman)
+                {
+                    _btnAttack.interactable = true;
+                    _btnSkip.interactable = true;
+                }
+                else
+                {
+                    _btnAttack.interactable = false;
+                    _btnSkip.interactable = false;
+                }
+            });
         }
 
         private IEnumerator SetupCamera()
@@ -117,10 +141,10 @@ namespace UnfrozenTestWork
             switch (_battleState)
             {
                 case BattleState.Overview:
-                  yield return _cameraController.FitOverview(_overviewSpace);
+                    yield return _cameraController.FitOverview(_overviewSpace);
                     break;
                 case BattleState.Battle:
-                   yield return _cameraController.FitBattle(_battleSpace);
+                    yield return _cameraController.FitBattle(_battleSpace);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(_battleState));
@@ -139,6 +163,12 @@ namespace UnfrozenTestWork
             _battleState = BattleState.Overview;
             _stateSwitcher.SwitchToOverview();
             yield return SetupCamera();
+        }
+
+        public void SetGameStatus(string message)
+        {
+            var tmp = _gameStatus.GetComponentInChildren<TMP_Text>();
+            tmp.text = message;
         }
 
         public IEnumerator RestoreUnitPositions()
@@ -268,6 +298,8 @@ namespace UnfrozenTestWork
         public IEnumerator Restart()
         {
             _gameOver = false;
+            _player.IsHuman = true;
+            _enemy.IsHuman = false;
 
             DestroyAllUnits();
             SpawnUnits();

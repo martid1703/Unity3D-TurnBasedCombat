@@ -115,7 +115,7 @@ public class Unit : MonoBehaviour
     public IEnumerator SkipTurn()
     {
         Debug.Log($"{this} skipping the turn.");
-        yield return null;
+        yield return new WaitForSeconds(0.5f);
     }
 
     private IEnumerator Attack(Unit attackedUnit)
