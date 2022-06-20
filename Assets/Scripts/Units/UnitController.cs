@@ -33,7 +33,7 @@ namespace UnfrozenTestWork
         {
             float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.TakeDamage, false, Idle);
             StartCoroutine(ShowDamagePopup(damage, unitData.Health, animationDuration));
-            _healthBar.TakeDamage(damage);
+            StartCoroutine(_healthBar.TakeDamage(damage));
             yield return new WaitForSecondsRealtime(animationDuration);
         }
 
@@ -83,7 +83,5 @@ namespace UnfrozenTestWork
         {
             transform.Rotate(new Vector3(0, 0, 90), Space.Self);
         }
-
-
     }
 }

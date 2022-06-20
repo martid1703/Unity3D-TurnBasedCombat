@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace UnfrozenTestWork
@@ -6,7 +7,10 @@ namespace UnfrozenTestWork
     public class HealthBar : MonoBehaviour
     {
         [SerializeField]
-        Gradient _gradient;
+        private Gradient _gradient;
+
+        [SerializeField]
+        private float _reduceSpeed = 5f;
 
         private Transform _bar;
         private float _health;
@@ -25,7 +29,7 @@ namespace UnfrozenTestWork
             _maxHealth = _health = maxHealth;
         }
 
-        public void TakeDamage(float damage)
+        public IEnumerator TakeDamage(float damage)
         {
             _health = Mathf.Clamp(_health - damage, 0, _health);
             if (_health < 0)
@@ -33,15 +37,22 @@ namespace UnfrozenTestWork
                 _health = 0;
             }
 
-            float healthNormalized = (float)Math.Round(_health / _maxHealth, 2);
-            _bar.localScale = new Vector3(healthNormalized, _bar.localScale.y);
-            var color = _gradient.Evaluate(healthNormalized);
-            SetColor(color);
+            float healthNormalized = _health / _maxHealth;
+            var diff = Math.Round(_bar.localScale.x - healthNormalized, 2);
+            while (diff > 0)
+            {
+                diff = Math.Round(_bar.localScale.x - healthNormalized, 2);
+                float heathChange = Mathf.Lerp(_bar.localScale.x, healthNormalized, _reduceSpeed * Time.deltaTime);
+                _bar.localScale = new Vector3(heathChange, _bar.localScale.y);
+                var color = _gradient.Evaluate(healthNormalized);
+                SetColor(color);
+                yield return null;
+            }
         }
 
         private void SetColor(Color color)
         {
-           _visibleHealth.color = color;
+            _visibleHealth.color = color;
         }
     }
 }
