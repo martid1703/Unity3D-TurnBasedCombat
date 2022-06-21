@@ -21,28 +21,51 @@ namespace UnfrozenTestWork
             SetCharacterState(PlayerAnimationState.Idle, true);
         }
 
+        public void SetAnimationSpeed(float speed)
+        {
+            _animationSpeed = speed;
+            var currentTrack = GetCurrentTrackEntry(0);
+            if (currentTrack !=null)
+            {
+                currentTrack.timeScale = speed;
+            }
+        }
+
+        Spine.TrackEntry GetCurrentTrackEntry(int layerIndex)
+        {
+            var currentTrackEntry = _skeletonAnimation.AnimationState.GetCurrent(layerIndex);
+            return currentTrackEntry;
+        }
+
+        /// <summary>Sets the horizontal flip state of the skeleton based on a nonzero float. If negative, the skeleton is flipped. If positive, the skeleton is not flipped.</summary>
+		public void SetFlip (float horizontal) {
+			if (horizontal != 0) {
+				_skeletonAnimation.Skeleton.ScaleX = horizontal > 0 ? 1f : -1f;
+			}
+		}
+
         public float SetCharacterState(PlayerAnimationState playerState, bool loop, Action onAnimationEnd = null)
         {
             switch (playerState)
             {
                 case PlayerAnimationState.Idle:
-                    return SetAnimation(_idle, loop, _animationSpeed, onAnimationEnd);
+                    return SetAnimation(_idle, loop, onAnimationEnd);
                 case PlayerAnimationState.Attack:
-                    return SetAnimation(_attack, loop, _animationSpeed, onAnimationEnd);
+                    return SetAnimation(_attack, loop, onAnimationEnd);
                 case PlayerAnimationState.DoubleShift:
-                    return SetAnimation(_doubleShift, loop, _animationSpeed, onAnimationEnd);
+                    return SetAnimation(_doubleShift, loop, onAnimationEnd);
                 case PlayerAnimationState.TakeDamage:
-                    return SetAnimation(_takeDamage, loop, _animationSpeed, onAnimationEnd);
+                    return SetAnimation(_takeDamage, loop, onAnimationEnd);
                 case PlayerAnimationState.Charge:
-                    return SetAnimation(_charge, loop, _animationSpeed, onAnimationEnd);
+                    return SetAnimation(_charge, loop, onAnimationEnd);
                 case PlayerAnimationState.Run:
-                    return SetAnimation(_run, loop, _animationSpeed, onAnimationEnd);
+                    return SetAnimation(_run, loop, onAnimationEnd);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(playerState));
             }
         }
 
-        private float SetAnimation(AnimationReferenceAsset animationReference, bool loop, float _animationSpeed, Action onAnimationEnd)
+        private float SetAnimation(AnimationReferenceAsset animationReference, bool loop, Action onAnimationEnd)
         {
             Spine.TrackEntry track = _skeletonAnimation.state.SetAnimation(0, animationReference, loop);
             track.timeScale = _animationSpeed;
@@ -51,7 +74,7 @@ namespace UnfrozenTestWork
                 track.End += delegate { onAnimationEnd(); };
             }
 
-            return track.AnimationEnd;
+            return track.AnimationEnd / _animationSpeed;
         }
     }
 }

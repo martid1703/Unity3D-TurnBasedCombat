@@ -18,6 +18,11 @@ namespace UnfrozenTestWork
             _healthBar = GetComponentInChildren<HealthBar>();
         }
 
+        public void SetAnimationSpeed(float speed)
+        {
+            _animatorController.SetAnimationSpeed(speed);
+        }
+
         public void Idle()
         {
             _animatorController.SetCharacterState(PlayerAnimationState.Idle, true);

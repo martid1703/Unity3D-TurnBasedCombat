@@ -20,9 +20,10 @@ namespace UnfrozenTestWork
 
         private int _minDamage = 50;
         private int _maxDamage = 100;
+        private float _moveSpeed = 5f;
 
-        private EventHandler _unitSelected;
-        private Func<Unit, bool> _isUnitSelectable;
+        private readonly EventHandler _unitSelected;
+        private readonly Func<Unit, bool> _isUnitSelectable;
 
         public UnitSpawner(
             Transform[] playerUnitPrefabs,
@@ -30,8 +31,7 @@ namespace UnfrozenTestWork
             Transform overviewSpace,
             EventHandler unitSelected,
             Transform unitsContainer,
-            Func<Unit, bool> isUnitSelectable
-        )
+            Func<Unit, bool> isUnitSelectable)
         {
             _playerUnitPrefabs = playerUnitPrefabs;
             _enemyUnitPrefabs = enemyUnitPrefabs;
@@ -101,6 +101,7 @@ namespace UnfrozenTestWork
             unit.Initialize(unitData);
             unit.UnitSelected += _unitSelected;
             unit.IsUnitSelectable = _isUnitSelectable;
+            BattleManager.Instance.BattleSpeedChange += unit.OnBattleSpeedChange;
             return unit;
         }
 
@@ -110,7 +111,7 @@ namespace UnfrozenTestWork
             int health = rnd.Next(_minHealth, _maxHealth);
             int damage = rnd.Next(_minDamage, _maxDamage);
 
-            var unitData = new UnitData(unitType, initiative, health, damage);
+            var unitData = new UnitData(unitType, initiative, health, damage, _moveSpeed);
             return unitData;
         }
     }

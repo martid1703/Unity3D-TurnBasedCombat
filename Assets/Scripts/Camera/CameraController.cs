@@ -14,19 +14,18 @@ namespace UnfrozenTestWork
             _overviewSize = _camera.orthographicSize;
         }
 
-        public IEnumerator FitOverview(Transform target, float speed = 5f)
+        public IEnumerator FitOverview(RectTransform target, float speed = 5f)
         {
             yield return ScaleAndFit(_overviewSize, target, speed);
         }
 
-        public IEnumerator FitBattle(Transform target, float speed = 5f)
+        public IEnumerator FitBattle(RectTransform target, float speed = 5f)
         {
-            var rect = target.GetComponent<RectTransform>().rect;
             float correction = 1.3f;
-            yield return ScaleAndFit((rect.height / 2f) * correction, target, speed);
+            yield return ScaleAndFit(target.rect.height / 2f * correction, target, speed);
         }
 
-        private IEnumerator ScaleAndFit(float targetOrthographicSize, Transform target, float speed = 10f)
+        private IEnumerator ScaleAndFit(float targetOrthographicSize, RectTransform target, float speed = 10f)
         {
             while (Mathf.Abs(_camera.orthographicSize - targetOrthographicSize) > 0.01f && transform.position != target.position)
             {

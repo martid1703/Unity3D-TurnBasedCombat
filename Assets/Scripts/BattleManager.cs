@@ -23,10 +23,10 @@ namespace UnfrozenTestWork
         private Transform _blur;
 
         [SerializeField]
-        private Transform _battleSpace;
+        private RectTransform _battleSpace;
 
         [SerializeField]
-        private Transform _overviewSpace;
+        private RectTransform _overviewSpace;
 
         [SerializeField]
         private Transform _unitsContainer;
@@ -49,9 +49,15 @@ namespace UnfrozenTestWork
         [SerializeField]
         private Transform _gameStatus;
 
+        [SerializeField]
+        [Range(1, 5)]
+        private int _battleSpeed = 3;
+
         private RootUI _rootUI;
         private InGameUI _inGameUI;
         private GameOverUI _gameOverUI;
+        private Slider _battleSpeedSlider;
+
         private Enemy _enemy;
         private Player _player;
         private CameraController _cameraController;
@@ -71,14 +77,18 @@ namespace UnfrozenTestWork
 
         private void Awake()
         {
+            _activeScene = SceneManager.GetActiveScene();
+            _cameraController = SceneObjectsFinder.FindFirstInRoot<CameraController>(_activeScene);
+            _rootUI = SceneObjectsFinder.FindFirstInRoot<RootUI>(_activeScene);
+            _inGameUI = _rootUI.GetComponentInChildren<InGameUI>(true);
+            _gameOverUI = _rootUI.GetComponentInChildren<GameOverUI>(true);
+            _battleSpeedSlider = _inGameUI.GetComponentInChildren<Slider>(true);
+
             _unitSelector = new UnitSelector();
         }
 
         private void Start()
         {
-            _activeScene = SceneManager.GetActiveScene();
-            _cameraController = SceneObjectsFinder.FindFirstInRoot<CameraController>(_activeScene);
-
             PlayerUnits = new List<Unit>();
             EnemyUnits = new List<Unit>();
 
@@ -96,13 +106,12 @@ namespace UnfrozenTestWork
         private void Update()
         {
             TrackKeyboard();
+            _battleSpeedSlider.value = _battleSpeed;
         }
 
         private void SetupUI()
         {
-            _rootUI = SceneObjectsFinder.FindFirstInRoot<RootUI>(_activeScene);
-            _inGameUI = _rootUI.GetComponentInChildren<InGameUI>(true);
-            _gameOverUI = _rootUI.GetComponentInChildren<GameOverUI>(true);
+
 
             _btnQuit.onClick.AddListener(() =>
             {
@@ -134,6 +143,7 @@ namespace UnfrozenTestWork
                     _btnSkip.interactable = false;
                 }
             });
+            _battleSpeedSlider.onValueChanged.AddListener((v) => { OnBattleSpeedChange(v); });
         }
 
         private IEnumerator SetupCamera()
@@ -149,6 +159,12 @@ namespace UnfrozenTestWork
                 default:
                     throw new ArgumentOutOfRangeException(nameof(_battleState));
             }
+        }
+
+        public event EventHandler<BattleSpeedEventArgs> BattleSpeedChange;
+        private void OnBattleSpeedChange(float speed)
+        {
+            BattleSpeedChange?.Invoke(this, new BattleSpeedEventArgs(speed));
         }
 
         public IEnumerator SwitchToBattle(Unit attackingUnit, Unit attackedUnit)
@@ -167,8 +183,7 @@ namespace UnfrozenTestWork
 
         public void SetGameStatus(string message)
         {
-            var tmp = _gameStatus.GetComponentInChildren<TMP_Text>();
-            tmp.text = message;
+            _gameStatus.GetComponentInChildren<TMP_Text>().text = message;
         }
 
         public IEnumerator RestoreUnitPositions()
@@ -351,6 +366,7 @@ namespace UnfrozenTestWork
 
             PlayerUnits = units.PlayerUnits.ToList();
             EnemyUnits = units.EnemyUnits.ToList();
+            OnBattleSpeedChange(_battleSpeedSlider.value);
         }
 
         public void Quit()

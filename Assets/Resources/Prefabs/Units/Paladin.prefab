@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6251479482383676395}
   - component: {fileID: 832763285905042234}
-  - component: {fileID: 1340572100793798891}
+  - component: {fileID: 1079827455766293689}
   - component: {fileID: 6769969792468497488}
   - component: {fileID: 3717426520880498079}
   m_Layer: 0
@@ -59,7 +59,7 @@ MonoBehaviour:
   _charge: {fileID: 11400000, guid: cc83238c61de380499565292bef7ada4, type: 2}
   _run: {fileID: 11400000, guid: cc83238c61de380499565292bef7ada4, type: 2}
   _animationSpeed: 1
---- !u!114 &1340572100793798891
+--- !u!114 &1079827455766293689
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,6 +71,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e73a65cfb67796e46ad502b8e3ecb028, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UnitData:
+    type: 2
+    initiative: 0
+    health: 0
+    damage: 0
+    moveSpeed: 0
 --- !u!114 &6769969792468497488
 MonoBehaviour:
   m_ObjectHideFlags: 0

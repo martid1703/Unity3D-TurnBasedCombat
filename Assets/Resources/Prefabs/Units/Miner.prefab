@@ -221,6 +221,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e73a65cfb67796e46ad502b8e3ecb028, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UnitData:
+    type: 2
+    initiative: 0
+    health: 0
+    damage: 0
+    moveSpeed: 0
 --- !u!114 &7143674558009318491
 MonoBehaviour:
   m_ObjectHideFlags: 0
