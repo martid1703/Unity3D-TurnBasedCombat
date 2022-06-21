@@ -77,7 +77,7 @@ namespace UnfrozenTestWork
 
         public void OnBattleSpeedChange(object sender, BattleSpeedEventArgs args)
         {
-            _unitController.SetAnimationSpeed(BattleSpeedConverter.GetAnimationSpeed(args.Speed));
+            _unitController.SetBattleSpeed(BattleSpeedConverter.GetAnimationSpeed(args.Speed));
             UnitData.ChangeMoveSpeed(BattleSpeedConverter.GetUnitMoveSpeed(args.Speed));
         }
 
@@ -213,8 +213,6 @@ namespace UnfrozenTestWork
                 heading = targetPosition - transform.position;
                 yield return null;
             }
-
-            _unitController.Idle();
         }
 
         private bool NeedFlipUnitOrientation(Vector3 targetPosition)

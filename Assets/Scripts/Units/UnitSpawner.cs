@@ -96,6 +96,7 @@ namespace UnfrozenTestWork
                 Quaternion.identity,
                 _unitsContainer
             );
+
             var unit = spawnedUnit.gameObject.GetComponentInChildren<Unit>();
             UnitData unitData = GenerateUnitData(unitType, rnd);
             unit.Initialize(unitData);

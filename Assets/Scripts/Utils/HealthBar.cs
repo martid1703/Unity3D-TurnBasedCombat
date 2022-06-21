@@ -9,7 +9,6 @@ namespace UnfrozenTestWork
         [SerializeField]
         private Gradient _gradient;
 
-        [SerializeField]
         private float _reduceSpeed = 5f;
 
         private Transform _bar;
@@ -27,6 +26,11 @@ namespace UnfrozenTestWork
         public void Initialize(float maxHealth)
         {
             _maxHealth = _health = maxHealth;
+        }
+
+        public void SetReduceHPSpeed(float reduceSpeed)
+        {
+            _reduceSpeed = reduceSpeed;
         }
 
         public IEnumerator TakeDamage(float damage)

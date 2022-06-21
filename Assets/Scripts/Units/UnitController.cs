@@ -7,20 +7,22 @@ namespace UnfrozenTestWork
     [RequireComponent(typeof(UnitAnimatorController))]
     public class UnitController : MonoBehaviour
     {
-        private UnitAnimatorController _animatorController;
+        [SerializeField]
         private GameObject _popupPrefab;
+        private UnitAnimatorController _animatorController;
         private HealthBar _healthBar;
+        private float _battleSpeed;
 
         private void Awake()
         {
             _animatorController = GetComponent<UnitAnimatorController>();
-            _popupPrefab = (GameObject)Resources.Load("Prefabs/DamagePopup");
             _healthBar = GetComponentInChildren<HealthBar>();
         }
 
-        public void SetAnimationSpeed(float speed)
+        public void SetBattleSpeed(float speed)
         {
             _animatorController.SetAnimationSpeed(speed);
+            _battleSpeed=speed;
         }
 
         public void Idle()
@@ -30,14 +32,16 @@ namespace UnfrozenTestWork
 
         public IEnumerator Attack(Action onComplete = null)
         {
-            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Attack, false, Idle);
+            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Attack, false);
             yield return new WaitForSecondsRealtime(animationDuration);
         }
 
         public IEnumerator TakeDamage(float damage, UnitData unitData, Action onComplete = null)
         {
-            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.TakeDamage, false, Idle);
+            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.TakeDamage, false);
             StartCoroutine(ShowDamagePopup(damage, unitData.Health, animationDuration));
+
+            _healthBar.SetReduceHPSpeed(BattleSpeedConverter.GetUnitMoveSpeed(_battleSpeed));
             StartCoroutine(_healthBar.TakeDamage(damage));
             yield return new WaitForSecondsRealtime(animationDuration);
         }
@@ -69,13 +73,13 @@ namespace UnfrozenTestWork
 
         public IEnumerator Charge(Action onComplete = null)
         {
-            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Charge, false, Idle);
+            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Charge, false);
             yield return new WaitForSecondsRealtime(animationDuration);
         }
 
         public IEnumerator DoubleShift(Action onComplete = null)
         {
-            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.DoubleShift, false, Idle);
+            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.DoubleShift, false);
             yield return new WaitForSecondsRealtime(animationDuration);
         }
 

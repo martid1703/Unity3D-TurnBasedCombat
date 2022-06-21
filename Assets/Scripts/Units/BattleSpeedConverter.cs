@@ -1,6 +1,3 @@
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 
 namespace UnfrozenTestWork
 {
@@ -10,60 +7,60 @@ namespace UnfrozenTestWork
         {
             if (battleSpeed <= 1)
             {
-                return 0.25f;
+                return 0.5f;
             }
 
             if (battleSpeed <= 2)
             {
-                return 0.5f;
+                return 1f;
             }
 
             if (battleSpeed <= 3)
             {
-                return 1f;
+                return 2f;
             }
 
             if (battleSpeed <= 4)
             {
-                return 2f;
+                return 3f;
             }
 
             if (battleSpeed <= 5)
             {
-                return 3f;
+                return 5f;
             }
 
-            return 5f;
+            return 10f;
         }
 
         public static float GetUnitMoveSpeed(float battleSpeed)
         {
             if (battleSpeed <= 1)
             {
-                return 0.5f;
+                return 1f;
             }
 
             if (battleSpeed <= 2)
             {
-                return 1f;
+                return 5f;
             }
 
             if (battleSpeed <= 3)
             {
-                return 3f;
+                return 10f;
             }
 
             if (battleSpeed <= 4)
             {
-                return 5f;
+                return 20f;
             }
 
             if (battleSpeed <= 5)
             {
-                return 7f;
+                return 30f;
             }
 
-            return 10f;
+            return 50f;
         }
     }
 }

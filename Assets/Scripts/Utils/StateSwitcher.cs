@@ -44,6 +44,8 @@ namespace UnfrozenTestWork
 
             _unitPositioner.PositionUnitsOverview(_playerUnits, _enemyUnits, fitInto);
 
+
+
             _blur.gameObject.SetActive(false);
             _inGameUI.gameObject.SetActive(true);
         }

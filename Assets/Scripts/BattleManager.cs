@@ -106,13 +106,10 @@ namespace UnfrozenTestWork
         private void Update()
         {
             TrackKeyboard();
-            _battleSpeedSlider.value = _battleSpeed;
         }
 
         private void SetupUI()
         {
-
-
             _btnQuit.onClick.AddListener(() =>
             {
                 Quit();
