@@ -62,5 +62,20 @@ namespace UnfrozenTestWork
 
             return 50f;
         }
+
+        public static float GetHPReduceSpeed(float battleSpeed)
+        {
+            if (battleSpeed <= 1)
+            {
+                return 10f;
+            }
+
+            if (battleSpeed <= 5)
+            {
+                return 30f;
+            }
+
+            return 50f;
+        }
     }
 }

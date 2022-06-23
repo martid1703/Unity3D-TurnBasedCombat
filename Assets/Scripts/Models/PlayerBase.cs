@@ -9,7 +9,7 @@ namespace UnfrozenTestWork
     {
         protected Unit _attackingUnit;
         protected Unit _attackedUnit;
-        protected PlayerState State { get; private set; }
+        protected PlayerTurnState State { get; private set; }
         protected BattleManager BattleManager { get; private set; }
         protected UnitSelector UnitSelector { get; private set; }
         public bool IsHuman { get; set; }
@@ -19,13 +19,13 @@ namespace UnfrozenTestWork
 
         private void Awake()
         {
-            State = PlayerState.Neutral;
+            State = PlayerTurnState.Wait;
             BattleManager = BattleManager.Instance;
             UnitSelector = new UnitSelector();
             _rnd = new Random();
         }
 
-        public void SetState(PlayerState state)
+        public void SetState(PlayerTurnState state)
         {
             State = state;
         }
@@ -48,20 +48,20 @@ namespace UnfrozenTestWork
 
             switch (State)
             {
-                case PlayerState.Attack:
+                case PlayerTurnState.TakeTurn:
                     yield return PerformTurn();
                     yield return BattleManager.RestoreUnitPositions();
                     break;
-                case PlayerState.Skip:
+                case PlayerTurnState.SkipTurn:
                     yield return SkipTurn();
                     break;
-                case PlayerState.Neutral:
+                case PlayerTurnState.Wait:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(State));
             }
 
-            SetState(PlayerState.Neutral);
+            SetState(PlayerTurnState.Wait);
             BattleManager.SetBattleManagerState(BattleManagerState.Free);
         }
 
@@ -83,20 +83,20 @@ namespace UnfrozenTestWork
             var rnd = _rnd.Next(0, 100);
             if (rnd < 30)
             {
-                SetState(PlayerState.Skip);
+                SetState(PlayerTurnState.SkipTurn);
             }
             else
             {
-                SetState(PlayerState.Attack);
+                SetState(PlayerTurnState.TakeTurn);
             }
 
-            if (State == PlayerState.Attack && _attackedUnit != null)
+            if (State == PlayerTurnState.TakeTurn && _attackedUnit != null)
             {
                 UnitSelector.DeselectUnits(attackedUnits, _attackedUnit);
                 yield break;
             }
 
-            if (State == PlayerState.Skip)
+            if (State == PlayerTurnState.SkipTurn)
             {
                 UnitSelector.DeselectUnits(attackedUnits);
                 yield break;
@@ -126,13 +126,13 @@ namespace UnfrozenTestWork
 
                 _attackedUnit = BattleManager.GetAttackedUnit();
 
-                if (State == PlayerState.Attack && _attackedUnit != null && _attackedUnit.UnitData.Type != UnitType.Player)
+                if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Type != UnitType.Player)
                 {
                     UnitSelector.DeselectUnits(attackedUnits, _attackedUnit);
                     yield break;
                 }
 
-                if (State == PlayerState.Skip)
+                if (State == PlayerTurnState.SkipTurn)
                 {
                     UnitSelector.DeselectUnits(attackedUnits);
                     yield break;

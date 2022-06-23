@@ -53,6 +53,14 @@ namespace UnfrozenTestWork
         [Range(1, 5)]
         private int _battleSpeed = 3;
 
+        [SerializeField]
+        private Texture2D _handCursor;
+
+        [SerializeField]
+        private Texture2D _swordCursor;
+        private CursorMode _cursorMode = CursorMode.ForceSoftware;
+        private Vector2 _cursorHotSpot = Vector2.zero;
+
         private RootUI _rootUI;
         private InGameUI _inGameUI;
         private GameOverUI _gameOverUI;
@@ -103,11 +111,6 @@ namespace UnfrozenTestWork
             _enemy = GetComponent<Enemy>();
         }
 
-        private void Update()
-        {
-            TrackKeyboard();
-        }
-
         private void SetupUI()
         {
             _btnQuit.onClick.AddListener(() =>
@@ -120,11 +123,11 @@ namespace UnfrozenTestWork
             });
             _btnAttack.onClick.AddListener(() =>
             {
-                _player.SetState(PlayerState.Attack);
+                _player.SetState(PlayerTurnState.TakeTurn);
             });
             _btnSkip.onClick.AddListener(() =>
             {
-                _player.SetState(PlayerState.Skip);
+                _player.SetState(PlayerTurnState.SkipTurn);
             });
             _btnAutoBattle.onClick.AddListener(() =>
             {
@@ -143,6 +146,11 @@ namespace UnfrozenTestWork
             _battleSpeedSlider.onValueChanged.AddListener((v) => { OnBattleSpeedChange(v); });
         }
 
+        private void Update()
+        {
+            TrackKeyboard();
+        }
+
         private IEnumerator SetupCamera()
         {
             switch (_battleState)
@@ -156,6 +164,16 @@ namespace UnfrozenTestWork
                 default:
                     throw new ArgumentOutOfRangeException(nameof(_battleState));
             }
+        }
+
+        public void SetAttackCursor()
+        {
+            Cursor.SetCursor(_swordCursor, _cursorHotSpot, _cursorMode);
+        }
+
+        public void SetRegularCursor()
+        {
+            Cursor.SetCursor(_handCursor, _cursorHotSpot, _cursorMode);
         }
 
         public event EventHandler<BattleSpeedEventArgs> BattleSpeedChange;
@@ -241,12 +259,12 @@ namespace UnfrozenTestWork
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
-                _player.SetState(PlayerState.Attack);
+                _player.SetState(PlayerTurnState.TakeTurn);
             }
 
             if (Input.GetKeyDown(KeyCode.S))
             {
-                _player.SetState(PlayerState.Skip);
+                _player.SetState(PlayerTurnState.SkipTurn);
             }
         }
 

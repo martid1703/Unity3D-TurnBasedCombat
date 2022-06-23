@@ -1,9 +1,9 @@
 namespace UnfrozenTestWork
 {
-    public enum PlayerState
+    public enum PlayerTurnState
     {
-        Attack,
-        Skip,
-        Neutral
+        TakeTurn,
+        SkipTurn,
+        Wait
     }
 }

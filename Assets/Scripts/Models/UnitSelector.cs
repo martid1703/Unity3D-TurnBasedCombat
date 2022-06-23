@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace UnfrozenTestWork
 {
     public class UnitSelector

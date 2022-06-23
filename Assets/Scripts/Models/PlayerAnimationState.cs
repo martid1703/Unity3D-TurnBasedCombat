@@ -4,9 +4,8 @@ namespace UnfrozenTestWork
     {
         Idle,
         Attack,
-        DoubleShift,
         TakeDamage,
-        Charge,
-        Run
+        Run, 
+        Die
     }
 }

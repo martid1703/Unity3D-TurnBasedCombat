@@ -7,6 +7,7 @@ namespace UnfrozenTestWork
     {
         private Camera _camera;
         private float _overviewSize;
+        private float _correction = 1.3f;
 
         private void Start()
         {
@@ -16,13 +17,12 @@ namespace UnfrozenTestWork
 
         public IEnumerator FitOverview(RectTransform target, float speed = 5f)
         {
-            yield return ScaleAndFit(_overviewSize, target, speed);
+            yield return ScaleAndFit(target.rect.height / 2f * _correction, target, speed);
         }
 
         public IEnumerator FitBattle(RectTransform target, float speed = 5f)
         {
-            float correction = 1.3f;
-            yield return ScaleAndFit(target.rect.height / 2f * correction, target, speed);
+            yield return ScaleAndFit(target.rect.height / 2f * _correction, target, speed);
         }
 
         private IEnumerator ScaleAndFit(float targetOrthographicSize, RectTransform target, float speed = 10f)

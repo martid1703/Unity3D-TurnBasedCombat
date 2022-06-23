@@ -40,6 +40,7 @@ namespace UnfrozenTestWork
             {
                 return;
             }
+            BattleManager.Instance.SetAttackCursor();
             _unitSelectionDisplayer.Highlight();
         }
 
@@ -54,6 +55,7 @@ namespace UnfrozenTestWork
 
         void OnMouseExit()
         {
+            BattleManager.Instance.SetRegularCursor();
             if (!IsUnitSelectable(this) || IsSelected)
             {
                 return;
@@ -187,6 +189,12 @@ namespace UnfrozenTestWork
             UpdateUnitData(UnitData);
             Deselect();
 
+            if (!IsAlive)
+            {
+                _unitController.Die();
+                yield break;
+            }
+
             _unitController.Idle();
         }
 
@@ -200,7 +208,7 @@ namespace UnfrozenTestWork
                 transform.right = heading;
             }
 
-            _unitController.Run();
+            StartCoroutine(_unitController.Run());
 
             while (heading.magnitude > stopDistance)
             {

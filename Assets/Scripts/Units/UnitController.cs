@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using Spine;
+using Spine.Unity;
 using UnityEngine;
 
 namespace UnfrozenTestWork
@@ -13,16 +15,67 @@ namespace UnfrozenTestWork
         private HealthBar _healthBar;
         private float _battleSpeed;
 
+        [Space]
+        public SkeletonAnimation _skeletonAnimation;
+
+        [SpineEvent(dataField: "skeletonAnimation", fallbackToTextField: true)]
+        public string footstepEvent;
+
+        [SpineEvent(dataField: "skeletonAnimation", fallbackToTextField: true)]
+        public string attackEvent;
+
+        [SpineEvent(dataField: "skeletonAnimation", fallbackToTextField: true)]
+        public string takeDamageEvent;
+
+        [Space]
+        [SerializeField]
+        private AudioSource _stepAudio;
+
+        [SerializeField]
+        private AudioSource _attackAudio;
+
+        [SerializeField]
+        private AudioSource _damageAudio;
+
+        private Spine.EventData _footstepEventData;
+        private Spine.EventData _attackEventData;
+        private Spine.EventData _takeDamageEventData;
+
         private void Awake()
         {
             _animatorController = GetComponent<UnitAnimatorController>();
             _healthBar = GetComponentInChildren<HealthBar>();
         }
 
+        private void Start()
+        {
+            _footstepEventData = _skeletonAnimation.Skeleton.Data.FindEvent(footstepEvent);
+            _attackEventData = _skeletonAnimation.Skeleton.Data.FindEvent(attackEvent);
+            _takeDamageEventData = _skeletonAnimation.Skeleton.Data.FindEvent(takeDamageEvent);
+
+            _skeletonAnimation.AnimationState.Event += HandleAnimationStateEvent;
+        }
+
+        private void HandleAnimationStateEvent(TrackEntry trackEntry, Spine.Event e)
+        {
+            if (_footstepEventData == e.Data)
+            {
+                _stepAudio.PlayOneShot(_stepAudio.clip);
+            }
+            if (_attackEventData == e.Data)
+            {
+                _attackAudio.PlayOneShot(_attackAudio.clip);
+            }
+            if (_takeDamageEventData == e.Data)
+            {
+                _damageAudio.PlayOneShot(_damageAudio.clip);
+            }
+        }
+
         public void SetBattleSpeed(float speed)
         {
             _animatorController.SetAnimationSpeed(speed);
-            _battleSpeed=speed;
+            _battleSpeed = speed;
         }
 
         public void Idle()
@@ -33,15 +86,17 @@ namespace UnfrozenTestWork
         public IEnumerator Attack(Action onComplete = null)
         {
             float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Attack, false);
+            _attackAudio.PlayOneShot(_attackAudio.clip);
             yield return new WaitForSecondsRealtime(animationDuration);
         }
 
         public IEnumerator TakeDamage(float damage, UnitData unitData, Action onComplete = null)
         {
             float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.TakeDamage, false);
+            _damageAudio.PlayOneShot(_damageAudio.clip);
             StartCoroutine(ShowDamagePopup(damage, unitData.Health, animationDuration));
 
-            _healthBar.SetReduceHPSpeed(BattleSpeedConverter.GetUnitMoveSpeed(_battleSpeed));
+            _healthBar.SetReduceHPSpeed(BattleSpeedConverter.GetHPReduceSpeed(_battleSpeed));
             StartCoroutine(_healthBar.TakeDamage(damage));
             yield return new WaitForSecondsRealtime(animationDuration);
         }
@@ -71,26 +126,15 @@ namespace UnfrozenTestWork
             return false;
         }
 
-        public IEnumerator Charge(Action onComplete = null)
+        public IEnumerator Run()
         {
-            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Charge, false);
-            yield return new WaitForSecondsRealtime(animationDuration);
-        }
-
-        public IEnumerator DoubleShift(Action onComplete = null)
-        {
-            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.DoubleShift, false);
-            yield return new WaitForSecondsRealtime(animationDuration);
-        }
-
-        public void Run()
-        {
-            _animatorController.SetCharacterState(PlayerAnimationState.Run, true);
+            float duration = _animatorController.SetCharacterState(PlayerAnimationState.Run, true);
+            yield return null;
         }
 
         public void Die()
         {
-            transform.Rotate(new Vector3(0, 0, 90), Space.Self);
+            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Die, false);
         }
     }
 }
