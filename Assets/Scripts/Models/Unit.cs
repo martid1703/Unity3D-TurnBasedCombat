@@ -18,6 +18,7 @@ namespace UnfrozenTestWork
         [SerializeField]
         public UnitData UnitData;
         public bool IsAlive => UnitData.Health > 0;
+        public bool IsEnemy => UnitData.Type == UnitType.Enemy;
         public bool IsSelected { get; private set; }
 
         void Awake()
@@ -130,7 +131,8 @@ namespace UnfrozenTestWork
         public IEnumerator SkipTurn()
         {
             Debug.Log($"{this} skipping the turn.");
-            yield return new WaitForSeconds(0.5f);
+            Deselect();
+            yield return new WaitForSeconds(1f);
         }
 
         private IEnumerator Attack(Unit attackedUnit)

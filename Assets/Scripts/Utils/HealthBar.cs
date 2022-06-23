@@ -42,16 +42,17 @@ namespace UnfrozenTestWork
             }
 
             float healthNormalized = _health / _maxHealth;
-            var diff = Math.Round(_bar.localScale.x - healthNormalized, 2);
-            while (diff > 0)
+            double diff;
+            do
             {
-                diff = Math.Round(_bar.localScale.x - healthNormalized, 2);
+                diff = Math.Round(_bar.localScale.x - healthNormalized, 5);
                 float heathChange = Mathf.Lerp(_bar.localScale.x, healthNormalized, _reduceSpeed * Time.deltaTime);
                 _bar.localScale = new Vector3(heathChange, _bar.localScale.y);
                 var color = _gradient.Evaluate(healthNormalized);
                 SetColor(color);
                 yield return null;
-            }
+
+            } while (diff > 0);
         }
 
         private void SetColor(Color color)

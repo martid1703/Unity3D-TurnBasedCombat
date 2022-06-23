@@ -16,8 +16,8 @@ namespace UnfrozenTestWork
             for (int i = 0; i < units.Length; i++)
             {
                 units[i].transform.localScale *= minScale;
-                var collider = units[i].GetComponentInChildren<BoxCollider2D>();
-                collider.size *= minScale;
+                //var collider = units[i].GetComponentInChildren<BoxCollider2D>();
+                //collider.size *= minScale;
                 var hpBar = units[i].GetComponentInChildren<HealthBar>();
                 hpBar.transform.localScale *= minScale;
                 var initiativeBar = units[i].GetComponentInChildren<InitiativeBar>();

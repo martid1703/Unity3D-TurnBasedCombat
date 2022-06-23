@@ -679,6 +679,7 @@ MonoBehaviour:
   _takeDamage: {fileID: 11400000, guid: 83e1b716474ea9141983c4d570adf4f9, type: 2}
   _attack: {fileID: 11400000, guid: ae878f2ec158b824cb9f66d108791a4f, type: 2}
   _run: {fileID: 11400000, guid: ae3118036e73daf4a97fcd068810098b, type: 2}
+  _die: {fileID: 0}
   _animationSpeed: 1
 --- !u!61 &1317514511931417965
 BoxCollider2D:
@@ -901,9 +902,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 760052318354370734}
     m_Modifications:
+    - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1847421344258202534, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_RootOrder
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1847421344258202534, guid: 9724782f022ace347ab56a59e440b484, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1847421344258202534, guid: 9724782f022ace347ab56a59e440b484, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1847421344258202534, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_LocalPosition.x
@@ -948,6 +961,10 @@ PrefabInstance:
     - target: {fileID: 6065542814607071193, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_Name
       value: Circle_Outlined
+      objectReference: {fileID: 0}
+    - target: {fileID: 6065542814607071193, guid: 9724782f022ace347ab56a59e440b484, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9724782f022ace347ab56a59e440b484, type: 3}

@@ -112,6 +112,11 @@ namespace UnfrozenTestWork
             int health = rnd.Next(_minHealth, _maxHealth);
             int damage = rnd.Next(_minDamage, _maxDamage);
 
+            if (unitType==UnitType.Enemy)
+            {
+                //health = 1;
+            }
+
             var unitData = new UnitData(unitType, initiative, health, damage, _moveSpeed);
             return unitData;
         }

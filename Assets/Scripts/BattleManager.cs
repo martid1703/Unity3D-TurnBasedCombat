@@ -23,6 +23,9 @@ namespace UnfrozenTestWork
         private Transform _blur;
 
         [SerializeField]
+        private Transform _fade;
+
+        [SerializeField]
         private RectTransform _battleSpace;
 
         [SerializeField]
@@ -272,7 +275,12 @@ namespace UnfrozenTestWork
         {
             AttackedUnit = sender as Unit;
             Debug.Log($"Player selected unit to attack. Unit:{AttackedUnit}.");
-            _unitSelector.DeselectUnits(EnemyUnits.ToArray(), AttackedUnit);
+            if (AttackedUnit.IsEnemy)
+            {
+                _unitSelector.DeselectUnitsExceptOne(EnemyUnits.ToArray(), AttackedUnit);
+                return;
+            }
+            _unitSelector.DeselectUnitsExceptOne(PlayerUnits.ToArray(), AttackedUnit);
         }
 
         public Unit GetAttackedUnit()
@@ -333,7 +341,7 @@ namespace UnfrozenTestWork
 
             DestroyAllUnits();
             SpawnUnits();
-            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI);
+            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
 
             yield return SwitchToOverview();
 

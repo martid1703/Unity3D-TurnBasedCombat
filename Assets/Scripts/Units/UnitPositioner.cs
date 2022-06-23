@@ -7,6 +7,7 @@ namespace UnfrozenTestWork
     {
         Dictionary<Unit, Vector3> _playerUnitPositions;
         Dictionary<Unit, Vector3> _enemyUnitPositions;
+        private static float _positionCoeff = 0.7f;
 
         public void PositionUnitsBattle(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
         {
@@ -91,7 +92,7 @@ namespace UnfrozenTestWork
                 {
                     var boxCollider = units[i].GetComponentInChildren<BoxCollider2D>();
                     var boxColliderPrevious = units[i - 1].GetComponentInChildren<BoxCollider2D>();
-                    offsetX = boxColliderPrevious.bounds.size.x / 2 + boxCollider.bounds.size.x / 2f;
+                    offsetX = boxColliderPrevious.bounds.size.x * _positionCoeff;
                 }
 
                 offsetX = units[i].UnitData.Type == UnitType.Player ? -offsetX : offsetX;

@@ -2,7 +2,7 @@ namespace UnfrozenTestWork
 {
     public class UnitSelector
     {
-        public void DeselectUnits(Unit[] units, Unit exceptSelected)
+        public void DeselectUnitsExceptOne(Unit[] units, Unit exceptSelected)
         {
             for (int i = 0; i < units.Length; i++)
             {

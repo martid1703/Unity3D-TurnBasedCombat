@@ -50,6 +50,9 @@ TagManager:
   - name: UnitsOverview
     uniqueID: 3812070795
     locked: 0
+  - name: Blur
+    uniqueID: 2068532651
+    locked: 0
   - name: UnitsBattle
     uniqueID: 2318975957
     locked: 0

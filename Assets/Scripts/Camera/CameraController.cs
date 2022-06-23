@@ -6,27 +6,27 @@ namespace UnfrozenTestWork
     public class CameraController : MonoBehaviour
     {
         private Camera _camera;
-        private float _overviewSize;
-        private float _correction = 1.3f;
+        private float _correction = 1.0f;
 
         private void Start()
         {
             _camera = GetComponent<Camera>();
-            _overviewSize = _camera.orthographicSize;
         }
 
         public IEnumerator FitOverview(RectTransform target, float speed = 5f)
         {
-            yield return ScaleAndFit(target.rect.height / 2f * _correction, target, speed);
+            yield return ScaleAndFit(target, speed);
         }
 
         public IEnumerator FitBattle(RectTransform target, float speed = 5f)
         {
-            yield return ScaleAndFit(target.rect.height / 2f * _correction, target, speed);
+            yield return ScaleAndFit(target, speed);
         }
 
-        private IEnumerator ScaleAndFit(float targetOrthographicSize, RectTransform target, float speed = 10f)
+        private IEnumerator ScaleAndFit(RectTransform target, float speed = 10f)
         {
+            var targetOrthographicSize = target.rect.width / _camera.aspect;
+
             while (Mathf.Abs(_camera.orthographicSize - targetOrthographicSize) > 0.01f && transform.position != target.position)
             {
                 float xTarget = target.position.x;

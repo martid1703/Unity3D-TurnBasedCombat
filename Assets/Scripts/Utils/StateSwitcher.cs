@@ -8,6 +8,7 @@ namespace UnfrozenTestWork
         private readonly Transform _overviewSpace;
         private readonly Transform _battleSpace;
         private readonly Transform _blur;
+        private readonly Transform _fade;
         private readonly InGameUI _inGameUI;
         private Unit[] _playerUnits;
         private Unit[] _enemyUnits;
@@ -15,7 +16,7 @@ namespace UnfrozenTestWork
         private readonly UnitPositioner _unitPositioner;
         private readonly UnitScaler _unitScaler;
 
-        public StateSwitcher(Transform overviewSpace, Transform battleSpace, Unit[] playerUnits, Unit[] enemyUnits, Transform blur, InGameUI inGameUI)
+        public StateSwitcher(Transform overviewSpace, Transform battleSpace, Unit[] playerUnits, Unit[] enemyUnits, Transform blur, InGameUI inGameUI, Transform fade)
         {
             _unitPositioner = new UnitPositioner();
             _unitScaler = new UnitScaler();
@@ -26,6 +27,7 @@ namespace UnfrozenTestWork
             _enemyUnits = enemyUnits ?? throw new System.ArgumentNullException(nameof(enemyUnits));
             _blur = blur ?? throw new System.ArgumentNullException(nameof(blur));
             _inGameUI = inGameUI ?? throw new System.ArgumentNullException(nameof(inGameUI));
+            _fade = fade ?? throw new ArgumentNullException(nameof(fade));
         }
 
         public void SwitchToOverview()
@@ -44,9 +46,8 @@ namespace UnfrozenTestWork
 
             _unitPositioner.PositionUnitsOverview(_playerUnits, _enemyUnits, fitInto);
 
-
-
             _blur.gameObject.SetActive(false);
+            _fade.gameObject.SetActive(false);
             _inGameUI.gameObject.SetActive(true);
         }
 
@@ -57,6 +58,7 @@ namespace UnfrozenTestWork
             _unitPositioner.RestoreUnitsPositions(attackingUnit, attackedUnit);
 
             _blur.gameObject.SetActive(false);
+            _fade.gameObject.SetActive(false);
             _inGameUI.gameObject.SetActive(true);
         }
 
@@ -74,8 +76,13 @@ namespace UnfrozenTestWork
             }
             _unitPositioner.ChangeSortingLayer(_playerUnits, "UnitsBattle");
             _unitPositioner.ChangeSortingLayer(_enemyUnits, "UnitsBattle");
-            _unitPositioner.PositionUnitsBattle(_playerUnits, _enemyUnits, _battleSpace.GetComponent<RectTransform>());
+
+            var fitInto = _battleSpace.GetComponent<RectTransform>();
+            //_unitScaler.ScaleUnits(new Unit[] { attackingUnit, attackedUnit }, fitInto.rect);
+            _unitPositioner.PositionUnitsBattle(_playerUnits, _enemyUnits, fitInto);
+
             _blur.gameObject.SetActive(true);
+            _fade.gameObject.SetActive(true);
             _inGameUI.gameObject.SetActive(false);
         }
     }

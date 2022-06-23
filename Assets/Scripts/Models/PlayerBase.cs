@@ -32,9 +32,6 @@ namespace UnfrozenTestWork
 
         public IEnumerator TakeTurn()
         {
-            _attackingUnit = BattleManager.AttackingUnit;
-            UnitSelector.DeselectUnits(BattleManager.PlayerUnits.ToArray(), _attackingUnit);
-
             var msg = $"Waiting player decision...";
             BattleManager.SetGameStatus(msg);
             if (IsHuman)
@@ -92,7 +89,7 @@ namespace UnfrozenTestWork
 
             if (State == PlayerTurnState.TakeTurn && _attackedUnit != null)
             {
-                UnitSelector.DeselectUnits(attackedUnits, _attackedUnit);
+                UnitSelector.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
                 yield break;
             }
 
@@ -114,11 +111,10 @@ namespace UnfrozenTestWork
 
         private IEnumerator WaitHumanDecision()
         {
-
             var attackedUnits = BattleManager.EnemyUnits.ToArray();
             while (true)
             {
-                if (!IsHuman)
+                if (!IsHuman)//in case we switch auto-mode
                 {
                     yield return WaitAIDecision();
                     yield break;
@@ -128,7 +124,7 @@ namespace UnfrozenTestWork
 
                 if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Type != UnitType.Player)
                 {
-                    UnitSelector.DeselectUnits(attackedUnits, _attackedUnit);
+                    UnitSelector.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
                     yield break;
                 }
 
