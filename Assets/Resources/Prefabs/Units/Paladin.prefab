@@ -364,7 +364,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.018183947, y: 3.3068225}
+  m_Offset: {x: -0.018183947, y: 3.4173193}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -375,7 +375,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 4.03644, y: 6.665734}
+  m_Size: {x: 4.03644, y: 8.765153}
   m_EdgeRadius: 0
 --- !u!1 &5466383317020606338
 GameObject:
@@ -833,7 +833,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
+      propertyPath: m_SortingLayer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
+      propertyPath: m_SortingLayerID
+      value: -482896501
       objectReference: {fileID: 0}
     - target: {fileID: 1847421344258202534, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_RootOrder
@@ -915,7 +923,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 508633629985399971, guid: bbcdb18af664f4041b2d70064ccdf8f0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 508633629985399971, guid: bbcdb18af664f4041b2d70064ccdf8f0, type: 3}
       propertyPath: m_LocalScale.y
@@ -985,7 +993,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 508633629985399971, guid: eec0ec89bc30f53488fc7b125588fdfb, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 508633629985399971, guid: eec0ec89bc30f53488fc7b125588fdfb, type: 3}
       propertyPath: m_LocalScale.y

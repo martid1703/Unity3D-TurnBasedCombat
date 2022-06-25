@@ -1,58 +1,100 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace UnfrozenTestWork
 {
     public class UnitPositioner : SingletonBase<UnitPositioner>
     {
-        Dictionary<Unit, Vector3> _playerUnitPositions;
-        Dictionary<Unit, Vector3> _enemyUnitPositions;
-        private static float _positionCoeff = 0.7f;
+        private const string _overviewLayer = "UnitsOverview";
+        private const string _battleLayer = "UnitsBattle";
 
-        public void PositionUnitsBattle(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
+        private readonly UnitScaler _unitScaler;
+        private UnitPositionResult _playerUnitPositions;
+        private UnitPositionResult _enemyUnitPositions;
+
+        private readonly float _offsetX;
+
+        public UnitPositioner()
         {
-            Position(playerUnits, enemyUnits, fitInto, out var playerUnitPositions, out var enemyUnitPositions);
+            _offsetX = 0f;
+            _unitScaler = new UnitScaler();
+        }
+        public UnitPositioner(float offsetX)
+        {
+            _offsetX = offsetX;
+            _unitScaler = new UnitScaler();
         }
 
-        public void PositionUnitsOverview(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
+        public void PositionUnitsOverview(Unit[] playerUnits, Unit[] enemyUnits, Rect fitInto)
         {
-            Position(playerUnits, enemyUnits, fitInto, out var playerUnitPositions, out var enemyUnitPositions);
+            var playerFitInto = GetPlayerFitInto(fitInto);
+            _playerUnitPositions = TransformUnits(playerUnits, playerFitInto);
+            ChangeSortingLayer(playerUnits, _overviewLayer);
 
-            _playerUnitPositions = playerUnitPositions;
-            _enemyUnitPositions = enemyUnitPositions;
+            var enmemyFitInto = GetEnemyFitInto(fitInto);
+            _enemyUnitPositions = TransformUnits(enemyUnits, enmemyFitInto);
+            ChangeSortingLayer(enemyUnits, _overviewLayer);
         }
 
-        public void RestoreUnitsPositions(Unit attackingUnit, Unit attackedUnit)
+        public void PositionUnitsBattle(Unit[] playerUnits, Unit[] enemyUnits, Rect fitInto)
+        {
+            var playerFitInto = GetPlayerFitInto(fitInto);
+            TransformUnits(playerUnits, playerFitInto);
+            ChangeSortingLayer(playerUnits, _battleLayer);
+
+            var enmemyFitInto = GetEnemyFitInto(fitInto);
+            TransformUnits(enemyUnits, enmemyFitInto);
+            ChangeSortingLayer(enemyUnits, _battleLayer);
+        }
+
+        private static Rect GetPlayerFitInto(Rect fitInto)
+        {
+            return new Rect(
+                 fitInto.position.x,
+                 fitInto.position.y,
+                 fitInto.width / 2,
+                 fitInto.height);
+        }
+
+        private static Rect GetEnemyFitInto(Rect fitInto)
+        {
+            return new Rect(
+                 fitInto.position.x + fitInto.width / 2,
+                 fitInto.position.y,
+                 fitInto.width / 2,
+                 fitInto.height);
+        }
+
+        public void ReturnToOverview(Unit attackingUnit, Unit attackedUnit)
         {
             if (_playerUnitPositions == null || _enemyUnitPositions == null)
             {
+                Debug.LogWarning("Cannot return unit to overview, because initial positions are not set.");
                 return;
             }
 
-            var position = attackingUnit.UnitData.Type == UnitType.Player ? _playerUnitPositions[attackingUnit] : _enemyUnitPositions[attackingUnit];
-            attackingUnit.transform.position = position;
-
-            position = attackedUnit.UnitData.Type == UnitType.Player ? _playerUnitPositions[attackedUnit] : _enemyUnitPositions[attackedUnit];
-            attackedUnit.transform.position = position;
+            RevertUnit(attackingUnit);
+            RevertUnit(attackedUnit);
         }
 
-        private void Position(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto, out Dictionary<Unit, Vector3> playerUnitPositions, out Dictionary<Unit, Vector3> enemyUnitPositions)
+        private UnitPositionResult TransformUnits(Unit[] units, Rect fitInto)
         {
-            Vector3 initialOffsetX = GetInitialUnitOffset(playerUnits, enemyUnits, fitInto);
+            Dictionary<Unit, UnitTransform> unitPositionResult = GetUnitPositionResult(units, fitInto);
+            var unitsRect = GetUnitsRect(unitPositionResult);
+            _unitScaler.ScaleUnits(units, unitsRect, fitInto);
+            unitPositionResult = GetUnitPositionResult(units, fitInto);
+            PlaceUnits(units, unitPositionResult);
+            return new UnitPositionResult(unitPositionResult, unitsRect);
+        }
 
-            playerUnitPositions = GetPositions(
-                playerUnits,
-                fitInto.position,
-                initialOffsetX
-            );
-            PlaceUnits(playerUnits, playerUnitPositions);
-
-            enemyUnitPositions = GetPositions(
-                enemyUnits,
-                fitInto.position,
-                initialOffsetX
-            );
-            PlaceUnits(enemyUnits, enemyUnitPositions);
+        private void RevertUnit(Unit unit)
+        {
+            var unitTransform = unit.UnitData.Type == UnitType.Player ? _playerUnitPositions.UnitTransforms[unit] : _enemyUnitPositions.UnitTransforms[unit];
+            unit.transform.position = unitTransform.Position;
+            unit.transform.localScale = unitTransform.Scale;
+            ChangeSortingLayer(new Unit[] { unit }, "UnitsBattle");
         }
 
         public void ChangeSortingLayer(Unit[] units, string layerName)
@@ -67,51 +109,70 @@ namespace UnfrozenTestWork
             }
         }
 
-        private Vector3 GetInitialUnitOffset(Unit[] playerUnits, Unit[] enemyUnits, RectTransform fitInto)
+        private Dictionary<Unit, UnitTransform> GetUnitPositionResult(Unit[] units, Rect fitInto)
         {
-            Unit playerWidestUnit = FindWidestUnit(playerUnits);
-            Unit enemyWidestUnit = FindWidestUnit(enemyUnits);
-            var playerBox = playerWidestUnit.GetComponent<BoxCollider2D>();
-            var enemyBox = enemyWidestUnit.GetComponent<BoxCollider2D>();
-            float initialOffsetX = playerBox.size.x > enemyBox.size.x ? playerBox.size.x : enemyBox.size.x;
-            return new Vector3(initialOffsetX, fitInto.rect.height / 2);
-        }
+            var unitsTransforms = new Dictionary<Unit, UnitTransform>();
 
-        private static Dictionary<Unit, Vector3> GetPositions(Unit[] units, Vector3 startPosition, Vector3 initialOffset)
-        {
-            var unitsPositions = new Dictionary<Unit, Vector3>();
-            var lastUnitPosition = startPosition;
+            float lastUnitPositionX = units[0].UnitData.Type == UnitType.Player ? fitInto.center.x + fitInto.width / 2 : fitInto.center.x - fitInto.width / 2;
+
             for (int i = 0; i < units.Length; i++)
             {
-                float offsetX;
+                float totalOffsetX;
+                var unitBoxCollider = units[i].GetComponentInChildren<BoxCollider2D>();
                 if (i == 0)
                 {
-                    offsetX = initialOffset.x;
+                    totalOffsetX = unitBoxCollider.size.x / 2 + _offsetX;
                 }
                 else
                 {
-                    var boxCollider = units[i].GetComponentInChildren<BoxCollider2D>();
-                    var boxColliderPrevious = units[i - 1].GetComponentInChildren<BoxCollider2D>();
-                    offsetX = boxColliderPrevious.bounds.size.x * _positionCoeff;
+                    var prevUnitSize = units[i - 1].GetComponentInChildren<BoxCollider2D>().size;
+                    totalOffsetX = unitBoxCollider.size.x / 2 + prevUnitSize.x / 2 + _offsetX;
                 }
 
-                offsetX = units[i].UnitData.Type == UnitType.Player ? -offsetX : offsetX;
-                Vector3 position = new Vector3(lastUnitPosition.x + offsetX, startPosition.y - initialOffset.y);
-                unitsPositions.Add(units[i], position);
-                lastUnitPosition = position;
+                totalOffsetX = units[i].UnitData.Type == UnitType.Player ? -totalOffsetX : totalOffsetX;
+
+                float targetRectBottom = fitInto.center.y - fitInto.height / 2;
+                Vector3 position = new Vector3(lastUnitPositionX + totalOffsetX, targetRectBottom);
+
+                // box collider size and offset values are not affected by unit current scale, so need to adjust
+                var unitPosition = units[i].transform.position;
+                var boxColliderCenter = targetRectBottom + unitBoxCollider.offset.y;
+                float boxColliderBottom = boxColliderCenter - unitBoxCollider.size.y / 2;
+                float deltaY = (boxColliderBottom - targetRectBottom) * units[i].transform.localScale.y;
+
+                var newPosition = new Vector3(position.x, position.y + deltaY);
+
+                unitsTransforms.Add(units[i], new UnitTransform(position, units[i].transform.localScale));
+                lastUnitPositionX = position.x;
             }
-            return unitsPositions;
+            return unitsTransforms;
         }
 
-        private void PlaceUnits(Unit[] units, Dictionary<Unit, Vector3> positions)
+        private Rect GetUnitsRect(Dictionary<Unit, UnitTransform> unitPositionResult)
         {
-            for (int i = 0; i < units.Length; i++)
-            {
-                units[i].transform.position = positions[units[i]];
-            }
+            var firstUnit = unitPositionResult.Keys.First();
+            var lastUnit = unitPositionResult.Keys.Last();
+
+            var dist = unitPositionResult[firstUnit].Position - unitPositionResult[lastUnit].Position;
+            Vector3 startPosition = dist / 2;
+
+            var firstUnitSize = firstUnit.GetComponentInChildren<BoxCollider2D>().size.x;
+            var lastUnitSize = lastUnit.GetComponentInChildren<BoxCollider2D>().size.x;
+
+            var unitRectWidth = dist.x + firstUnitSize / 2 + lastUnitSize / 2 + _offsetX;
+
+            var heighestUnit = FindHighestUnit(unitPositionResult.Keys.ToArray());
+
+            Rect unitsRect = new Rect(
+                startPosition.x,
+                startPosition.y,
+                unitRectWidth,
+                heighestUnit.GetComponent<BoxCollider2D>().size.y
+            );
+            return unitsRect;
         }
 
-        private Unit FindWidestUnit(Unit[] units)
+        private Unit FindHighestUnit(Unit[] units)
         {
             Unit biggestUnit = units[0];
 
@@ -119,12 +180,20 @@ namespace UnfrozenTestWork
             {
                 var unitBox = units[i].GetComponent<BoxCollider2D>();
                 var biggestUnitBox = biggestUnit.GetComponent<BoxCollider2D>();
-                if (unitBox.size.x > biggestUnitBox.size.x)
+                if (unitBox.size.y > biggestUnitBox.size.y)
                 {
                     biggestUnit = units[i];
                 }
             }
             return biggestUnit;
+        }
+
+        private void PlaceUnits(Unit[] units, Dictionary<Unit, UnitTransform> unitsTransforms)
+        {
+            for (int i = 0; i < units.Length; i++)
+            {
+                units[i].transform.position = unitsTransforms[units[i]].Position;
+            }
         }
     }
 }

@@ -6,33 +6,31 @@ namespace UnfrozenTestWork
     public class CameraController : MonoBehaviour
     {
         private Camera _camera;
-        private float _correction = 1.0f;
 
         private void Start()
         {
             _camera = GetComponent<Camera>();
         }
 
-        public IEnumerator FitOverview(RectTransform target, float speed = 5f)
+        public IEnumerator FitOverview(Rect target, float speed = 5f)
         {
             yield return ScaleAndFit(target, speed);
         }
 
-        public IEnumerator FitBattle(RectTransform target, float speed = 5f)
+        public IEnumerator FitBattle(Rect target, float speed = 5f)
         {
             yield return ScaleAndFit(target, speed);
         }
 
-        private IEnumerator ScaleAndFit(RectTransform target, float speed = 10f)
+        private IEnumerator ScaleAndFit(Rect target, float speed = 10f)
         {
-            var targetOrthographicSize = target.rect.width / _camera.aspect;
+            var targetOrthographicSize = target.width / _camera.aspect / 2;
+            float _tolerance = 0.1f;
 
-            while (Mathf.Abs(_camera.orthographicSize - targetOrthographicSize) > 0.01f && transform.position != target.position)
+            while (Mathf.Abs(_camera.orthographicSize - targetOrthographicSize) > _tolerance || (Vector2)transform.position != target.center)
             {
-                float xTarget = target.position.x;
-                float yTarget = target.position.y;
-                float xNew = Mathf.Lerp(transform.position.x, xTarget, Time.deltaTime * speed);
-                float yNew = Mathf.Lerp(transform.position.y, yTarget, Time.deltaTime * speed);
+                float xNew = Mathf.Lerp(transform.position.x, target.center.x, Time.deltaTime * speed);
+                float yNew = Mathf.Lerp(transform.position.y, target.center.y, Time.deltaTime * speed);
                 transform.position = new Vector3(xNew, yNew, transform.position.z);
 
                 _camera.orthographicSize = Mathf.Lerp(_camera.orthographicSize, targetOrthographicSize, Time.deltaTime * speed);

@@ -159,10 +159,10 @@ namespace UnfrozenTestWork
             switch (_battleState)
             {
                 case BattleState.Overview:
-                    yield return _cameraController.FitOverview(_overviewSpace);
+                    yield return _cameraController.FitOverview(_overviewSpace.rect);
                     break;
                 case BattleState.Battle:
-                    yield return _cameraController.FitBattle(_battleSpace);
+                    yield return _cameraController.FitBattle(_battleSpace.rect);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(_battleState));
