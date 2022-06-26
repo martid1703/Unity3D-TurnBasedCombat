@@ -18,7 +18,7 @@ namespace UnfrozenTestWork
                 var initiativeBar = units[i].GetComponentInChildren<InitiativeBar>();
                 //initiativeBar.transform.localScale *= minScale;
                 var selection = units[i].GetComponentInChildren<UnitSelectionDisplayer>();
-                selection.transform.localScale *= minScale;
+                //selection.transform.localScale *= minScale;
             }
         }
     }

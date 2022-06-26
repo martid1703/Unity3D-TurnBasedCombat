@@ -204,10 +204,10 @@ namespace UnfrozenTestWork
             _gameStatus.GetComponentInChildren<TMP_Text>().text = message;
         }
 
-        public IEnumerator RestoreUnitPositions()
+        public IEnumerator ReturnUnitsBack()
         {
             _battleState = BattleState.Overview;
-            _stateSwitcher.RestoreUnitPositions(AttackingUnit, AttackedUnit);
+            _stateSwitcher.ReturnUnitsBack(AttackingUnit, AttackedUnit);
             yield return SetupCamera();
         }
 

@@ -212,7 +212,7 @@ namespace UnfrozenTestWork
 
             StartCoroutine(_unitController.Run());
 
-            while (heading.magnitude > stopDistance)
+            while (Math.Abs(heading.x) > stopDistance)
             {
                 var x = Mathf.MoveTowards(
                     transform.position.x,

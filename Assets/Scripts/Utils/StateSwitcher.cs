@@ -13,8 +13,6 @@ namespace UnfrozenTestWork
         private readonly Unit[] _playerUnits;
         private readonly Unit[] _enemyUnits;
 
-        private readonly UnitPositioner _unitPositioner;
-
         public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, Unit[] playerUnits, Unit[] enemyUnits, Transform blur, InGameUI inGameUI, Transform fade)
         {
             _overviewSpace = overviewSpace ?? throw new System.ArgumentNullException(nameof(overviewSpace));
@@ -25,18 +23,17 @@ namespace UnfrozenTestWork
             _inGameUI = inGameUI ?? throw new System.ArgumentNullException(nameof(inGameUI));
             _fade = fade ?? throw new ArgumentNullException(nameof(fade));
 
-            _unitPositioner = new UnitPositioner();
         }
 
         public void SwitchToOverview()
         {
-            _unitPositioner.PositionUnitsOverview(_playerUnits, _enemyUnits, _overviewSpace.rect);
+            UnitPositioner.Instance.PositionUnitsOverview(_playerUnits, _enemyUnits, _overviewSpace.rect);
             SwitchUIToOverview();
         }
 
-        public void RestoreUnitPositions(Unit attackingUnit, Unit attackedUnit)
+        public void ReturnUnitsBack(Unit attackingUnit, Unit attackedUnit)
         {
-            _unitPositioner.ReturnToOverview(attackingUnit, attackedUnit);
+            UnitPositioner.Instance.ReturnUnitsBack(attackingUnit, attackedUnit);
             SwitchUIToOverview();
         }
 
@@ -45,10 +42,13 @@ namespace UnfrozenTestWork
             _blur.gameObject.SetActive(false);
             _fade.gameObject.SetActive(false);
             _inGameUI.gameObject.SetActive(true);
+            _overviewSpace.gameObject.SetActive(true);
+            _battleSpace.gameObject.SetActive(false);
         }
 
         public void SwitchToBattle(Unit attackingUnit, Unit attackedUnit)
         {
+
             Unit[] playerUnits;
             Unit[] enemyUnits;
 
@@ -64,7 +64,7 @@ namespace UnfrozenTestWork
             }
 
             var fitInto = _battleSpace.GetComponent<RectTransform>();
-            _unitPositioner.PositionUnitsBattle(playerUnits, enemyUnits, fitInto.rect);
+            UnitPositioner.Instance.PositionUnitsBattle(playerUnits, enemyUnits, fitInto.rect);
 
             SwitchUIToBattle();
         }
@@ -74,6 +74,8 @@ namespace UnfrozenTestWork
             _blur.gameObject.SetActive(true);
             _fade.gameObject.SetActive(true);
             _inGameUI.gameObject.SetActive(false);
+            _overviewSpace.gameObject.SetActive(false);
+            _battleSpace.gameObject.SetActive(true);
         }
     }
 }

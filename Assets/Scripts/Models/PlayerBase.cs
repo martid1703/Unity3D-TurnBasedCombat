@@ -47,7 +47,7 @@ namespace UnfrozenTestWork
             {
                 case PlayerTurnState.TakeTurn:
                     yield return PerformTurn();
-                    yield return BattleManager.RestoreUnitPositions();
+                    yield return BattleManager.ReturnUnitsBack();
                     break;
                 case PlayerTurnState.SkipTurn:
                     yield return SkipTurn();

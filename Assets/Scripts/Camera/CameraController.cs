@@ -24,8 +24,9 @@ namespace UnfrozenTestWork
 
         private IEnumerator ScaleAndFit(Rect target, float speed = 10f)
         {
-            var targetOrthographicSize = target.width / _camera.aspect / 2;
-            float _tolerance = 0.1f;
+            float _tolerance = 0.5f;
+            var height = target.width / _camera.aspect;
+            var targetOrthographicSize = height / 2;
 
             while (Mathf.Abs(_camera.orthographicSize - targetOrthographicSize) > _tolerance || (Vector2)transform.position != target.center)
             {
