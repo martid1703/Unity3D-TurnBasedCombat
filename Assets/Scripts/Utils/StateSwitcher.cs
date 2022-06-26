@@ -10,10 +10,10 @@ namespace UnfrozenTestWork
         private readonly Transform _blur;
         private readonly Transform _fade;
         private readonly InGameUI _inGameUI;
-        private readonly Unit[] _playerUnits;
-        private readonly Unit[] _enemyUnits;
+        private readonly UnitModel[] _playerUnits;
+        private readonly UnitModel[] _enemyUnits;
 
-        public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, Unit[] playerUnits, Unit[] enemyUnits, Transform blur, InGameUI inGameUI, Transform fade)
+        public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, UnitModel[] playerUnits, UnitModel[] enemyUnits, Transform blur, InGameUI inGameUI, Transform fade)
         {
             _overviewSpace = overviewSpace ?? throw new System.ArgumentNullException(nameof(overviewSpace));
             _battleSpace = battleSpace ?? throw new System.ArgumentNullException(nameof(battleSpace));
@@ -31,7 +31,7 @@ namespace UnfrozenTestWork
             SwitchUIToOverview();
         }
 
-        public void ReturnUnitsBack(Unit attackingUnit, Unit attackedUnit)
+        public void ReturnUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
         {
             UnitPositioner.Instance.ReturnUnitsBack(attackingUnit, attackedUnit);
             SwitchUIToOverview();
@@ -42,25 +42,24 @@ namespace UnfrozenTestWork
             _blur.gameObject.SetActive(false);
             _fade.gameObject.SetActive(false);
             _inGameUI.gameObject.SetActive(true);
-            _overviewSpace.gameObject.SetActive(true);
-            _battleSpace.gameObject.SetActive(false);
+            //_overviewSpace.gameObject.SetActive(true);
+            //_battleSpace.gameObject.SetActive(false);
         }
 
-        public void SwitchToBattle(Unit attackingUnit, Unit attackedUnit)
+        public void SwitchToBattle(UnitModel attackingUnit, UnitModel attackedUnit)
         {
+            UnitModel[] playerUnits;
+            UnitModel[] enemyUnits;
 
-            Unit[] playerUnits;
-            Unit[] enemyUnits;
-
-            if (attackingUnit.UnitData.Type == UnitType.Player)
+            if (attackingUnit.UnitData.Belonging == UnitBelonging.Player)
             {
-                playerUnits = new Unit[] { attackingUnit };
-                enemyUnits = new Unit[] { attackedUnit };
+                playerUnits = new UnitModel[] { attackingUnit };
+                enemyUnits = new UnitModel[] { attackedUnit };
             }
             else
             {
-                playerUnits = new Unit[] { attackedUnit };
-                enemyUnits = new Unit[] { attackingUnit };
+                playerUnits = new UnitModel[] { attackedUnit };
+                enemyUnits = new UnitModel[] { attackingUnit };
             }
 
             var fitInto = _battleSpace.GetComponent<RectTransform>();
@@ -73,9 +72,9 @@ namespace UnfrozenTestWork
         {
             _blur.gameObject.SetActive(true);
             _fade.gameObject.SetActive(true);
-            _inGameUI.gameObject.SetActive(false);
-            _overviewSpace.gameObject.SetActive(false);
-            _battleSpace.gameObject.SetActive(true);
+            //_inGameUI.gameObject.SetActive(false);
+            //_overviewSpace.gameObject.SetActive(false);
+            //_battleSpace.gameObject.SetActive(true);
         }
     }
 }

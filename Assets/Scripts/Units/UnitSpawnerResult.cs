@@ -2,11 +2,11 @@ namespace UnfrozenTestWork
 {
     public class UnitSpawnerResult
     {
-        public Unit[] PlayerUnits { get; private set; }
-        public Unit[] EnemyUnits { get; private set; }
-        public Unit[] NeutralUnits { get; private set; }
+        public UnitModel[] PlayerUnits { get; private set; }
+        public UnitModel[] EnemyUnits { get; private set; }
+        public UnitModel[] NeutralUnits { get; private set; }
 
-        public UnitSpawnerResult(Unit[] playerUnits, Unit[] enemyUnits, Unit[] neutralUnits)
+        public UnitSpawnerResult(UnitModel[] playerUnits, UnitModel[] enemyUnits, UnitModel[] neutralUnits)
         {
             PlayerUnits = playerUnits ?? throw new System.ArgumentNullException(nameof(playerUnits));
             EnemyUnits = enemyUnits ?? throw new System.ArgumentNullException(nameof(enemyUnits));

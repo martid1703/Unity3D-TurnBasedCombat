@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace UnfrozenTestWork
 {
-    public class UnitComparer : IComparer<Unit>
+    public class UnitComparer : IComparer<UnitModel>
     {
 
-        public int Compare(Unit x, Unit y)
+        public int Compare(UnitModel x, UnitModel y)
         {
             if (x == null)
             {

@@ -6,8 +6,14 @@ using UnityEngine;
 namespace UnfrozenTestWork
 {
     [RequireComponent(typeof(UnitController))]
-    public class Unit : MonoBehaviour
+    public class UnitModel : MonoBehaviour
     {
+        [SerializeField]
+        public UnitData UnitData;
+
+        [SerializeField]
+        public bool IsSelected;
+
         private UnitController _unitController;
         private UnitSelectionDisplayer _unitSelectionDisplayer;
         private BoxCollider2D _boxCollider2d;
@@ -15,11 +21,9 @@ namespace UnfrozenTestWork
         private HealthBar _healthBar;
         private InitiativeBar _initiativeBar;
 
-        [SerializeField]
-        public UnitData UnitData;
         public bool IsAlive => UnitData.Health > 0;
-        public bool IsEnemy => UnitData.Type == UnitType.Enemy;
-        public bool IsSelected { get; private set; }
+        public bool IsEnemy => UnitData.Belonging == UnitBelonging.Enemy;
+        //public bool IsSelected { get; private set; }
 
         void Awake()
         {
@@ -33,7 +37,7 @@ namespace UnfrozenTestWork
 
         void Start() { }
 
-        public Func<Unit, bool> IsUnitSelectable;
+        public Func<UnitModel, bool> IsUnitSelectable;
 
         void OnMouseEnter()
         {
@@ -87,6 +91,7 @@ namespace UnfrozenTestWork
         public void SelectAsAttacker()
         {
             _unitSelectionDisplayer.SelectAsAttacker();
+            IsSelected = true;
         }
 
         public void Deselect()
@@ -105,12 +110,12 @@ namespace UnfrozenTestWork
 
         private void ResetLookDirection()
         {
-            if (UnitData.Type == UnitType.Player)
+            if (UnitData.Belonging == UnitBelonging.Player)
             {
                 transform.right = Vector3.right;
             }
 
-            if (UnitData.Type == UnitType.Enemy)
+            if (UnitData.Belonging == UnitBelonging.Enemy)
             {
                 transform.right = Vector3.left;
             }
@@ -122,8 +127,10 @@ namespace UnfrozenTestWork
             _unitInfo.text = ToString();
         }
 
-        public IEnumerator TakeTurn(Unit target)
+        public IEnumerator TakeTurn(UnitModel target)
         {
+            Debug.Log($"{this} taking his turn on the target: {target}.");
+            yield return new WaitForSeconds(1f);
             yield return Attack(target);
             Deselect();
         }
@@ -135,7 +142,7 @@ namespace UnfrozenTestWork
             yield return new WaitForSeconds(1f);
         }
 
-        private IEnumerator Attack(Unit attackedUnit)
+        private IEnumerator Attack(UnitModel attackedUnit)
         {
             Debug.Log($"{this} attacking the target: {attackedUnit}.");
 
@@ -155,7 +162,7 @@ namespace UnfrozenTestWork
             _unitController.Idle();
         }
 
-        private Vector3 GetTargetPosition(Unit attackedUnit)
+        private Vector3 GetTargetPosition(UnitModel attackedUnit)
         {
             float selfThickness = _boxCollider2d.bounds.extents.x;
             float targetThickness = attackedUnit._boxCollider2d.bounds.extents.x;
@@ -178,7 +185,7 @@ namespace UnfrozenTestWork
             return targetPosition;
         }
 
-        private bool IsTargetToTheLeft(Unit target)
+        private bool IsTargetToTheLeft(UnitModel target)
         {
             return transform.position.x > target.transform.position.x;
         }

@@ -1,17 +1,13 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = System.Random;
+using Random = UnityEngine.Random;
 
 namespace UnfrozenTestWork
 {
     public class UnitSpawner
     {
-        private Transform[] _playerUnitPrefabs;
-        private Transform[] _enemyUnitPrefabs;
         private Transform _overviewSpace;
-        private Transform _unitsContainer;
-
         private int _minInitiative = 50;
         private int _maxInitiative = 100;// 100% is max value
 
@@ -23,33 +19,39 @@ namespace UnfrozenTestWork
         private float _moveSpeed = 5f;
 
         private readonly EventHandler _unitSelected;
-        private readonly Func<Unit, bool> _isUnitSelectable;
+        private readonly Func<UnitModel, bool> _isUnitSelectable;
+
+        private Transform _playerUnitsContainer;
+        private Transform _enemyUnitsContainer;
 
         public UnitSpawner(
-            Transform[] playerUnitPrefabs,
-            Transform[] enemyUnitPrefabs,
             Transform overviewSpace,
             EventHandler unitSelected,
-            Transform unitsContainer,
-            Func<Unit, bool> isUnitSelectable)
+            Func<UnitModel, bool> isUnitSelectable,
+            Transform playerUnitsContainer,
+            Transform enemyUnitsContainer)
         {
-            _playerUnitPrefabs = playerUnitPrefabs;
-            _enemyUnitPrefabs = enemyUnitPrefabs;
             _overviewSpace = overviewSpace;
             _unitSelected = unitSelected;
-            _unitsContainer = unitsContainer;
             _isUnitSelectable = isUnitSelectable;
+            _playerUnitsContainer = playerUnitsContainer;
+            _enemyUnitsContainer = enemyUnitsContainer;
         }
 
-        public UnitSpawnerResult Spawn()
+        public UnitSpawnerResult Spawn(UnitType[] playerUnits, UnitType[] enemyUnits)
         {
-            var rnd = new Random();
-
             var startPosition = GetStartPosition();
-            var playerUnits = SpawnPlayerUnits(startPosition, rnd);
-            var enemyUnits = SpawnEnemyUnits(startPosition, rnd);
+            var spawnedPlayerUnits = SpawnUnits(UnitBelonging.Player, playerUnits, startPosition);
+            var spawnedEnemyUnits = SpawnUnits(UnitBelonging.Enemy, enemyUnits, startPosition);
 
-            return new UnitSpawnerResult(playerUnits, enemyUnits, new Unit[0]);
+            return new UnitSpawnerResult(spawnedPlayerUnits, spawnedEnemyUnits, new UnitModel[0]);
+        }
+
+        public void AddUnit(UnitBelonging unitBelonging, UnitType unit, List<UnitModel> units)
+        {
+            var startPosition = GetStartPosition();
+            var spawnedUnit = SpawnUnit(unitBelonging, unit, startPosition);
+            units.Add(spawnedUnit);
         }
 
         private Vector3 GetStartPosition()
@@ -57,67 +59,50 @@ namespace UnfrozenTestWork
             return new Vector3(_overviewSpace.position.x, _overviewSpace.position.y);
         }
 
-        private Unit[] SpawnPlayerUnits(Vector3 startPosition, Random rnd)
+        private UnitModel[] SpawnUnits(UnitBelonging unitBelonging, UnitType[] units, Vector3 startPosition)
         {
-            var units = new List<Unit>(_playerUnitPrefabs.Length + _enemyUnitPrefabs.Length);
-
-            for (int i = 0; i < _playerUnitPrefabs.Length; i++)
+            var spawnedUnits = new List<UnitModel>();
+            for (int i = 0; i < units.Length; i++)
             {
-                var spawnedUnit = SpawnUnit(UnitType.Player, startPosition, _playerUnitPrefabs[i], rnd);
-                units.Add(spawnedUnit);
+                var spawnedUnit = SpawnUnit(unitBelonging, units[i], startPosition);
+                spawnedUnits.Add(spawnedUnit);
             }
 
-            return units.ToArray();
+            return spawnedUnits.ToArray();
         }
 
-        private Unit[] SpawnEnemyUnits(Vector3 startPosition, Random rnd)
+        private UnitModel SpawnUnit(UnitBelonging unitBelonging, UnitType unit, Vector3 position)
         {
-            var units = new List<Unit>(_playerUnitPrefabs.Length + _enemyUnitPrefabs.Length);
+            UnitModel unitPrefab = UnitManager.Instance.GetUnitPrefab(unit);
 
-            for (int i = 0; i < _enemyUnitPrefabs.Length; i++)
+            if (unitPrefab == null)
             {
-                Unit spawnedUnit = SpawnUnit(UnitType.Enemy, startPosition, _enemyUnitPrefabs[i], rnd);
-                units.Add(spawnedUnit);
+                throw new Exception($"Cannot find prefab for unit type - {unit}.");
             }
 
-            return units.ToArray();
-        }
+            var unitParent = unitBelonging == UnitBelonging.Player ? _playerUnitsContainer : _enemyUnitsContainer;
 
-        private Unit SpawnUnit(
-            UnitType unitType,
-            Vector3 position,
-            Transform unitPrefab,
-            Random rnd
-        )
-        {
             var spawnedUnit = GameObject.Instantiate(
                 unitPrefab,
                 position,
                 Quaternion.identity,
-                _unitsContainer
-            );
+                unitParent);
 
-            var unit = spawnedUnit.gameObject.GetComponentInChildren<Unit>();
-            UnitData unitData = GenerateUnitData(unitType, rnd);
-            unit.Initialize(unitData);
-            unit.UnitSelected += _unitSelected;
-            unit.IsUnitSelectable = _isUnitSelectable;
-            BattleManager.Instance.BattleSpeedChange += unit.OnBattleSpeedChange;
-            return unit;
+            UnitData unitData = GenerateUnitData(unitBelonging, unit);
+            spawnedUnit.Initialize(unitData);
+            spawnedUnit.UnitSelected += _unitSelected;
+            spawnedUnit.IsUnitSelectable = _isUnitSelectable;
+            BattleManager.Instance.BattleSpeedChange += spawnedUnit.OnBattleSpeedChange;
+            return spawnedUnit;
         }
 
-        private UnitData GenerateUnitData(UnitType unitType, Random rnd)
+        private UnitData GenerateUnitData(UnitBelonging unitBelonging, UnitType unitType)
         {
-            int initiative = rnd.Next(_minInitiative, _maxInitiative);
-            int health = rnd.Next(_minHealth, _maxHealth);
-            int damage = rnd.Next(_minDamage, _maxDamage);
+            int initiative = Random.Range(_minInitiative, _maxInitiative);
+            int health = Random.Range(_minHealth, _maxHealth);
+            int damage = Random.Range(_minDamage, _maxDamage);
 
-            if (unitType==UnitType.Enemy)
-            {
-                //health = 1;
-            }
-
-            var unitData = new UnitData(unitType, initiative, health, damage, _moveSpeed);
+            var unitData = new UnitData(unitBelonging, unitType, initiative, health, damage, _moveSpeed);
             return unitData;
         }
     }

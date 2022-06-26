@@ -4,7 +4,7 @@ namespace UnfrozenTestWork
 {
     public class UnitScaler
     {
-        public void ScaleUnits(Unit[] units, Rect unitsRect, Rect fitInto)
+        public void ScaleUnits(UnitModel[] units, Rect unitsRect, Rect fitInto)
         {
             float scaleX = fitInto.width < unitsRect.width ? fitInto.width / unitsRect.width : 1;
             float scaleY = fitInto.height < unitsRect.height ? fitInto.height / unitsRect.height : 1;

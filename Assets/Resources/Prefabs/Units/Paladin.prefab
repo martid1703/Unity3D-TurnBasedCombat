@@ -326,11 +326,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitData:
-    type: 2
-    initiative: 85
-    health: 150
-    damage: 75
+    health: 100
+    damage: 50
     moveSpeed: 20
+    initiative: 80
+    type: 0
 --- !u!114 &6769969792468497488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -583,7 +583,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -482896501
-  m_SortingLayer: 2
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &2277357763597429306
@@ -833,11 +833,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_SortingLayer
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_SortingLayerID

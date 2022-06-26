@@ -44,9 +44,6 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: UI
-    uniqueID: 539664043
-    locked: 0
   - name: UnitsOverview
     uniqueID: 3812070795
     locked: 0
@@ -55,4 +52,7 @@ TagManager:
     locked: 0
   - name: UnitsBattle
     uniqueID: 2318975957
+    locked: 0
+  - name: UI
+    uniqueID: 539664043
     locked: 0

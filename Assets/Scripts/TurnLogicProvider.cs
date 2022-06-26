@@ -6,21 +6,19 @@ namespace UnfrozenTestWork
 {
     public class TurnLogicProvider
     {
-        private Queue<Unit> _battleQueue;
-        private List<Unit> _playerUnits;
-        private List<Unit> _enemyUnits;
-        private Unit _attackingUnit;
-        private Action<UnitType> _gameOver;
+        private Queue<UnitModel> _battleQueue;
+        private List<UnitModel> _playerUnits;
+        private List<UnitModel> _enemyUnits;
+        private UnitModel _attackingUnit;
+        private Action<UnitBelonging> _gameOver;
         private Action<BattleManagerState> _updateBattleManagerState;
 
         public TurnLogicProvider(
-            Unit attackingUnit,
-            List<Unit> playerUnits,
-            List<Unit> enemyUnits,
+            List<UnitModel> playerUnits,
+            List<UnitModel> enemyUnits,
             Action<BattleManagerState> updateBattleManagerState,
-            Action<UnitType> gameOver)
+            Action<UnitBelonging> gameOver)
         {
-            _attackingUnit = attackingUnit;
             _playerUnits = playerUnits;
             _enemyUnits = enemyUnits;
             _gameOver = gameOver;
@@ -29,12 +27,12 @@ namespace UnfrozenTestWork
 
         public void CreateBattleQueue()
         {
-            var units = new List<Unit>();
+            var units = new List<UnitModel>();
             units.AddRange(_playerUnits);
             units.AddRange(_enemyUnits);
             units.Sort(new UnitComparer());
 
-            var battleQueue = new Queue<Unit>(units.Count);
+            var battleQueue = new Queue<UnitModel>(units.Count);
             for (int i = units.Count; i > 0; i--)
             {
                 battleQueue.Enqueue(units[i - 1]);
@@ -43,11 +41,11 @@ namespace UnfrozenTestWork
             _battleQueue = battleQueue;
         }
 
-        public Unit NextTurn(Unit attackedUnit)
+        public UnitModel NextTurn(UnitModel attackedUnit)
         {
             CheckIsAlive(attackedUnit);
 
-            if (CheckWinCondition(out UnitType winner))
+            if (CheckWinCondition(out UnitBelonging winner))
             {
                 Debug.Log("Win condition is met!");
                 _gameOver(winner);
@@ -66,9 +64,9 @@ namespace UnfrozenTestWork
             return _attackingUnit;
         }
 
-        private bool CheckWinCondition(out UnitType winner)
+        private bool CheckWinCondition(out UnitBelonging winner)
         {
-            winner = UnitType.Neutral;
+            winner = UnitBelonging.Player;
             if (_playerUnits.Count == 0 & _enemyUnits.Count == 0)
             {
                 return true;
@@ -76,19 +74,19 @@ namespace UnfrozenTestWork
 
             if (_playerUnits.Count == 0)
             {
-                winner = UnitType.Enemy;
+                winner = UnitBelonging.Enemy;
                 return true;
             }
 
             if (_enemyUnits.Count == 0)
             {
-                winner = UnitType.Player;
+                winner = UnitBelonging.Player;
                 return true;
             }
             return false;
         }
 
-        private void CheckIsAlive(Unit unit)
+        private void CheckIsAlive(UnitModel unit)
         {
             if (unit == null)
             {
@@ -100,15 +98,13 @@ namespace UnfrozenTestWork
                 return;
             }
 
-            switch (unit.UnitData.Type)
+            switch (unit.UnitData.Belonging)
             {
-                case UnitType.Player:
+                case UnitBelonging.Player:
                     _playerUnits.Remove(unit);
                     break;
-                case UnitType.Enemy:
+                case UnitBelonging.Enemy:
                     _enemyUnits.Remove(unit);
-                    break;
-                case UnitType.Neutral:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Type));
@@ -116,9 +112,9 @@ namespace UnfrozenTestWork
             unit.DestroySelf();
         }
 
-        private Unit GetNextAttackingUnit()
+        private UnitModel GetNextAttackingUnit()
         {
-            Unit attackingUnit = null;
+            UnitModel attackingUnit = null;
             while (attackingUnit == null)
             {
                 if (_battleQueue.Count == 0)

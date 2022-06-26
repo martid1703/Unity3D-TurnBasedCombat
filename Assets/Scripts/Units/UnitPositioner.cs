@@ -20,7 +20,7 @@ namespace UnfrozenTestWork
             _unitScaler = new UnitScaler();
         }
 
-        public void PositionUnitsOverview(Unit[] playerUnits, Unit[] enemyUnits, Rect fitInto, float spaceBetweenUnits = 0f)
+        public void PositionUnitsOverview(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect fitInto, float spaceBetweenUnits = 0f)
         {
             _spaceBetweenUnits = spaceBetweenUnits;
 
@@ -33,7 +33,7 @@ namespace UnfrozenTestWork
             ChangeSortingLayer(enemyUnits, _overviewLayer);
         }
 
-        public void PositionUnitsBattle(Unit[] playerUnits, Unit[] enemyUnits, Rect fitInto, float spaceBetweenUnits = 2f)
+        public void PositionUnitsBattle(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect fitInto, float spaceBetweenUnits = 2f)
         {
             _spaceBetweenUnits = spaceBetweenUnits;
 
@@ -64,7 +64,7 @@ namespace UnfrozenTestWork
                  fitInto.height);
         }
 
-        public void ReturnUnitsBack(Unit attackingUnit, Unit attackedUnit)
+        public void ReturnUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
         {
             if (_playerUnitPositions == null || _enemyUnitPositions == null)
             {
@@ -76,17 +76,17 @@ namespace UnfrozenTestWork
             RevertUnit(attackedUnit);
         }
 
-        private void RevertUnit(Unit unit)
+        private void RevertUnit(UnitModel unit)
         {
-            var unitTransform = unit.UnitData.Type == UnitType.Player ? _playerUnitPositions.UnitTransforms[unit] : _enemyUnitPositions.UnitTransforms[unit];
+            var unitTransform = unit.UnitData.Belonging == UnitBelonging.Player ? _playerUnitPositions.UnitTransforms[unit] : _enemyUnitPositions.UnitTransforms[unit];
             unit.transform.position = unitTransform.Position;
             unit.transform.localScale = unitTransform.Scale;
-            ChangeSortingLayer(new Unit[] { unit }, _overviewLayer);
+            ChangeSortingLayer(new UnitModel[] { unit }, _overviewLayer);
         }
 
-        private UnitPositionResult TransformUnits(Unit[] units, Rect fitInto)
+        private UnitPositionResult TransformUnits(UnitModel[] units, Rect fitInto)
         {
-            Dictionary<Unit, UnitTransform> unitPositionResult = GetUnitPositionResult(units, fitInto);
+            Dictionary<UnitModel, UnitTransform> unitPositionResult = GetUnitPositionResult(units, fitInto);
             var unitsRect = GetUnitsRect(unitPositionResult);
             _unitScaler.ScaleUnits(units, unitsRect, fitInto);
             unitPositionResult = GetUnitPositionResult(units, fitInto);
@@ -94,7 +94,7 @@ namespace UnfrozenTestWork
             return new UnitPositionResult(unitPositionResult, unitsRect);
         }
 
-        public void ChangeSortingLayer(Unit[] units, string layerName)
+        public void ChangeSortingLayer(UnitModel[] units, string layerName)
         {
             for (int i = 0; i < units.Length; i++)
             {
@@ -106,11 +106,11 @@ namespace UnfrozenTestWork
             }
         }
 
-        private Dictionary<Unit, UnitTransform> GetUnitPositionResult(Unit[] units, Rect fitInto)
+        private Dictionary<UnitModel, UnitTransform> GetUnitPositionResult(UnitModel[] units, Rect fitInto)
         {
-            var unitsTransforms = new Dictionary<Unit, UnitTransform>();
+            var unitsTransforms = new Dictionary<UnitModel, UnitTransform>();
 
-            float lastUnitPositionX = units[0].UnitData.Type == UnitType.Player ? fitInto.center.x + fitInto.width / 2 : fitInto.center.x - fitInto.width / 2;
+            float lastUnitPositionX = units[0].UnitData.Belonging == UnitBelonging.Player ? fitInto.center.x + fitInto.width / 2 : fitInto.center.x - fitInto.width / 2;
 
             for (int i = 0; i < units.Length; i++)
             {
@@ -126,7 +126,7 @@ namespace UnfrozenTestWork
                     totalOffsetX = unitBoxCollider.size.x / 2 + prevUnitSize.x / 2 + _spaceBetweenUnits;
                 }
 
-                totalOffsetX = units[i].UnitData.Type == UnitType.Player ? -totalOffsetX : totalOffsetX;
+                totalOffsetX = units[i].UnitData.Belonging == UnitBelonging.Player ? -totalOffsetX : totalOffsetX;
 
                 // box collider size and offset values are not affected by unit current scale, so need to adjust
                 totalOffsetX *= units[i].transform.localScale.x;
@@ -142,7 +142,7 @@ namespace UnfrozenTestWork
             return unitsTransforms;
         }
 
-        private Rect GetUnitsRect(Dictionary<Unit, UnitTransform> unitPositionResult)
+        private Rect GetUnitsRect(Dictionary<UnitModel, UnitTransform> unitPositionResult)
         {
             var width = FindWidth(unitPositionResult.Keys.ToArray());
             var height = FindHight(unitPositionResult.Keys.ToArray());
@@ -156,7 +156,7 @@ namespace UnfrozenTestWork
             return unitsRect;
         }
 
-        private float FindWidth(Unit[] units)
+        private float FindWidth(UnitModel[] units)
         {
             float width = 0;
             for (int i = 0; i < units.Length; i++)
@@ -166,7 +166,7 @@ namespace UnfrozenTestWork
             return width;
         }
 
-        private float FindHight(Unit[] units)
+        private float FindHight(UnitModel[] units)
         {
             float height = 0;
 
@@ -181,7 +181,7 @@ namespace UnfrozenTestWork
             return height;
         }
 
-        private void PlaceUnits(Unit[] units, Dictionary<Unit, UnitTransform> unitsTransforms)
+        private void PlaceUnits(UnitModel[] units, Dictionary<UnitModel, UnitTransform> unitsTransforms)
         {
             for (int i = 0; i < units.Length; i++)
             {

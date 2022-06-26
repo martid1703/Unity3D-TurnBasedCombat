@@ -7,8 +7,8 @@ namespace UnfrozenTestWork
 {
     public abstract class PlayerBase : MonoBehaviour
     {
-        protected Unit _attackingUnit;
-        protected Unit _attackedUnit;
+        protected UnitModel _attackingUnit;
+        protected UnitModel _attackedUnit;
         protected PlayerTurnState State { get; private set; }
         protected BattleManager BattleManager { get; private set; }
         protected UnitSelector UnitSelector { get; private set; }
@@ -64,7 +64,11 @@ namespace UnfrozenTestWork
 
         protected virtual IEnumerator WaitAIDecision()
         {
-            Unit[] attackedUnits;
+            var msg = $"Waiting AI decision...";
+            BattleManager.SetGameStatus(msg);
+            yield return new WaitForSeconds(0.5f);
+
+            UnitModel[] attackedUnits;
 
             if (this is Player)
             {
@@ -100,7 +104,7 @@ namespace UnfrozenTestWork
             }
         }
 
-        private Unit SelectAttackedUnit(Unit[] units)
+        private UnitModel SelectAttackedUnit(UnitModel[] units)
         {
             var random = new Random();
             var rnd = random.Next(0, units.Length);
@@ -122,7 +126,7 @@ namespace UnfrozenTestWork
 
                 _attackedUnit = BattleManager.GetAttackedUnit();
 
-                if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Type != UnitType.Player)
+                if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Belonging != UnitBelonging.Player)
                 {
                     UnitSelector.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
                     yield break;

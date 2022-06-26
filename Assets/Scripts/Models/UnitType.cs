@@ -1,9 +1,11 @@
+using System;
+
 namespace UnfrozenTestWork
 {
+    [Serializable]
     public enum UnitType
     {
-        Player,
-        Enemy,
-        Neutral
+        Paladin,
+        Miner
     }
 }

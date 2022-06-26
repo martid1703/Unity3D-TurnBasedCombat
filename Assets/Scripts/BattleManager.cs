@@ -14,10 +14,10 @@ namespace UnfrozenTestWork
     public class BattleManager : SingletonMonobehaviour<BattleManager>
     {
         [SerializeField]
-        private Transform[] _playerUnitPrefabs;
+        private UnitType[] _playerUnits;
 
         [SerializeField]
-        private Transform[] _enemyUnitPrefabs;
+        private UnitType[] _enemyUnits;
 
         [SerializeField]
         private Transform _blur;
@@ -32,7 +32,10 @@ namespace UnfrozenTestWork
         private RectTransform _overviewSpace;
 
         [SerializeField]
-        private Transform _unitsContainer;
+        private Transform _playerUnitsContainer;
+
+        [SerializeField]
+        private Transform _enemyUnitsContainer;
 
         [SerializeField]
         private Button _btnQuit;
@@ -50,11 +53,19 @@ namespace UnfrozenTestWork
         private Button _btnAutoBattle;
 
         [SerializeField]
-        private Transform _gameStatus;
+        private Button _btnAddPlayerUnits;
 
         [SerializeField]
-        [Range(1, 5)]
-        private int _battleSpeed = 3;
+        private Button _btnRemovePlayerUnits;
+
+        [SerializeField]
+        private Button _btnAddEnemyUnits;
+
+        [SerializeField]
+        private Button _btnRemoveEnemyUnits;
+
+        [SerializeField]
+        private Transform _gameStatus;
 
         [SerializeField]
         private Texture2D _handCursor;
@@ -81,10 +92,10 @@ namespace UnfrozenTestWork
         private UnitSelector _unitSelector;
         private StateSwitcher _stateSwitcher;
 
-        public List<Unit> PlayerUnits { get; private set; }
-        public List<Unit> EnemyUnits { get; private set; }
-        public Unit AttackingUnit { get; private set; }
-        public Unit AttackedUnit { get; private set; }
+        public List<UnitModel> PlayerUnits { get; private set; }
+        public List<UnitModel> EnemyUnits { get; private set; }
+        public UnitModel AttackingUnit { get; private set; }
+        public UnitModel AttackedUnit { get; private set; }
 
         private void Awake()
         {
@@ -100,8 +111,8 @@ namespace UnfrozenTestWork
 
         private void Start()
         {
-            PlayerUnits = new List<Unit>();
-            EnemyUnits = new List<Unit>();
+            PlayerUnits = new List<UnitModel>();
+            EnemyUnits = new List<UnitModel>();
 
             SetupPlayers();
             SetupUI();
@@ -139,14 +150,113 @@ namespace UnfrozenTestWork
                 {
                     _btnAttack.interactable = true;
                     _btnSkip.interactable = true;
+                    _btnAddPlayerUnits.interactable = true;
+                    _btnRemovePlayerUnits.interactable = true;
                 }
                 else
                 {
                     _btnAttack.interactable = false;
                     _btnSkip.interactable = false;
+                    _btnAddPlayerUnits.interactable = false;
+                    _btnRemovePlayerUnits.interactable = false;
                 }
             });
             _battleSpeedSlider.onValueChanged.AddListener((v) => { OnBattleSpeedChange(v); });
+            _btnAddPlayerUnits.onClick.AddListener(() =>
+           {
+               IncrementPlayerUnits(UnitBelonging.Player);
+           });
+            _btnRemovePlayerUnits.onClick.AddListener(() =>
+           {
+               DecrementPlayerUnits(UnitBelonging.Player);
+           });
+            _btnAddEnemyUnits.onClick.AddListener(() =>
+          {
+              IncrementPlayerUnits(UnitBelonging.Enemy);
+          });
+            _btnRemoveEnemyUnits.onClick.AddListener(() =>
+           {
+               DecrementPlayerUnits(UnitBelonging.Enemy);
+           });
+        }
+
+        private void DecrementPlayerUnits(UnitBelonging unitBelonging)
+        {
+            UnitModel unit;
+            switch (unitBelonging)
+            {
+                case UnitBelonging.Player:
+                    if (PlayerUnits.Count == 1)
+                    {
+                        return;
+                    }
+                    unit = GetUnitToRemove(PlayerUnits.ToArray());
+                    PlayerUnits.Remove(unit);
+                    break;
+                case UnitBelonging.Enemy:
+                    if (EnemyUnits.Count == 1)
+                    {
+                        return;
+                    }
+                    unit = GetUnitToRemove(EnemyUnits.ToArray());
+                    EnemyUnits.Remove(unit);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(unitBelonging));
+            }
+
+            unit.DestroySelf();
+            StartCoroutine(SwitchToOverview());
+        }
+
+        private void IncrementPlayerUnits(UnitBelonging unitBelonging)
+        {
+            if (_battleState != BattleState.Overview)
+            {
+                return;
+            }
+
+            var unitSpawner = new UnitSpawner(
+                            _overviewSpace,
+                            OnUnitSelected,
+                            IsUnitSelectable,
+                            _playerUnitsContainer,
+                            _enemyUnitsContainer
+                        );
+
+            UnitType unitType;
+            List<UnitModel> units;
+
+            switch (unitBelonging)
+            {
+                case UnitBelonging.Player:
+                    unitType = PlayerUnits.Last().UnitData.Type;
+                    units = PlayerUnits;
+                    break;
+                case UnitBelonging.Enemy:
+                    unitType = EnemyUnits.Last().UnitData.Type;
+                    units = EnemyUnits;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(unitBelonging));
+            }
+
+            unitSpawner.AddUnit(unitBelonging, unitType, units);
+            StartCoroutine(SwitchToOverview());
+        }
+
+        private UnitModel GetUnitToRemove(UnitModel[] units)
+        {
+            for (int i = 0; i < units.Length; i++)
+            {
+                var unit = units[i];
+                if (unit.IsSelected)
+                {
+                    continue;
+                }
+                return unit;
+            }
+            throw new InvalidOperationException("Cannot find unit to remove");
         }
 
         private void Update()
@@ -185,17 +295,20 @@ namespace UnfrozenTestWork
             BattleSpeedChange?.Invoke(this, new BattleSpeedEventArgs(speed));
         }
 
-        public IEnumerator SwitchToBattle(Unit attackingUnit, Unit attackedUnit)
+        public IEnumerator SwitchToBattle(UnitModel attackingUnit, UnitModel attackedUnit)
         {
-            _battleState = BattleState.Battle;
             _stateSwitcher.SwitchToBattle(attackingUnit, attackedUnit);
+            _battleState = BattleState.Battle;
             yield return SetupCamera();
         }
 
         public IEnumerator SwitchToOverview()
         {
-            _battleState = BattleState.Overview;
+            _turnLogicProvider = new TurnLogicProvider(PlayerUnits, EnemyUnits, SetBattleManagerState, GameOver);
+            _turnLogicProvider.CreateBattleQueue();
+            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
             _stateSwitcher.SwitchToOverview();
+            _battleState = BattleState.Overview;
             yield return SetupCamera();
         }
 
@@ -206,8 +319,9 @@ namespace UnfrozenTestWork
 
         public IEnumerator ReturnUnitsBack()
         {
+            var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
             _battleState = BattleState.Overview;
-            _stateSwitcher.ReturnUnitsBack(AttackingUnit, AttackedUnit);
+            stateSwitcher.ReturnUnitsBack(AttackingUnit, AttackedUnit);
             yield return SetupCamera();
         }
 
@@ -224,15 +338,13 @@ namespace UnfrozenTestWork
                     yield break;
                 }
 
-                switch (AttackingUnit.UnitData.Type)
+                switch (AttackingUnit.UnitData.Belonging)
                 {
-                    case UnitType.Player:
+                    case UnitBelonging.Player:
                         StartCoroutine(_player.TakeTurn());
                         break;
-                    case UnitType.Enemy:
+                    case UnitBelonging.Enemy:
                         StartCoroutine(_enemy.TakeTurn());
-                        break;
-                    case UnitType.Neutral:
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(AttackingUnit.UnitData.Type));
@@ -273,7 +385,7 @@ namespace UnfrozenTestWork
 
         private void OnUnitSelected(object sender, EventArgs args)
         {
-            AttackedUnit = sender as Unit;
+            AttackedUnit = sender as UnitModel;
             Debug.Log($"Player selected unit to attack. Unit:{AttackedUnit}.");
             if (AttackedUnit.IsEnemy)
             {
@@ -283,12 +395,12 @@ namespace UnfrozenTestWork
             _unitSelector.DeselectUnitsExceptOne(PlayerUnits.ToArray(), AttackedUnit);
         }
 
-        public Unit GetAttackedUnit()
+        public UnitModel GetAttackedUnit()
         {
             return AttackedUnit;
         }
 
-        private bool IsUnitSelectable(Unit unit)
+        private bool IsUnitSelectable(UnitModel unit)
         {
             if (AttackingUnit == null || unit.UnitData.Type == AttackingUnit.UnitData.Type || unit.IsSelected)
             {
@@ -302,13 +414,13 @@ namespace UnfrozenTestWork
             _battleManagerstate = state;
         }
 
-        private void GameOver(UnitType winner)
+        private void GameOver(UnitBelonging winner)
         {
             _gameOver = true;
             ShowGameOverUI(winner);
         }
 
-        private void ShowGameOverUI(UnitType winner)
+        private void ShowGameOverUI(UnitBelonging winner)
         {
             HideInGameUI();
 
@@ -341,7 +453,7 @@ namespace UnfrozenTestWork
 
             DestroyAllUnits();
             SpawnUnits();
-            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
+            OnBattleSpeedChange(_battleSpeedSlider.value);
 
             yield return SwitchToOverview();
 
@@ -349,15 +461,6 @@ namespace UnfrozenTestWork
 
             HideGameOverUI();
             ShowInGameUI();
-
-            _turnLogicProvider = new TurnLogicProvider(
-                AttackingUnit,
-                PlayerUnits,
-                EnemyUnits,
-                SetBattleManagerState,
-                GameOver
-            );
-            _turnLogicProvider.CreateBattleQueue();
 
             StartCoroutine(StartGameCycle());
         }
@@ -378,18 +481,17 @@ namespace UnfrozenTestWork
         private void SpawnUnits()
         {
             var unitSpawner = new UnitSpawner(
-                _playerUnitPrefabs,
-                _enemyUnitPrefabs,
                 _overviewSpace,
                 OnUnitSelected,
-                _unitsContainer,
-                IsUnitSelectable
+                IsUnitSelectable,
+                _playerUnitsContainer,
+                _enemyUnitsContainer
             );
-            var units = unitSpawner.Spawn();
+
+            UnitSpawnerResult units = unitSpawner.Spawn(_playerUnits, _enemyUnits);
 
             PlayerUnits = units.PlayerUnits.ToList();
             EnemyUnits = units.EnemyUnits.ToList();
-            OnBattleSpeedChange(_battleSpeedSlider.value);
         }
 
         public void Quit()
