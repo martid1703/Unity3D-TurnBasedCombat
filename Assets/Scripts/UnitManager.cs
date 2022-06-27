@@ -11,7 +11,7 @@ namespace UnfrozenTestWork
 
         private Dictionary<UnitType, UnitReference> _unitsDic;
 
-        private void Start()
+        private void Awake()
         {
             _unitsDic = _units.ToDictionary(u => u.UnitType);
         }

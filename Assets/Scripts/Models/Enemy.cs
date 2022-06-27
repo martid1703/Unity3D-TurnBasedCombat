@@ -4,11 +4,10 @@ namespace UnfrozenTestWork
 {
     public class Enemy : PlayerBase
     {
-        public IEnumerator TakeTurn()
+        public new IEnumerator TakeTurn()
         {
             _attackingUnit = BattleManager.AttackingUnit;
             UnitSelector.DeselectUnitsExceptOne(BattleManager.EnemyUnits.ToArray(), _attackingUnit);
-
             yield return base.TakeTurn();
         }
     }

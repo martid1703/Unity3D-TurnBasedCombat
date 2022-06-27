@@ -20,6 +20,8 @@ namespace UnfrozenTestWork
 
         [SerializeField]
         private UnitType type;
+
+        [SerializeField]
         private UnitBelonging unitBelonging;
 
         internal UnitBelonging Belonging { get => unitBelonging; private set => unitBelonging = value; }

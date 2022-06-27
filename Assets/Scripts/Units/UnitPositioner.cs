@@ -10,8 +10,10 @@ namespace UnfrozenTestWork
         private const string _battleLayer = "UnitsBattle";
 
         private readonly UnitScaler _unitScaler;
-        private UnitPositionResult _playerUnitPositions;
-        private UnitPositionResult _enemyUnitPositions;
+
+        // need to keep these fields unchanged
+        private static UnitPositionResult _playerUnitPositions;
+        private static UnitPositionResult _enemyUnitPositions;
 
         private float _spaceBetweenUnits;
 

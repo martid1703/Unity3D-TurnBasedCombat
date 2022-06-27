@@ -42,8 +42,6 @@ namespace UnfrozenTestWork
             _blur.gameObject.SetActive(false);
             _fade.gameObject.SetActive(false);
             _inGameUI.gameObject.SetActive(true);
-            //_overviewSpace.gameObject.SetActive(true);
-            //_battleSpace.gameObject.SetActive(false);
         }
 
         public void SwitchToBattle(UnitModel attackingUnit, UnitModel attackedUnit)
@@ -63,6 +61,7 @@ namespace UnfrozenTestWork
             }
 
             var fitInto = _battleSpace.GetComponent<RectTransform>();
+
             UnitPositioner.Instance.PositionUnitsBattle(playerUnits, enemyUnits, fitInto.rect);
 
             SwitchUIToBattle();
@@ -72,9 +71,6 @@ namespace UnfrozenTestWork
         {
             _blur.gameObject.SetActive(true);
             _fade.gameObject.SetActive(true);
-            //_inGameUI.gameObject.SetActive(false);
-            //_overviewSpace.gameObject.SetActive(false);
-            //_battleSpace.gameObject.SetActive(true);
         }
     }
 }

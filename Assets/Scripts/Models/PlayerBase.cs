@@ -82,7 +82,7 @@ namespace UnfrozenTestWork
             _attackedUnit = SelectAttackedUnit(attackedUnits);
 
             var rnd = _rnd.Next(0, 100);
-            if (rnd < 30)
+            if (rnd < 20)
             {
                 SetState(PlayerTurnState.SkipTurn);
             }
