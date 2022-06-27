@@ -228,6 +228,7 @@ namespace UnfrozenTestWork
             var unitQtyChanger = new UnitQtyChanger(BattleState, _overviewSpace, OnUnitSelected, IsUnitSelectable, _playerUnitsContainer, _enemyUnitsContainer, PlayerUnits, EnemyUnits);
             unitQtyChanger.Decrement(unitBelonging);
             StartCoroutine(SwitchToOverview());
+            OnBattleSpeedChange(_battleSpeedSlider.value);
         }
 
         private void IncrementUnits(UnitBelonging unitBelonging)
@@ -235,6 +236,7 @@ namespace UnfrozenTestWork
             var unitQtyChanger = new UnitQtyChanger(BattleState, _overviewSpace, OnUnitSelected, IsUnitSelectable, _playerUnitsContainer, _enemyUnitsContainer, PlayerUnits, EnemyUnits);
             unitQtyChanger.Increment(unitBelonging);
             StartCoroutine(SwitchToOverview());
+            OnBattleSpeedChange(_battleSpeedSlider.value);
         }
 
         private void Update()
