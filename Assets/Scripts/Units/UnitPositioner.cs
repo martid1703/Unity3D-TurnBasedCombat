@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace UnfrozenTestWork
@@ -11,9 +11,8 @@ namespace UnfrozenTestWork
 
         private readonly UnitScaler _unitScaler;
 
-        // need to keep these fields unchanged
-        private static UnitPositionResult _playerUnitPositions;
-        private static UnitPositionResult _enemyUnitPositions;
+        // need to keep these field unchanged for revert unit position
+        private static UnitPositionResult _unitPositionResult;
 
         private float _spaceBetweenUnits;
 
@@ -25,27 +24,66 @@ namespace UnfrozenTestWork
         public void PositionUnitsOverview(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect fitInto, float spaceBetweenUnits = 0f)
         {
             _spaceBetweenUnits = spaceBetweenUnits;
-
-            var playerFitInto = GetPlayerFitInto(fitInto);
-            _playerUnitPositions = TransformUnits(playerUnits, playerFitInto);
-            ChangeSortingLayer(playerUnits, _overviewLayer);
-
-            var enmemyFitInto = GetEnemyFitInto(fitInto);
-            _enemyUnitPositions = TransformUnits(enemyUnits, enmemyFitInto);
-            ChangeSortingLayer(enemyUnits, _overviewLayer);
+            _unitPositionResult = PerformPositioning(playerUnits, enemyUnits, fitInto, _overviewLayer);
         }
 
         public void PositionUnitsBattle(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect fitInto, float spaceBetweenUnits = 2f)
         {
             _spaceBetweenUnits = spaceBetweenUnits;
+            PerformPositioning(playerUnits, enemyUnits, fitInto, _battleLayer);
+        }
 
+        public void RevertUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
+        {
+            if (_unitPositionResult == null)
+            {
+                Debug.LogWarning("Cannot return unit to overview, because initial positions are not set.");
+                return;
+            }
+
+            RevertUnit(attackingUnit);
+            RevertUnit(attackedUnit);
+        }
+
+        private void RevertUnit(UnitModel unit)
+        {
+            UnitTransform unitTransform;
+            switch (unit.UnitData.Belonging)
+            {
+                case UnitBelonging.Player:
+                    unitTransform = _unitPositionResult.PlayerUnitTransforms[unit];
+                    break;
+                case UnitBelonging.Enemy:
+                    unitTransform = _unitPositionResult.EnemyUnitTransforms[unit];
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Belonging));
+            }
+
+            unit.transform.position = unitTransform.Position;
+            unit.transform.localScale = unitTransform.Scale;
+            ChangeSortingLayer(new UnitModel[] { unit }, _overviewLayer);
+        }
+
+        private UnitPositionResult PerformPositioning(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect fitInto, string unitLayer)
+        {
             var playerFitInto = GetPlayerFitInto(fitInto);
-            TransformUnits(playerUnits, playerFitInto);
-            ChangeSortingLayer(playerUnits, _battleLayer);
+            var enemyFitInto = GetEnemyFitInto(fitInto);
 
-            var enmemyFitInto = GetEnemyFitInto(fitInto);
-            TransformUnits(enemyUnits, enmemyFitInto);
-            ChangeSortingLayer(enemyUnits, _battleLayer);
+            Scale(playerUnits, enemyUnits, playerFitInto, enemyFitInto);
+            UnitPositionResult unitPositionResult = PlaceUnits(playerUnits, enemyUnits, playerFitInto, enemyFitInto, unitLayer);
+            return unitPositionResult;
+        }
+
+        private UnitPositionResult PlaceUnits(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect playerFitInto, Rect enemyFitInto, string layerName)
+        {
+            Dictionary<UnitModel, UnitTransform> PlayerUnitTransforms = PlaceUnits(playerUnits, playerFitInto);
+            ChangeSortingLayer(playerUnits, layerName);
+
+            Dictionary<UnitModel, UnitTransform> EnemyUnitTransforms = PlaceUnits(enemyUnits, enemyFitInto);
+            ChangeSortingLayer(enemyUnits, layerName);
+
+            return new UnitPositionResult(PlayerUnitTransforms, EnemyUnitTransforms);
         }
 
         private static Rect GetPlayerFitInto(Rect fitInto)
@@ -66,37 +104,17 @@ namespace UnfrozenTestWork
                  fitInto.height);
         }
 
-        public void ReturnUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
+        private void Scale(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect playerFitInto, Rect enemyFitInto)
         {
-            if (_playerUnitPositions == null || _enemyUnitPositions == null)
-            {
-                Debug.LogWarning("Cannot return unit to overview, because initial positions are not set.");
-                return;
-            }
+            Dictionary<UnitModel, UnitTransform> playerUnitPositionResult = GetUnitPositionResult(playerUnits, playerFitInto);
+            Dictionary<UnitModel, UnitTransform> enemyPositionResult = GetUnitPositionResult(enemyUnits, enemyFitInto);
 
-            RevertUnit(attackingUnit);
-            RevertUnit(attackedUnit);
+            float smallestScale = _unitScaler.FindSmallestScale(playerUnitPositionResult, enemyPositionResult, playerFitInto, enemyFitInto, _spaceBetweenUnits);
+            _unitScaler.ScaleUnits(playerUnits, smallestScale);
+            _unitScaler.ScaleUnits(enemyUnits, smallestScale);
         }
 
-        private void RevertUnit(UnitModel unit)
-        {
-            var unitTransform = unit.UnitData.Belonging == UnitBelonging.Player ? _playerUnitPositions.UnitTransforms[unit] : _enemyUnitPositions.UnitTransforms[unit];
-            unit.transform.position = unitTransform.Position;
-            unit.transform.localScale = unitTransform.Scale;
-            ChangeSortingLayer(new UnitModel[] { unit }, _overviewLayer);
-        }
-
-        private UnitPositionResult TransformUnits(UnitModel[] units, Rect fitInto)
-        {
-            Dictionary<UnitModel, UnitTransform> unitPositionResult = GetUnitPositionResult(units, fitInto);
-            var unitsRect = GetUnitsRect(unitPositionResult);
-            _unitScaler.ScaleUnits(units, unitsRect, fitInto);
-            unitPositionResult = GetUnitPositionResult(units, fitInto);
-            PlaceUnits(units, unitPositionResult);
-            return new UnitPositionResult(unitPositionResult, unitsRect);
-        }
-
-        public void ChangeSortingLayer(UnitModel[] units, string layerName)
+        private void ChangeSortingLayer(UnitModel[] units, string layerName)
         {
             for (int i = 0; i < units.Length; i++)
             {
@@ -136,7 +154,6 @@ namespace UnfrozenTestWork
 
                 float targetRectBottom = fitInto.center.y - fitInto.height / 2;
                 Vector3 position = new Vector3(lastUnitPositionX + totalOffsetX, targetRectBottom - deltaY);
-                //var newPosition = new Vector3(position.x, position.y - deltaY);
 
                 unitsTransforms.Add(units[i], new UnitTransform(position, units[i].transform.localScale));
                 lastUnitPositionX = position.x;
@@ -144,51 +161,14 @@ namespace UnfrozenTestWork
             return unitsTransforms;
         }
 
-        private Rect GetUnitsRect(Dictionary<UnitModel, UnitTransform> unitPositionResult)
+        private Dictionary<UnitModel, UnitTransform> PlaceUnits(UnitModel[] units, Rect fitInto)
         {
-            var width = FindWidth(unitPositionResult.Keys.ToArray());
-            var height = FindHight(unitPositionResult.Keys.ToArray());
-
-            Rect unitsRect = new Rect(
-                0,
-                0,
-                width,
-                height
-            );
-            return unitsRect;
-        }
-
-        private float FindWidth(UnitModel[] units)
-        {
-            float width = 0;
+            Dictionary<UnitModel, UnitTransform> unitPositionResult = GetUnitPositionResult(units, fitInto);
             for (int i = 0; i < units.Length; i++)
             {
-                width += units[i].GetComponent<BoxCollider2D>().size.x + _spaceBetweenUnits;
+                units[i].transform.position = unitPositionResult[units[i]].Position;
             }
-            return width;
-        }
-
-        private float FindHight(UnitModel[] units)
-        {
-            float height = 0;
-
-            for (int i = 0; i < units.Length; i++)
-            {
-                var unitBox = units[i].GetComponent<BoxCollider2D>();
-                if (unitBox.size.y > height)
-                {
-                    height = unitBox.size.y;
-                }
-            }
-            return height;
-        }
-
-        private void PlaceUnits(UnitModel[] units, Dictionary<UnitModel, UnitTransform> unitsTransforms)
-        {
-            for (int i = 0; i < units.Length; i++)
-            {
-                units[i].transform.position = unitsTransforms[units[i]].Position;
-            }
+            return unitPositionResult;
         }
     }
 }

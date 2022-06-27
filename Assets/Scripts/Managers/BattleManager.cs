@@ -110,7 +110,12 @@ namespace UnfrozenTestWork
             _unitSelector = new UnitSelector();
         }
 
-        private IEnumerator Start()
+        private void Start()
+        {
+            StartCoroutine(Restart());
+        }
+
+        public IEnumerator Restart()
         {
             yield return ValidateGameStartConditions();
 
@@ -119,7 +124,21 @@ namespace UnfrozenTestWork
 
             SetupPlayers();
             SetupUI();
-            StartCoroutine(Restart());
+
+            _gameOver = false;
+
+            DestroyAllUnits();
+            SpawnUnits();
+            OnBattleSpeedChange(_battleSpeedSlider.value);
+
+            yield return SwitchToOverview();
+
+            SetBattleManagerState(BattleManagerState.Free);
+
+            HideGameOverUI();
+            ShowInGameUI();
+
+            StartCoroutine(StartGameCycle());
         }
 
         private IEnumerator ValidateGameStartConditions()
@@ -160,25 +179,7 @@ namespace UnfrozenTestWork
             });
             _btnAutoBattle.onClick.AddListener(() =>
             {
-                _player.IsHuman = !_player.IsHuman;
-                if (_player.IsHuman)
-                {
-                    _btnAttack.interactable = true;
-                    _btnSkip.interactable = true;
-                    _btnAddPlayerUnits.interactable = true;
-                    _btnRemovePlayerUnits.interactable = true;
-                    _btnAddEnemyUnits.interactable = true;
-                    _btnRemoveEnemyUnits.interactable = true;
-                }
-                else
-                {
-                    _btnAttack.interactable = false;
-                    _btnSkip.interactable = false;
-                    _btnAddPlayerUnits.interactable = false;
-                    _btnRemovePlayerUnits.interactable = false;
-                    _btnAddEnemyUnits.interactable = false;
-                    _btnRemoveEnemyUnits.interactable = false;
-                }
+                SwitchAutoBattleMode();
             });
             _battleSpeedSlider.onValueChanged.AddListener((v) => { OnBattleSpeedChange(v); });
             _btnAddPlayerUnits.onClick.AddListener(() =>
@@ -197,6 +198,29 @@ namespace UnfrozenTestWork
            {
                DecrementUnits(UnitBelonging.Enemy);
            });
+        }
+
+        private void SwitchAutoBattleMode()
+        {
+            _player.IsHuman = !_player.IsHuman;
+            if (_player.IsHuman)
+            {
+                SwitchUIToAutoBattleMode(false);
+            }
+            else
+            {
+                SwitchUIToAutoBattleMode(true);
+            }
+        }
+
+        private void SwitchUIToAutoBattleMode(bool isOn)
+        {
+            _btnAttack.interactable = !isOn;
+            _btnSkip.interactable = !isOn;
+            _btnAddPlayerUnits.interactable = !isOn;
+            _btnRemovePlayerUnits.interactable = !isOn;
+            _btnAddEnemyUnits.interactable = !isOn;
+            _btnRemoveEnemyUnits.interactable = !isOn;
         }
 
         private void DecrementUnits(UnitBelonging unitBelonging)
@@ -252,6 +276,7 @@ namespace UnfrozenTestWork
         public IEnumerator SwitchToBattle(UnitModel attackingUnit, UnitModel attackedUnit)
         {
             _stateSwitcher.SwitchToBattle(attackingUnit, attackedUnit);
+            SwitchUIToAutoBattleMode(true);
             BattleState = BattleState.Battle;
             yield return SetupCamera();
         }
@@ -262,6 +287,10 @@ namespace UnfrozenTestWork
             _turnLogicProvider.CreateBattleQueue();
             _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
             _stateSwitcher.SwitchToOverview();
+            if (_player.IsHuman)
+            {
+                SwitchUIToAutoBattleMode(false);
+            }
             BattleState = BattleState.Overview;
             yield return SetupCamera();
         }
@@ -276,6 +305,10 @@ namespace UnfrozenTestWork
             var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
             BattleState = BattleState.Overview;
             stateSwitcher.ReturnUnitsBack(AttackingUnit, AttackedUnit);
+            if (_player.IsHuman)
+            {
+                SwitchUIToAutoBattleMode(false);
+            }
             yield return SetupCamera();
         }
 
@@ -324,8 +357,39 @@ namespace UnfrozenTestWork
             }
         }
 
+        private bool IsGameOnPause()
+        {
+            return Time.timeScale == 0;
+        }
+
+        private void PutGameOnPause(bool pause)
+        {
+            if (pause)
+            {
+                Time.timeScale = 0f;
+            }
+            else
+            {
+                Time.timeScale = 1f;
+            }
+        }
+
         private void TrackKeyboard()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (!IsGameOnPause())
+                {
+                    ShowGameOverUI("PAUSE...", false);
+                    PutGameOnPause(true);
+                }
+                else
+                {
+                    HideGameOverUI();
+                    PutGameOnPause(false);
+                }
+            }
+
             if (Input.GetKeyDown(KeyCode.A))
             {
                 _player.SetState(PlayerTurnState.TakeTurn);
@@ -395,6 +459,7 @@ namespace UnfrozenTestWork
         private void HideGameOverUI()
         {
             _gameOverUI.gameObject.SetActive(false);
+            ShowInGameUI();
         }
 
         private void ShowInGameUI()
@@ -405,26 +470,6 @@ namespace UnfrozenTestWork
         private void HideInGameUI()
         {
             _inGameUI.gameObject.SetActive(false);
-        }
-
-        public IEnumerator Restart()
-        {
-            _gameOver = false;
-            _player.IsHuman = true;
-            _enemy.IsHuman = false;
-
-            DestroyAllUnits();
-            SpawnUnits();
-            OnBattleSpeedChange(_battleSpeedSlider.value);
-
-            yield return SwitchToOverview();
-
-            SetBattleManagerState(BattleManagerState.Free);
-
-            HideGameOverUI();
-            ShowInGameUI();
-
-            StartCoroutine(StartGameCycle());
         }
 
         private void DestroyAllUnits()

@@ -130,7 +130,6 @@ namespace UnfrozenTestWork
         public IEnumerator TakeTurn(UnitModel target)
         {
             Debug.Log($"{this} taking his turn on the target: {target}.");
-            yield return new WaitForSeconds(1f);
             yield return Attack(target);
             Deselect();
         }
@@ -139,7 +138,7 @@ namespace UnfrozenTestWork
         {
             Debug.Log($"{this} skipping the turn.");
             Deselect();
-            yield return new WaitForSeconds(1f);
+            yield return null;
         }
 
         private IEnumerator Attack(UnitModel attackedUnit)

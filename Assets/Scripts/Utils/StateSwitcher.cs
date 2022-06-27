@@ -22,26 +22,18 @@ namespace UnfrozenTestWork
             _blur = blur ?? throw new System.ArgumentNullException(nameof(blur));
             _inGameUI = inGameUI ?? throw new System.ArgumentNullException(nameof(inGameUI));
             _fade = fade ?? throw new ArgumentNullException(nameof(fade));
-
         }
 
         public void SwitchToOverview()
         {
             UnitPositioner.Instance.PositionUnitsOverview(_playerUnits, _enemyUnits, _overviewSpace.rect);
-            SwitchUIToOverview();
+            RemoveBackgroundBattleEffects();
         }
 
         public void ReturnUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
         {
-            UnitPositioner.Instance.ReturnUnitsBack(attackingUnit, attackedUnit);
-            SwitchUIToOverview();
-        }
-
-        private void SwitchUIToOverview()
-        {
-            _blur.gameObject.SetActive(false);
-            _fade.gameObject.SetActive(false);
-            _inGameUI.gameObject.SetActive(true);
+            UnitPositioner.Instance.RevertUnitsBack(attackingUnit, attackedUnit);
+            RemoveBackgroundBattleEffects();
         }
 
         public void SwitchToBattle(UnitModel attackingUnit, UnitModel attackedUnit)
@@ -60,17 +52,20 @@ namespace UnfrozenTestWork
                 enemyUnits = new UnitModel[] { attackingUnit };
             }
 
-            var fitInto = _battleSpace.GetComponent<RectTransform>();
-
-            UnitPositioner.Instance.PositionUnitsBattle(playerUnits, enemyUnits, fitInto.rect);
-
-            SwitchUIToBattle();
+            UnitPositioner.Instance.PositionUnitsBattle(playerUnits, enemyUnits, _battleSpace.rect);
+            AddBackgroundBattleEffects();
         }
 
-        private void SwitchUIToBattle()
+        private void AddBackgroundBattleEffects()
         {
             _blur.gameObject.SetActive(true);
             _fade.gameObject.SetActive(true);
+        }
+
+        private void RemoveBackgroundBattleEffects()
+        {
+            _blur.gameObject.SetActive(false);
+            _fade.gameObject.SetActive(false);
         }
     }
 }

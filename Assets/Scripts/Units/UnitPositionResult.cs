@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace UnfrozenTestWork
 {
     public class UnitPositionResult
     {
-        public Dictionary<UnitModel, UnitTransform> UnitTransforms { get; private set; }
-        public Rect UnitsRect { get; private set; }
+        public Dictionary<UnitModel, UnitTransform> PlayerUnitTransforms { get; private set; }
+        public Dictionary<UnitModel, UnitTransform> EnemyUnitTransforms { get; private set; }
 
-        public UnitPositionResult(Dictionary<UnitModel, UnitTransform> unitTransforms, Rect unitsRect)
+        public UnitPositionResult(Dictionary<UnitModel, UnitTransform> playerUnitTransforms, Dictionary<UnitModel, UnitTransform> enemyUnitTransforms)
         {
-            UnitTransforms = unitTransforms ?? throw new ArgumentNullException(nameof(unitTransforms));
-            UnitsRect = unitsRect;
+            PlayerUnitTransforms = playerUnitTransforms ?? throw new ArgumentNullException(nameof(playerUnitTransforms));
+            EnemyUnitTransforms = enemyUnitTransforms ?? throw new ArgumentNullException(nameof(enemyUnitTransforms));
         }
     }
 }

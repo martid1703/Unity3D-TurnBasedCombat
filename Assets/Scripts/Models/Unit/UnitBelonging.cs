@@ -4,6 +4,5 @@ namespace UnfrozenTestWork
     {
         Player,
         Enemy,
-        //Neutral
     }
 }

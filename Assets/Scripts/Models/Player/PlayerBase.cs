@@ -1,28 +1,26 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using Random = System.Random;
+using Random = UnityEngine.Random;
 
 namespace UnfrozenTestWork
 {
     public abstract class PlayerBase : MonoBehaviour
     {
+        [SerializeField]
+        public bool IsHuman;
+
         protected UnitModel _attackingUnit;
         protected UnitModel _attackedUnit;
         protected PlayerTurnState State { get; private set; }
         protected BattleManager BattleManager { get; private set; }
         protected UnitSelector UnitSelector { get; private set; }
-        public bool IsHuman { get; set; }
-
-        private Random _rnd;
-
 
         private void Awake()
         {
             State = PlayerTurnState.Wait;
             BattleManager = BattleManager.Instance;
             UnitSelector = new UnitSelector();
-            _rnd = new Random();
         }
 
         public void SetState(PlayerTurnState state)
@@ -62,6 +60,35 @@ namespace UnfrozenTestWork
             BattleManager.SetBattleManagerState(BattleManagerState.Free);
         }
 
+        private IEnumerator WaitHumanDecision()
+        {
+            while (true)
+            {
+                var attackedUnits = BattleManager.EnemyUnits.ToArray();
+                if (!IsHuman)//in case we switch auto-mode
+                {
+                    yield return WaitAIDecision();
+                    yield break;
+                }
+
+                _attackedUnit = BattleManager.GetAttackedUnit();
+
+                if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Belonging != UnitBelonging.Player)
+                {
+                    UnitSelector.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
+                    yield break;
+                }
+
+                if (State == PlayerTurnState.SkipTurn)
+                {
+                    UnitSelector.DeselectUnits(attackedUnits);
+                    yield break;
+                }
+
+                yield return null;
+            }
+        }
+
         protected virtual IEnumerator WaitAIDecision()
         {
             var msg = $"Waiting AI decision...";
@@ -81,7 +108,7 @@ namespace UnfrozenTestWork
 
             _attackedUnit = SelectAttackedUnit(attackedUnits);
 
-            var rnd = _rnd.Next(0, 100);
+            var rnd = Random.Range(0, 100);
             if (rnd < 20)
             {
                 SetState(PlayerTurnState.SkipTurn);
@@ -106,40 +133,10 @@ namespace UnfrozenTestWork
 
         private UnitModel SelectAttackedUnit(UnitModel[] units)
         {
-            var random = new Random();
-            var rnd = random.Next(0, units.Length);
+            var rnd = Random.Range(0, units.Length);
             var _attackedUnit = units[rnd];
             _attackedUnit.SelectAsTarget();
             return _attackedUnit;
-        }
-
-        private IEnumerator WaitHumanDecision()
-        {
-            var attackedUnits = BattleManager.EnemyUnits.ToArray();
-            while (true)
-            {
-                if (!IsHuman)//in case we switch auto-mode
-                {
-                    yield return WaitAIDecision();
-                    yield break;
-                }
-
-                _attackedUnit = BattleManager.GetAttackedUnit();
-
-                if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Belonging != UnitBelonging.Player)
-                {
-                    UnitSelector.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
-                    yield break;
-                }
-
-                if (State == PlayerTurnState.SkipTurn)
-                {
-                    UnitSelector.DeselectUnits(attackedUnits);
-                    yield break;
-                }
-
-                yield return null;
-            }
         }
 
         protected IEnumerator PerformTurn()
