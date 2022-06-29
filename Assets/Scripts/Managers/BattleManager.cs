@@ -79,9 +79,11 @@ namespace UnfrozenTestWork
         private InGameUI _inGameUI;
         private GameOverUI _gameOverUI;
         private Slider _battleSpeedSlider;
+        private readonly float _defaultBattleSpeed = 2f;
 
         private Enemy _enemy;
         private Player _player;
+        private bool _playerIsHuman;
         private CameraController _cameraController;
         private BattleManagerState _battleManagerstate;
         private TurnLogicProvider _turnLogicProvider;
@@ -106,27 +108,35 @@ namespace UnfrozenTestWork
             _inGameUI = _rootUI.GetComponentInChildren<InGameUI>(true);
             _gameOverUI = _rootUI.GetComponentInChildren<GameOverUI>(true);
             _battleSpeedSlider = _inGameUI.GetComponentInChildren<Slider>(true);
+            _battleSpeedSlider.value = _defaultBattleSpeed;
 
             _unitSelector = new UnitSelector();
         }
 
         private void Start()
         {
-            StartCoroutine(Restart());
+            StopAllCoroutines();
+            PutGameOnPause(false);
+            StartCoroutine(Restart(true));
         }
 
-        public IEnumerator Restart()
+        public IEnumerator Restart(bool isNewGame)
         {
             yield return ValidateGameStartConditions();
 
-            SetupPlayers();
-            SetupUI();
+            SetupPlayers(isNewGame);
+
+            if (isNewGame)
+            {
+                SetupUI();
+            }
 
             _gameOver = false;
 
             DestroyAllUnits();
             SpawnUnits();
-            OnBattleSpeedChange(_battleSpeedSlider.value);
+
+            _battleSpeedSlider.value = _defaultBattleSpeed;
 
             yield return SwitchToOverview();
 
@@ -135,7 +145,35 @@ namespace UnfrozenTestWork
             HideGameOverUI();
             ShowInGameUI();
 
+
+
             StartCoroutine(StartGameCycle());
+        }
+
+        private IEnumerator StartGameCycle()
+        {
+            while (true)
+            {
+                yield return WaitBattleManagerState(BattleManagerState.Free);
+
+                AttackingUnit = _turnLogicProvider.NextTurn(AttackedUnit);
+
+                if (_gameOver)
+                {
+                    yield break;
+                }
+
+                if (_turnLogicProvider.IsPlayerTurn())
+                {
+                    StartCoroutine(_player.TakeTurn());
+                }
+                else
+                {
+                    StartCoroutine(_enemy.TakeTurn());
+                }
+
+                yield return null;
+            }
         }
 
         private IEnumerator ValidateGameStartConditions()
@@ -150,9 +188,17 @@ namespace UnfrozenTestWork
             }
         }
 
-        private void SetupPlayers()
+        private void SetupPlayers(bool isNewGame)
         {
             _player = GetComponent<Player>();
+            if (isNewGame)
+            {
+                _playerIsHuman = _player.IsHuman;
+            }
+            else
+            {
+                _player.IsHuman = _playerIsHuman;
+            }
             _enemy = GetComponent<Enemy>();
         }
 
@@ -164,7 +210,9 @@ namespace UnfrozenTestWork
             });
             _btnRestart.onClick.AddListener(() =>
             {
-                StartCoroutine(Restart());
+                StopAllCoroutines();
+                PutGameOnPause(false);
+                StartCoroutine(Restart(false));
             });
             _btnAttack.onClick.AddListener(() =>
             {
@@ -309,33 +357,6 @@ namespace UnfrozenTestWork
                 SwitchUIToAutoBattleMode(false);
             }
             yield return SetupCamera();
-        }
-
-        private IEnumerator StartGameCycle()
-        {
-            PutGameOnPause(false);
-            while (true)
-            {
-                yield return WaitBattleManagerState(BattleManagerState.Free);
-
-                AttackingUnit = _turnLogicProvider.NextTurn(AttackedUnit);
-
-                if (_gameOver)
-                {
-                    yield break;
-                }
-
-                if (_turnLogicProvider.IsPlayerTurn())
-                {
-                    StartCoroutine(_player.TakeTurn());
-                }
-                else
-                {
-                    StartCoroutine(_enemy.TakeTurn());
-                }
-
-                yield return null;
-            }
         }
 
         private IEnumerator WaitBattleManagerState(BattleManagerState state)
