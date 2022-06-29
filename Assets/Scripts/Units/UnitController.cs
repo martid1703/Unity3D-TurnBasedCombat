@@ -2,21 +2,21 @@ using System;
 using System.Collections;
 using Spine;
 using Spine.Unity;
+using TMPro;
 using UnityEngine;
 
 namespace UnfrozenTestWork
 {
     [RequireComponent(typeof(UnitAnimatorController))]
-    public class UnitController : MonoBehaviour
+    [RequireComponent(typeof(AudioController))]
+    public class UnitController : MonoBehaviour, IUnitController
     {
         [SerializeField]
         private GameObject _popupPrefab;
-        private UnitAnimatorController _animatorController;
-        private HealthBar _healthBar;
-        private float _battleSpeed;
 
         [Space]
-        public SkeletonAnimation _skeletonAnimation;
+        [SerializeField]
+        private SkeletonAnimation _skeletonAnimation;
 
         [SpineEvent(dataField: "skeletonAnimation", fallbackToTextField: true)]
         public string footstepEvent;
@@ -27,48 +27,59 @@ namespace UnfrozenTestWork
         [SpineEvent(dataField: "skeletonAnimation", fallbackToTextField: true)]
         public string takeDamageEvent;
 
-        [Space]
-        [SerializeField]
-        private AudioSource _stepAudio;
-
-        [SerializeField]
-        private AudioSource _attackAudio;
-
-        [SerializeField]
-        private AudioSource _damageAudio;
-
+        private IUnitAnimatorController _animatorController;
+        private HealthBarController _healthBarController;
+        private InitiativeBarController _initiativeBarController;
+        private AudioController _audioController;
+        private float _battleSpeed;
         private Spine.EventData _footstepEventData;
         private Spine.EventData _attackEventData;
         private Spine.EventData _takeDamageEventData;
+        private TextMeshPro _unitInfo;
+
 
         private void Awake()
         {
-            _animatorController = GetComponent<UnitAnimatorController>();
-            _healthBar = GetComponentInChildren<HealthBar>();
+            _animatorController = GetComponent<IUnitAnimatorController>();
+            _healthBarController = GetComponentInChildren<HealthBarController>();
+            _initiativeBarController = GetComponentInChildren<InitiativeBarController>();
+            _audioController = GetComponentInChildren<AudioController>();
+            _unitInfo = transform.GetComponentInChildren<TextMeshPro>();
         }
 
         private void Start()
         {
+            SetAnimationEvents();
+        }
+
+        private void SetAnimationEvents()
+        {
             _footstepEventData = _skeletonAnimation.Skeleton.Data.FindEvent(footstepEvent);
             _attackEventData = _skeletonAnimation.Skeleton.Data.FindEvent(attackEvent);
             _takeDamageEventData = _skeletonAnimation.Skeleton.Data.FindEvent(takeDamageEvent);
-
             _skeletonAnimation.AnimationState.Event += HandleAnimationStateEvent;
         }
 
+        public void Initialize(UnitData unitData)
+        {
+            _healthBarController.Initialize(unitData.Health);
+            _initiativeBarController.Initialize(unitData.Initiative);
+        }
+
+        // a.t.m. not all given spine animations have required attack events, threfore some sounds are played manually
         private void HandleAnimationStateEvent(TrackEntry trackEntry, Spine.Event e)
         {
             if (_footstepEventData == e.Data)
             {
-                _stepAudio.PlayOneShot(_stepAudio.clip);
+                _audioController.PlayStep();
             }
             if (_attackEventData == e.Data)
             {
-                _attackAudio.PlayOneShot(_attackAudio.clip);
+                _audioController.PlayAttack();
             }
             if (_takeDamageEventData == e.Data)
             {
-                _damageAudio.PlayOneShot(_damageAudio.clip);
+                _audioController.PlayDamage();
             }
         }
 
@@ -86,18 +97,22 @@ namespace UnfrozenTestWork
         public IEnumerator Attack(Action onComplete = null)
         {
             float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Attack, false);
-            _attackAudio.PlayOneShot(_attackAudio.clip);
+            _audioController.PlayAttack();
             yield return new WaitForSecondsRealtime(animationDuration);
         }
 
         public IEnumerator TakeDamage(float damage, UnitData unitData, Action onComplete = null)
         {
             float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.TakeDamage, false);
-            _damageAudio.PlayOneShot(_damageAudio.clip);
+
+            _audioController.PlayDamage();
             StartCoroutine(ShowDamagePopup(damage, unitData.Health, animationDuration));
 
-            _healthBar.SetReduceHPSpeed(BattleSpeedConverter.GetHPReduceSpeed(_battleSpeed));
-            StartCoroutine(_healthBar.TakeDamage(damage));
+            _healthBarController.SetReduceHPSpeed(BattleSpeedConverter.GetHPReduceSpeed(_battleSpeed));
+            StartCoroutine(_healthBarController.TakeDamage(damage));
+
+            _unitInfo.text = ToString();
+
             yield return new WaitForSecondsRealtime(animationDuration);
         }
 
@@ -134,7 +149,7 @@ namespace UnfrozenTestWork
 
         public void Die()
         {
-            float animationDuration = _animatorController.SetCharacterState(PlayerAnimationState.Die, false);
+            float duration = _animatorController.SetCharacterState(PlayerAnimationState.Die, false);
         }
     }
 }

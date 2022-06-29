@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnfrozenTestWork
 {
-    public class UnitAnimatorController : MonoBehaviour
+    public class UnitAnimatorController : MonoBehaviour, IUnitAnimatorController
     {
         [SerializeField]
         private SkeletonAnimation _skeletonAnimation;
@@ -14,7 +14,6 @@ namespace UnfrozenTestWork
 
         [SerializeField]
         private float _animationSpeed = 1f;
-
 
         private void Start()
         {
@@ -31,19 +30,10 @@ namespace UnfrozenTestWork
             }
         }
 
-        Spine.TrackEntry GetCurrentTrackEntry(int layerIndex)
+        private Spine.TrackEntry GetCurrentTrackEntry(int layerIndex)
         {
             var currentTrackEntry = _skeletonAnimation.AnimationState.GetCurrent(layerIndex);
             return currentTrackEntry;
-        }
-
-        /// <summary>Sets the horizontal flip state of the skeleton based on a nonzero float. If negative, the skeleton is flipped. If positive, the skeleton is not flipped.</summary>
-		public void SetFlip(float horizontal)
-        {
-            if (horizontal != 0)
-            {
-                _skeletonAnimation.Skeleton.ScaleX = horizontal > 0 ? 1f : -1f;
-            }
         }
 
         public float SetCharacterState(PlayerAnimationState playerState, bool loop, Action onAnimationEnd = null)

@@ -29,7 +29,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3170585142834983467}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &4512180676219917191
 AudioSource:
@@ -156,7 +156,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3170585142834983467}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &7363611679587174221
 AudioSource:
@@ -267,6 +267,7 @@ GameObject:
   - component: {fileID: 1079827455766293689}
   - component: {fileID: 6769969792468497488}
   - component: {fileID: 3717426520880498079}
+  - component: {fileID: 7898694974942807903}
   m_Layer: 0
   m_Name: Paladin
   m_TagString: Untagged
@@ -331,6 +332,8 @@ MonoBehaviour:
     moveSpeed: 20
     initiative: 80
     type: 0
+    unitBelonging: 0
+  IsSelected: 0
 --- !u!114 &6769969792468497488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -348,9 +351,6 @@ MonoBehaviour:
   footstepEvent: footstep
   attackEvent: 
   takeDamageEvent: 
-  _stepAudio: {fileID: 7363611679587174221}
-  _attackAudio: {fileID: 4512180676219917191}
-  _damageAudio: {fileID: 8586556715343625438}
 --- !u!61 &3717426520880498079
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -377,6 +377,21 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 4.03644, y: 8.765153}
   m_EdgeRadius: 0
+--- !u!114 &7898694974942807903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3094068078193828546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b7fb6413fa40b64997ba8006ce0a007, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stepAudio: {fileID: 7363611679587174221}
+  _attackAudio: {fileID: 4512180676219917191}
+  _damageAudio: {fileID: 8586556715343625438}
 --- !u!1 &5466383317020606338
 GameObject:
   m_ObjectHideFlags: 0
@@ -648,8 +663,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 7928458668724642534}
   - {fileID: 5038947931988336635}
+  - {fileID: 7928458668724642534}
   - {fileID: 6023923560322994103}
   m_Father: {fileID: 6251479482383676395}
   m_RootOrder: 5

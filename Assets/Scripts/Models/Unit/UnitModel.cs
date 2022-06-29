@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UnfrozenTestWork
 {
-    [RequireComponent(typeof(UnitController))]
+    [RequireComponent(typeof(IUnitController))]
     public class UnitModel : MonoBehaviour
     {
         [SerializeField]
@@ -14,24 +14,17 @@ namespace UnfrozenTestWork
         [SerializeField]
         public bool IsSelected;
 
-        private UnitController _unitController;
+        private IUnitController _unitController;
         private UnitSelectionDisplayer _unitSelectionDisplayer;
         private BoxCollider2D _boxCollider2d;
-        private TextMeshPro _unitInfo;
-        private HealthBar _healthBar;
-        private InitiativeBar _initiativeBar;
 
         public bool IsAlive => UnitData.Health > 0;
         public bool IsEnemy => UnitData.Belonging == UnitBelonging.Enemy;
-        //public bool IsSelected { get; private set; }
 
         void Awake()
         {
-            _unitController = GetComponent<UnitController>();
+            _unitController = GetComponent<IUnitController>();
             _boxCollider2d = GetComponentInChildren<BoxCollider2D>();
-            _unitInfo = transform.GetComponentInChildren<TextMeshPro>();
-            _healthBar = GetComponentInChildren<HealthBar>();
-            _initiativeBar = GetComponentInChildren<InitiativeBar>();
             _unitSelectionDisplayer = GetComponentInChildren<UnitSelectionDisplayer>();
         }
 
@@ -102,10 +95,9 @@ namespace UnfrozenTestWork
 
         public void Initialize(UnitData unitData)
         {
-            _healthBar.Initialize(unitData.Health);
-            _initiativeBar.Initialize(unitData.Initiative);
-            UpdateUnitData(unitData);
+            UnitData = unitData;
             ResetLookDirection();
+            _unitController.Initialize(unitData);
         }
 
         private void ResetLookDirection()
@@ -119,12 +111,6 @@ namespace UnfrozenTestWork
             {
                 transform.right = Vector3.left;
             }
-        }
-
-        private void UpdateUnitData(UnitData unitData)
-        {
-            UnitData = unitData;
-            _unitInfo.text = ToString();
         }
 
         public IEnumerator TakeTurn(UnitModel target)
@@ -192,9 +178,7 @@ namespace UnfrozenTestWork
         public IEnumerator TakeDamage(int damage)
         {
             yield return _unitController.TakeDamage(damage, UnitData);
-
             UnitData.TakeDamage(damage);
-            UpdateUnitData(UnitData);
             Deselect();
 
             if (!IsAlive)

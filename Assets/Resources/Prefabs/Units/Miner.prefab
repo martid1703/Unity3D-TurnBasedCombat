@@ -597,6 +597,7 @@ GameObject:
   - component: {fileID: 7143674558009318491}
   - component: {fileID: 5451527165657545139}
   - component: {fileID: 1317514511931417965}
+  - component: {fileID: 5758099650639076563}
   m_Layer: 0
   m_Name: Miner
   m_TagString: Untagged
@@ -641,8 +642,9 @@ MonoBehaviour:
     damage: 50
     moveSpeed: 20
     initiative: 80
-    unitBelonging: 0
     type: 1
+    unitBelonging: 0
+  IsSelected: 0
 --- !u!114 &7143674558009318491
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -660,9 +662,6 @@ MonoBehaviour:
   footstepEvent: 
   attackEvent: Hit
   takeDamageEvent: Miner_getDamage
-  _stepAudio: {fileID: 6859570316616348918}
-  _attackAudio: {fileID: 8109554653034456787}
-  _damageAudio: {fileID: 6426253494344686033}
 --- !u!114 &5451527165657545139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -708,6 +707,21 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 5.8613453, y: 12.931995}
   m_EdgeRadius: 0
+--- !u!114 &5758099650639076563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8404479906183593918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b7fb6413fa40b64997ba8006ce0a007, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stepAudio: {fileID: 6859570316616348918}
+  _attackAudio: {fileID: 8109554653034456787}
+  _damageAudio: {fileID: 6426253494344686033}
 --- !u!1 &8883483544165788275
 GameObject:
   m_ObjectHideFlags: 0
@@ -792,7 +806,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -482896501
-  m_SortingLayer: 2
+  m_SortingLayer: 1
   m_SortingOrder: 1
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &8883483544165788272
@@ -909,7 +923,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_SortingLayer
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1401868800699482263, guid: 9724782f022ace347ab56a59e440b484, type: 3}
       propertyPath: m_SortingLayerID

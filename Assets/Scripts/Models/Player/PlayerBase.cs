@@ -71,7 +71,7 @@ namespace UnfrozenTestWork
                     yield break;
                 }
 
-                _attackedUnit = BattleManager.GetAttackedUnit();
+                _attackedUnit = BattleManager.AttackedUnit;
 
                 if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Belonging != UnitBelonging.Player)
                 {

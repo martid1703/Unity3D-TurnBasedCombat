@@ -91,7 +91,7 @@ namespace UnfrozenTestWork
         private UnitSelector _unitSelector;
         private StateSwitcher _stateSwitcher;
 
-        public Transform OverviewSpace { get { return _overviewSpace; } }
+        public Transform OverviewSpace => _overviewSpace;
         public BattleState BattleState { get; private set; }
         public List<UnitModel> PlayerUnits { get; private set; }
         public List<UnitModel> EnemyUnits { get; private set; }
@@ -118,9 +118,6 @@ namespace UnfrozenTestWork
         public IEnumerator Restart()
         {
             yield return ValidateGameStartConditions();
-
-            PlayerUnits = new List<UnitModel>();
-            EnemyUnits = new List<UnitModel>();
 
             SetupPlayers();
             SetupUI();
@@ -285,7 +282,7 @@ namespace UnfrozenTestWork
 
         public IEnumerator SwitchToOverview()
         {
-            _turnLogicProvider = new TurnLogicProvider(PlayerUnits, EnemyUnits, SetBattleManagerState, ShowGameOverUI);
+            _turnLogicProvider = new TurnLogicProvider(PlayerUnits, EnemyUnits, SetBattleManagerState, GameOver);
             _turnLogicProvider.CreateBattleQueue();
             _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
             _stateSwitcher.SwitchToOverview();
@@ -316,7 +313,8 @@ namespace UnfrozenTestWork
 
         private IEnumerator StartGameCycle()
         {
-            while (!_gameOver)
+            PutGameOnPause(false);
+            while (true)
             {
                 yield return WaitBattleManagerState(BattleManagerState.Free);
 
@@ -327,17 +325,15 @@ namespace UnfrozenTestWork
                     yield break;
                 }
 
-                switch (AttackingUnit.UnitData.Belonging)
+                if (_turnLogicProvider.IsPlayerTurn())
                 {
-                    case UnitBelonging.Player:
-                        StartCoroutine(_player.TakeTurn());
-                        break;
-                    case UnitBelonging.Enemy:
-                        StartCoroutine(_enemy.TakeTurn());
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(AttackingUnit.UnitData.Type));
+                    StartCoroutine(_player.TakeTurn());
                 }
+                else
+                {
+                    StartCoroutine(_enemy.TakeTurn());
+                }
+
                 yield return null;
             }
         }
@@ -382,7 +378,7 @@ namespace UnfrozenTestWork
             {
                 if (!IsGameOnPause())
                 {
-                    ShowGameOverUI("PAUSE...", false);
+                    ShowGameOverUI("PAUSE...", true);
                     PutGameOnPause(true);
                 }
                 else
@@ -415,11 +411,6 @@ namespace UnfrozenTestWork
             _unitSelector.DeselectUnitsExceptOne(PlayerUnits.ToArray(), AttackedUnit);
         }
 
-        public UnitModel GetAttackedUnit()
-        {
-            return AttackedUnit;
-        }
-
         internal bool IsUnitSelectable(UnitModel unit)
         {
             if (AttackingUnit == null || unit.UnitData.Belonging == AttackingUnit.UnitData.Belonging || unit.IsSelected)
@@ -434,9 +425,10 @@ namespace UnfrozenTestWork
             _battleManagerstate = state;
         }
 
-        private void ShowGameOverUI(UnitBelonging winner)
+        private void GameOver(UnitBelonging winner)
         {
             var msg = $"Game Over! \nWinner is {winner}.";
+            _gameOver = true;
             ShowGameOverUI(msg, true);
         }
 
@@ -476,14 +468,20 @@ namespace UnfrozenTestWork
 
         private void DestroyAllUnits()
         {
-            foreach (var unit in PlayerUnits)
+            if (PlayerUnits != null)
             {
-                unit.DestroySelf();
+                foreach (var unit in PlayerUnits)
+                {
+                    unit.DestroySelf();
+                }
             }
 
-            foreach (var unit in EnemyUnits)
+            if (EnemyUnits != null)
             {
-                unit.DestroySelf();
+                foreach (var unit in EnemyUnits)
+                {
+                    unit.DestroySelf();
+                }
             }
         }
 

@@ -5,7 +5,7 @@ namespace UnfrozenTestWork
         Idle,
         Attack,
         TakeDamage,
-        Run, 
+        Run,
         Die
     }
 }
