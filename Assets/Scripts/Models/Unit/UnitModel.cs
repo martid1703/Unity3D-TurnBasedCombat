@@ -11,8 +11,9 @@ namespace UnfrozenTestWork
         [SerializeField]
         public UnitData UnitData;
 
-        [SerializeField]
-        public bool IsSelected;
+        public bool IsSelectedAsTarget;
+        public bool IsSelectedAsAttacker;
+
 
         private IUnitController _unitController;
         private UnitSelectionDisplayer _unitSelectionDisplayer;
@@ -31,30 +32,32 @@ namespace UnfrozenTestWork
         void Start() { }
 
         public Func<UnitModel, bool> IsUnitSelectable;
+        public Func<UnitModel, bool> IsUnitSelectableAsTarget;
 
         void OnMouseEnter()
         {
-            if (!IsUnitSelectable(this))
+            if (!IsUnitSelectable(this) || IsSelectedAsTarget || IsSelectedAsAttacker)
             {
                 return;
             }
-            BattleManager.Instance.SetAttackCursor();
             _unitSelectionDisplayer.Highlight();
+            _unitController.ShowUnitInfo(ToString());
         }
 
         private void OnMouseUp()
         {
-            if (!IsUnitSelectable(this))
+            if (!IsUnitSelectableAsTarget(this))
             {
                 return;
             }
+            _unitController.HideUnitInfo();
             SelectAsTarget();
         }
 
         void OnMouseExit()
         {
-            BattleManager.Instance.SetRegularCursor();
-            if (!IsUnitSelectable(this) || IsSelected)
+            _unitController.HideUnitInfo();
+            if (IsSelectedAsTarget || IsSelectedAsAttacker)
             {
                 return;
             }
@@ -70,7 +73,7 @@ namespace UnfrozenTestWork
 
         public void SelectAsTarget()
         {
-            IsSelected = true;
+            IsSelectedAsTarget = true;
             _unitSelectionDisplayer.SelectAsTarget();
             UnitSelected?.Invoke(this, new EventArgs());
         }
@@ -84,12 +87,14 @@ namespace UnfrozenTestWork
         public void SelectAsAttacker()
         {
             _unitSelectionDisplayer.SelectAsAttacker();
-            IsSelected = true;
+            IsSelectedAsAttacker = true;
+            IsSelectedAsTarget = false;
         }
 
         public void Deselect()
         {
-            IsSelected = false;
+            IsSelectedAsAttacker = false;
+            IsSelectedAsTarget = false;
             _unitSelectionDisplayer.Deselect();
         }
 
@@ -104,12 +109,12 @@ namespace UnfrozenTestWork
         {
             if (UnitData.Belonging == UnitBelonging.Player)
             {
-                transform.right = Vector3.right;
+                _unitController.SetLookDirection(Vector3.right);
             }
 
             if (UnitData.Belonging == UnitBelonging.Enemy)
             {
-                transform.right = Vector3.left;
+                _unitController.SetLookDirection(Vector3.left);
             }
         }
 
@@ -195,10 +200,7 @@ namespace UnfrozenTestWork
             float stopDistance = 0.1f)
         {
             Vector3 heading = targetPosition - transform.position;
-            if (NeedFlipUnitOrientation(heading))
-            {
-                transform.right = heading;
-            }
+            _unitController.FlipUnitOrientationIfNeeded(heading);
 
             StartCoroutine(_unitController.Run());
 
@@ -213,13 +215,6 @@ namespace UnfrozenTestWork
                 heading = targetPosition - transform.position;
                 yield return null;
             }
-        }
-
-        private bool NeedFlipUnitOrientation(Vector3 targetPosition)
-        {
-            Vector3 heading = targetPosition - transform.position;
-
-            return (heading.x > 0 && transform.right.x < 0) || (heading.x < 0 && transform.right.x > 0);
         }
 
         public override string ToString()

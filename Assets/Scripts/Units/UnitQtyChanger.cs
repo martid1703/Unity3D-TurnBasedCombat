@@ -7,32 +7,17 @@ namespace UnfrozenTestWork
 {
     public class UnitQtyChanger
     {
-        private BattleState _battleState;
-        private Transform _overviewSpace;
-        private EventHandler _unitSelected;
-        private Func<UnitModel, bool> _isUnitSelectable;
-        private Transform _playerUnitsContainer;
-        private Transform _enemyUnitsContainer;
+        private readonly UnitSpawner _unitSpawner;
         private List<UnitModel> _playerUnits;
         private List<UnitModel> _enemyUnits;
 
 
         public UnitQtyChanger(
-            BattleState battleState,
-            Transform overviewSpace,
-            EventHandler unitSelected,
-            Func<UnitModel, bool> isUnitSelectable,
-            Transform playerUnitsContainer,
-            Transform enemyUnitsContainer,
+            UnitSpawner unitSpawner,
             List<UnitModel> playerUnits,
             List<UnitModel> enemyUnits)
         {
-            _battleState = battleState;
-            _overviewSpace = overviewSpace;
-            _unitSelected = unitSelected;
-            _isUnitSelectable = isUnitSelectable;
-            _playerUnitsContainer = playerUnitsContainer;
-            _enemyUnitsContainer = enemyUnitsContainer;
+            _unitSpawner = unitSpawner;
             _playerUnits = playerUnits;
             _enemyUnits = enemyUnits;
         }
@@ -44,25 +29,16 @@ namespace UnfrozenTestWork
                 return;
             }
 
-            var unitSpawner = new UnitSpawner(
-                            _overviewSpace,
-                            _unitSelected,
-                            _isUnitSelectable,
-                            _playerUnitsContainer,
-                            _enemyUnitsContainer
-                        );
-
             UnitType unitType;
-
             switch (unitBelonging)
             {
                 case UnitBelonging.Player:
                     unitType = _playerUnits.Last().UnitData.Type;
-                    unitSpawner.AddUnit(unitBelonging, unitType, _playerUnits);
+                    _unitSpawner.AddUnit(unitBelonging, unitType, _playerUnits);
                     break;
                 case UnitBelonging.Enemy:
                     unitType = _enemyUnits.Last().UnitData.Type;
-                    unitSpawner.AddUnit(unitBelonging, unitType, _enemyUnits);
+                    _unitSpawner.AddUnit(unitBelonging, unitType, _enemyUnits);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unitBelonging));
@@ -102,7 +78,7 @@ namespace UnfrozenTestWork
             for (int i = 0; i < units.Length; i++)
             {
                 var unit = units[i];
-                if (unit.IsSelected)
+                if (unit.IsSelectedAsTarget)
                 {
                     continue;
                 }

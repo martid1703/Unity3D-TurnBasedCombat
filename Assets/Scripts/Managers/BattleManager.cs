@@ -2,10 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 namespace UnfrozenTestWork
 {
@@ -37,62 +35,17 @@ namespace UnfrozenTestWork
         [SerializeField]
         private Transform _enemyUnitsContainer;
 
-        [SerializeField]
-        private Button _btnQuit;
 
-        [SerializeField]
-        private Button _btnRestart;
-
-        [SerializeField]
-        private Button _btnAttack;
-
-        [SerializeField]
-        private Button _btnSkip;
-
-        [SerializeField]
-        private Button _btnAutoBattle;
-
-        [SerializeField]
-        private Button _btnAddPlayerUnits;
-
-        [SerializeField]
-        private Button _btnRemovePlayerUnits;
-
-        [SerializeField]
-        private Button _btnAddEnemyUnits;
-
-        [SerializeField]
-        private Button _btnRemoveEnemyUnits;
-
-        [SerializeField]
-        private Transform _gameStatus;
-
-        [SerializeField]
-        private Texture2D _handCursor;
-
-        [SerializeField]
-        private Texture2D _swordCursor;
-        private CursorMode _cursorMode = CursorMode.ForceSoftware;
-        private Vector2 _cursorHotSpot = Vector2.zero;
-
-        private RootUI _rootUI;
-        private InGameUI _inGameUI;
-        private GameOverUI _gameOverUI;
-        private Slider _battleSpeedSlider;
-        private readonly float _defaultBattleSpeed = 2f;
-
-        private Enemy _enemy;
-        private Player _player;
-        private bool _playerIsHuman;
         private CameraController _cameraController;
         private BattleManagerState _battleManagerstate;
         private TurnLogicProvider _turnLogicProvider;
-
-        private Scene _activeScene;
         private bool _gameOver;
-        private UnitSelector _unitSelector;
         private StateSwitcher _stateSwitcher;
+        private UIManager _uiManager;
+        private UnitSpawner _unitSpawner;
 
+        public Enemy Enemy { get; private set; }
+        public Player Player { get; private set; }
         public Transform OverviewSpace => _overviewSpace;
         public BattleState BattleState { get; private set; }
         public List<UnitModel> PlayerUnits { get; private set; }
@@ -102,50 +55,44 @@ namespace UnfrozenTestWork
 
         private void Awake()
         {
-            _activeScene = SceneManager.GetActiveScene();
+            var _activeScene = SceneManager.GetActiveScene();
             _cameraController = SceneObjectsFinder.FindFirstInRoot<CameraController>(_activeScene);
-            _rootUI = SceneObjectsFinder.FindFirstInRoot<RootUI>(_activeScene);
-            _inGameUI = _rootUI.GetComponentInChildren<InGameUI>(true);
-            _gameOverUI = _rootUI.GetComponentInChildren<GameOverUI>(true);
-            _battleSpeedSlider = _inGameUI.GetComponentInChildren<Slider>(true);
-            _battleSpeedSlider.value = _defaultBattleSpeed;
-
-            _unitSelector = new UnitSelector();
+            _uiManager = FindObjectOfType<UIManager>();
+            Player = GetComponent<Player>();
+            Enemy = GetComponent<Enemy>();
         }
 
         private void Start()
         {
-            StopAllCoroutines();
-            PutGameOnPause(false);
-            StartCoroutine(Restart(true));
+            _unitSpawner = new UnitSpawner(
+                            _overviewSpace,
+                            OnUnitSelected,
+                            IsUnitSelectable,
+                            IsUnitSelectableAsTarget,
+                            _playerUnitsContainer,
+                            _enemyUnitsContainer);
         }
 
         public IEnumerator Restart(bool isNewGame)
         {
             yield return ValidateGameStartConditions();
 
-            SetupPlayers(isNewGame);
-
-            if (isNewGame)
-            {
-                SetupUI();
-            }
-
             _gameOver = false;
 
-            DestroyAllUnits();
-            SpawnUnits();
+            UnitManager.DestroyAllUnits(PlayerUnits, EnemyUnits);
 
-            _battleSpeedSlider.value = _defaultBattleSpeed;
+            UnitSpawnerResult spawnResult = _unitSpawner.Spawn(_playerUnitsPrefabs, _enemyUnitsPrefabs);
+
+            PlayerUnits = spawnResult.PlayerUnits.ToList();
+            EnemyUnits = spawnResult.EnemyUnits.ToList();
+
+            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, spawnResult, _blur, _fade);
 
             yield return SwitchToOverview();
 
             SetBattleManagerState(BattleManagerState.Free);
 
-            HideGameOverUI();
-            ShowInGameUI();
-
-
+            _uiManager.ShowInGameUI(isNewGame);
 
             StartCoroutine(StartGameCycle());
         }
@@ -165,11 +112,11 @@ namespace UnfrozenTestWork
 
                 if (_turnLogicProvider.IsPlayerTurn())
                 {
-                    StartCoroutine(_player.TakeTurn());
+                    StartCoroutine(Player.TakeTurn());
                 }
                 else
                 {
-                    StartCoroutine(_enemy.TakeTurn());
+                    StartCoroutine(Enemy.TakeTurn());
                 }
 
                 yield return null;
@@ -181,112 +128,32 @@ namespace UnfrozenTestWork
             if (_playerUnitsPrefabs.Count() == 0 || _enemyUnitsPrefabs.Count() == 0)
             {
                 var msg = "Player or Enemy units are not set. Exiting...";
-                ShowGameOverUI(msg, false);
+                _uiManager.ShowGameOverUI(msg, false);
                 yield return new WaitForSeconds(3f);
                 Quit();
                 yield break;
             }
         }
 
-        private void SetupPlayers(bool isNewGame)
+        public void SwitchAutoBattleMode()
         {
-            _player = GetComponent<Player>();
-            if (isNewGame)
-            {
-                _playerIsHuman = _player.IsHuman;
-            }
-            else
-            {
-                _player.IsHuman = _playerIsHuman;
-            }
-            _enemy = GetComponent<Enemy>();
+            Player.IsHuman = !Player.IsHuman;
         }
 
-        private void SetupUI()
+        public void DecrementUnits(UnitBelonging unitBelonging)
         {
-            _btnQuit.onClick.AddListener(() =>
-            {
-                Quit();
-            });
-            _btnRestart.onClick.AddListener(() =>
-            {
-                StopAllCoroutines();
-                PutGameOnPause(false);
-                StartCoroutine(Restart(false));
-            });
-            _btnAttack.onClick.AddListener(() =>
-            {
-                _player.SetState(PlayerTurnState.TakeTurn);
-            });
-            _btnSkip.onClick.AddListener(() =>
-            {
-                _player.SetState(PlayerTurnState.SkipTurn);
-            });
-            _btnAutoBattle.onClick.AddListener(() =>
-            {
-                SwitchAutoBattleMode();
-            });
-            _battleSpeedSlider.onValueChanged.AddListener((v) => { OnBattleSpeedChange(v); });
-            _btnAddPlayerUnits.onClick.AddListener(() =>
-           {
-               IncrementUnits(UnitBelonging.Player);
-           });
-            _btnRemovePlayerUnits.onClick.AddListener(() =>
-           {
-               DecrementUnits(UnitBelonging.Player);
-           });
-            _btnAddEnemyUnits.onClick.AddListener(() =>
-          {
-              IncrementUnits(UnitBelonging.Enemy);
-          });
-            _btnRemoveEnemyUnits.onClick.AddListener(() =>
-           {
-               DecrementUnits(UnitBelonging.Enemy);
-           });
-        }
-
-        private void SwitchAutoBattleMode()
-        {
-            _player.IsHuman = !_player.IsHuman;
-            if (_player.IsHuman)
-            {
-                SwitchUIToAutoBattleMode(false);
-            }
-            else
-            {
-                SwitchUIToAutoBattleMode(true);
-            }
-        }
-
-        private void SwitchUIToAutoBattleMode(bool isOn)
-        {
-            _btnAttack.interactable = !isOn;
-            _btnSkip.interactable = !isOn;
-            _btnAddPlayerUnits.interactable = !isOn;
-            _btnRemovePlayerUnits.interactable = !isOn;
-            _btnAddEnemyUnits.interactable = !isOn;
-            _btnRemoveEnemyUnits.interactable = !isOn;
-        }
-
-        private void DecrementUnits(UnitBelonging unitBelonging)
-        {
-            var unitQtyChanger = new UnitQtyChanger(BattleState, _overviewSpace, OnUnitSelected, IsUnitSelectable, _playerUnitsContainer, _enemyUnitsContainer, PlayerUnits, EnemyUnits);
+            var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
             unitQtyChanger.Decrement(unitBelonging);
             StartCoroutine(SwitchToOverview());
-            OnBattleSpeedChange(_battleSpeedSlider.value);
+            OnBattleSpeedChange(_uiManager.InGameUI.BattleSpeedSlider.value);
         }
 
-        private void IncrementUnits(UnitBelonging unitBelonging)
+        public void IncrementUnits(UnitBelonging unitBelonging)
         {
-            var unitQtyChanger = new UnitQtyChanger(BattleState, _overviewSpace, OnUnitSelected, IsUnitSelectable, _playerUnitsContainer, _enemyUnitsContainer, PlayerUnits, EnemyUnits);
+            var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
             unitQtyChanger.Increment(unitBelonging);
             StartCoroutine(SwitchToOverview());
-            OnBattleSpeedChange(_battleSpeedSlider.value);
-        }
-
-        private void Update()
-        {
-            TrackKeyboard();
+            OnBattleSpeedChange(_uiManager.InGameUI.BattleSpeedSlider.value);
         }
 
         private IEnumerator SetupCamera()
@@ -304,18 +171,8 @@ namespace UnfrozenTestWork
             }
         }
 
-        public void SetAttackCursor()
-        {
-            Cursor.SetCursor(_swordCursor, _cursorHotSpot, _cursorMode);
-        }
-
-        public void SetRegularCursor()
-        {
-            Cursor.SetCursor(_handCursor, _cursorHotSpot, _cursorMode);
-        }
-
         public event EventHandler<BattleSpeedEventArgs> BattleSpeedChange;
-        private void OnBattleSpeedChange(float speed)
+        public void OnBattleSpeedChange(float speed)
         {
             BattleSpeedChange?.Invoke(this, new BattleSpeedEventArgs(speed));
         }
@@ -323,7 +180,7 @@ namespace UnfrozenTestWork
         public IEnumerator SwitchToBattle(UnitModel attackingUnit, UnitModel attackedUnit)
         {
             _stateSwitcher.SwitchToBattle(attackingUnit, attackedUnit);
-            SwitchUIToAutoBattleMode(true);
+            _uiManager.SwitchToBattleMode();
             BattleState = BattleState.Battle;
             yield return SetupCamera();
         }
@@ -332,30 +189,22 @@ namespace UnfrozenTestWork
         {
             _turnLogicProvider = new TurnLogicProvider(PlayerUnits, EnemyUnits, SetBattleManagerState, GameOver);
             _turnLogicProvider.CreateBattleQueue();
-            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
             _stateSwitcher.SwitchToOverview();
-            if (_player.IsHuman)
-            {
-                SwitchUIToAutoBattleMode(false);
-            }
+            _uiManager.SwitchToOverviewMode();
             BattleState = BattleState.Overview;
             yield return SetupCamera();
         }
 
         public void SetGameStatus(string message)
         {
-            _gameStatus.GetComponentInChildren<TMP_Text>().text = message;
+            _uiManager.SetGameStatus(message);
         }
 
         public IEnumerator ReturnUnitsBack()
         {
-            var stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits.ToArray(), EnemyUnits.ToArray(), _blur, _inGameUI, _fade);
             BattleState = BattleState.Overview;
-            stateSwitcher.ReturnUnitsBack(AttackingUnit, AttackedUnit);
-            if (_player.IsHuman)
-            {
-                SwitchUIToAutoBattleMode(false);
-            }
+            _stateSwitcher.RevertUnitsBack(AttackingUnit, AttackedUnit);
+            _uiManager.SwitchToOverviewMode();
             yield return SetupCamera();
         }
 
@@ -376,65 +225,35 @@ namespace UnfrozenTestWork
             }
         }
 
-        private bool IsGameOnPause()
-        {
-            return Time.timeScale == 0;
-        }
-
-        private void PutGameOnPause(bool pause)
-        {
-            if (pause)
-            {
-                Time.timeScale = 0f;
-            }
-            else
-            {
-                Time.timeScale = 1f;
-            }
-        }
-
-        private void TrackKeyboard()
-        {
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                if (!IsGameOnPause())
-                {
-                    ShowGameOverUI("PAUSE...", true);
-                    PutGameOnPause(true);
-                }
-                else
-                {
-                    HideGameOverUI();
-                    PutGameOnPause(false);
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                _player.SetState(PlayerTurnState.TakeTurn);
-            }
-
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                _player.SetState(PlayerTurnState.SkipTurn);
-            }
-        }
-
-        internal void OnUnitSelected(object sender, EventArgs args)
+        public void OnUnitSelected(object sender, EventArgs args)
         {
             AttackedUnit = sender as UnitModel;
             Debug.Log($"Player selected unit to attack. Unit:{AttackedUnit}.");
             if (AttackedUnit.IsEnemy)
             {
-                _unitSelector.DeselectUnitsExceptOne(EnemyUnits.ToArray(), AttackedUnit);
+                UnitManager.DeselectUnitsExceptOne(EnemyUnits, AttackedUnit);
                 return;
             }
-            _unitSelector.DeselectUnitsExceptOne(PlayerUnits.ToArray(), AttackedUnit);
+            UnitManager.DeselectUnitsExceptOne(PlayerUnits, AttackedUnit);
         }
 
-        internal bool IsUnitSelectable(UnitModel unit)
+        public bool IsUnitSelectable(UnitModel unit)
         {
-            if (AttackingUnit == null || unit.UnitData.Belonging == AttackingUnit.UnitData.Belonging || unit.IsSelected)
+            if (BattleState == BattleState.Battle)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public bool IsUnitSelectableAsTarget(UnitModel unit)
+        {
+            if (!IsUnitSelectable(unit))
+            {
+                return false;
+            }
+
+            if (AttackingUnit == null || unit.UnitData.Belonging == AttackingUnit.UnitData.Belonging || unit.IsSelectedAsTarget)
             {
                 return false;
             }
@@ -450,76 +269,8 @@ namespace UnfrozenTestWork
         {
             var msg = $"Game Over! \nWinner is {winner}.";
             _gameOver = true;
-            ShowGameOverUI(msg, true);
-        }
-
-        private void ShowGameOverUI(string msg, bool allowRestart)
-        {
-            HideInGameUI();
-            var msgbox = _gameOverUI.transform.Find("Message");
-            var tmp = msgbox.GetComponent<TMP_Text>();
-            tmp.text = msg;
-            ShowGameOverUI(allowRestart);
-        }
-
-        private void ShowGameOverUI(bool allowRestart)
-        {
-            _gameOverUI.gameObject.SetActive(true);
-            if (!allowRestart)
-            {
-                _btnRestart.interactable = false;
-            }
-        }
-
-        private void HideGameOverUI()
-        {
-            _gameOverUI.gameObject.SetActive(false);
-            ShowInGameUI();
-        }
-
-        private void ShowInGameUI()
-        {
-            _inGameUI.gameObject.SetActive(true);
-        }
-
-        private void HideInGameUI()
-        {
-            _inGameUI.gameObject.SetActive(false);
-        }
-
-        private void DestroyAllUnits()
-        {
-            if (PlayerUnits != null)
-            {
-                foreach (var unit in PlayerUnits)
-                {
-                    unit.DestroySelf();
-                }
-            }
-
-            if (EnemyUnits != null)
-            {
-                foreach (var unit in EnemyUnits)
-                {
-                    unit.DestroySelf();
-                }
-            }
-        }
-
-        private void SpawnUnits()
-        {
-            var unitSpawner = new UnitSpawner(
-                _overviewSpace,
-                OnUnitSelected,
-                IsUnitSelectable,
-                _playerUnitsContainer,
-                _enemyUnitsContainer
-            );
-
-            UnitSpawnerResult units = unitSpawner.Spawn(_playerUnitsPrefabs, _enemyUnitsPrefabs);
-
-            PlayerUnits = units.PlayerUnits.ToList();
-            EnemyUnits = units.EnemyUnits.ToList();
+            _uiManager.HideInGameUI();
+            _uiManager.ShowGameOverUI(msg, true);
         }
 
         public void Quit()

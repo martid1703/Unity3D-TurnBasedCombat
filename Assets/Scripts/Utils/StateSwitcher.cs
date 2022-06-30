@@ -9,18 +9,21 @@ namespace UnfrozenTestWork
         private readonly RectTransform _battleSpace;
         private readonly Transform _blur;
         private readonly Transform _fade;
-        private readonly InGameUI _inGameUI;
         private readonly UnitModel[] _playerUnits;
         private readonly UnitModel[] _enemyUnits;
 
-        public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, UnitModel[] playerUnits, UnitModel[] enemyUnits, Transform blur, InGameUI inGameUI, Transform fade)
+        public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, UnitSpawnerResult unitSpawnerResult, Transform blur, Transform fade)
         {
+            if (unitSpawnerResult is null)
+            {
+                throw new ArgumentNullException(nameof(unitSpawnerResult));
+            }
+
             _overviewSpace = overviewSpace ?? throw new System.ArgumentNullException(nameof(overviewSpace));
             _battleSpace = battleSpace ?? throw new System.ArgumentNullException(nameof(battleSpace));
-            _playerUnits = playerUnits ?? throw new System.ArgumentNullException(nameof(playerUnits));
-            _enemyUnits = enemyUnits ?? throw new System.ArgumentNullException(nameof(enemyUnits));
+            _playerUnits = unitSpawnerResult.PlayerUnits ?? throw new System.ArgumentNullException(nameof(unitSpawnerResult));
+            _enemyUnits = unitSpawnerResult.EnemyUnits ?? throw new System.ArgumentNullException(nameof(unitSpawnerResult));
             _blur = blur ?? throw new System.ArgumentNullException(nameof(blur));
-            _inGameUI = inGameUI ?? throw new System.ArgumentNullException(nameof(inGameUI));
             _fade = fade ?? throw new ArgumentNullException(nameof(fade));
         }
 
@@ -30,7 +33,7 @@ namespace UnfrozenTestWork
             RemoveBackgroundBattleEffects();
         }
 
-        public void ReturnUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
+        public void RevertUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
         {
             UnitPositioner.Instance.RevertUnitsBack(attackingUnit, attackedUnit);
             RemoveBackgroundBattleEffects();

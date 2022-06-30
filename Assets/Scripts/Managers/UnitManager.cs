@@ -1,28 +1,65 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace UnfrozenTestWork
 {
-    public class UnitManager : SingletonMonobehaviour<UnitManager>
+    public class UnitManager : MonoBehaviour
     {
         [SerializeField]
-        private UnitReference[] _units;
+        private UIManager _uiManager;
 
-        private Dictionary<UnitType, UnitReference> _unitsDic;
-
-        private void Awake()
+        public void OnUnitMouseOver(object sender, EventArgs args)
         {
-            _unitsDic = _units.ToDictionary(u => u.UnitType);
+            var unit = sender as UnitModel;
+            if (unit.IsEnemy)
+            {
+                _uiManager.SetAttackCursor();
+                return;
+            }
+            _uiManager.SetRegularCursor();
         }
 
-        public UnitModel GetUnitPrefab(UnitType unitType)
+        public static void DeselectUnitsExceptOne(IEnumerable<UnitModel> units, UnitModel exceptSelected)
         {
-            if (!_unitsDic.TryGetValue(unitType, out var unitReference))
+            foreach (var unit in units)
             {
-                throw new System.Exception($"Cannot find prefab for unit type: {unitType}.");
+                if (unit == exceptSelected)
+                {
+                    continue;
+                }
+                unit.Deselect();
             }
-            return unitReference.UnitPrefab;
+        }
+
+        public static void DeselectUnits(IEnumerable<UnitModel> units)
+        {
+            foreach (var unit in units)
+            {
+                unit.Deselect();
+            }
+        }
+
+        public static void DestroyAllUnits(IEnumerable<UnitModel> playerUnits, IEnumerable<UnitModel> enemyUnits)
+        {
+            if (playerUnits != null)
+            {
+                foreach (var unit in playerUnits)
+                {
+                    unit.DestroySelf();
+                }
+            }
+
+            if (enemyUnits != null)
+            {
+                foreach (var unit in enemyUnits)
+                {
+                    unit.DestroySelf();
+                }
+            }
+
+            playerUnits = new List<UnitModel>();
+            enemyUnits = new List<UnitModel>();
         }
     }
 }

@@ -12,7 +12,13 @@ namespace UnfrozenTestWork
     public class UnitController : MonoBehaviour, IUnitController
     {
         [SerializeField]
+        private Transform _view;
+
+        [SerializeField]
         private GameObject _popupPrefab;
+
+        [SerializeField]
+        private Transform _unitInfo;
 
         [Space]
         [SerializeField]
@@ -35,8 +41,8 @@ namespace UnfrozenTestWork
         private Spine.EventData _footstepEventData;
         private Spine.EventData _attackEventData;
         private Spine.EventData _takeDamageEventData;
-        private TextMeshPro _unitInfo;
 
+        private TMP_Text _unitInfoText;
 
         private void Awake()
         {
@@ -44,7 +50,7 @@ namespace UnfrozenTestWork
             _healthBarController = GetComponentInChildren<HealthBarController>();
             _initiativeBarController = GetComponentInChildren<InitiativeBarController>();
             _audioController = GetComponentInChildren<AudioController>();
-            _unitInfo = transform.GetComponentInChildren<TextMeshPro>();
+            _unitInfoText = _unitInfo.GetComponentInChildren<TMP_Text>();
         }
 
         private void Start()
@@ -83,6 +89,26 @@ namespace UnfrozenTestWork
             }
         }
 
+        public void SetLookDirection(Vector3 lookDirection)
+        {
+            _view.transform.right = lookDirection;
+        }
+
+        public void FlipUnitOrientationIfNeeded(Vector3 targetPosition)
+        {
+            if (NeedFlipUnitOrientation(targetPosition))
+            {
+                SetLookDirection(targetPosition);
+            }
+        }
+
+        private bool NeedFlipUnitOrientation(Vector3 targetPosition)
+        {
+            Vector3 heading = targetPosition - _view.transform.position;
+
+            return (heading.x > 0 && _view.transform.right.x < 0) || (heading.x < 0 && _view.transform.right.x > 0);
+        }
+
         public void SetBattleSpeed(float speed)
         {
             _animatorController.SetAnimationSpeed(speed);
@@ -111,7 +137,7 @@ namespace UnfrozenTestWork
             _healthBarController.SetReduceHPSpeed(BattleSpeedConverter.GetHPReduceSpeed(_battleSpeed));
             StartCoroutine(_healthBarController.TakeDamage(damage));
 
-            _unitInfo.text = ToString();
+
 
             yield return new WaitForSecondsRealtime(animationDuration);
         }
@@ -150,6 +176,17 @@ namespace UnfrozenTestWork
         public void Die()
         {
             float duration = _animatorController.SetCharacterState(PlayerAnimationState.Die, false);
+        }
+
+        public void ShowUnitInfo(string info)
+        {
+            _unitInfoText.text = info;
+            _unitInfo.gameObject.SetActive(true);
+        }
+
+        public void HideUnitInfo()
+        {
+            _unitInfo.gameObject.SetActive(false);
         }
     }
 }

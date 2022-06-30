@@ -1,21 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UnfrozenTestWork
 {
     public class GameOverUI : MonoBehaviour
     {
-        // Start is called before the first frame update
-        void Start()
+        [SerializeField]
+        public Button Quit;
+
+        [SerializeField]
+        public Button Restart;
+
+        private void OnDisable()
         {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
+            Quit.onClick.RemoveAllListeners();
+            Restart.onClick.RemoveAllListeners();
         }
     }
 }

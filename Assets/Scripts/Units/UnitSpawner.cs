@@ -20,6 +20,7 @@ namespace UnfrozenTestWork
 
         private readonly EventHandler _unitSelected;
         private readonly Func<UnitModel, bool> _isUnitSelectable;
+        private readonly Func<UnitModel, bool> _isUnitSelectableAsTarget;
 
         private Transform _playerUnitsContainer;
         private Transform _enemyUnitsContainer;
@@ -28,6 +29,7 @@ namespace UnfrozenTestWork
             Transform overviewSpace,
             EventHandler unitSelected,
             Func<UnitModel, bool> isUnitSelectable,
+            Func<UnitModel, bool> isUnitSelectableAsTarget,
             Transform playerUnitsContainer,
             Transform enemyUnitsContainer)
         {
@@ -36,9 +38,10 @@ namespace UnfrozenTestWork
             _isUnitSelectable = isUnitSelectable;
             _playerUnitsContainer = playerUnitsContainer;
             _enemyUnitsContainer = enemyUnitsContainer;
+            _isUnitSelectableAsTarget = isUnitSelectableAsTarget;
         }
 
-        public UnitSpawnerResult Spawn(UnitType[] playerUnits, UnitType[] enemyUnits)
+        public UnitSpawnerResult Spawn(IEnumerable<UnitType> playerUnits, IEnumerable<UnitType> enemyUnits)
         {
             var startPosition = GetStartPosition();
             var spawnedPlayerUnits = SpawnUnits(UnitBelonging.Player, playerUnits, startPosition);
@@ -59,12 +62,12 @@ namespace UnfrozenTestWork
             return new Vector3(_overviewSpace.position.x, _overviewSpace.position.y);
         }
 
-        private UnitModel[] SpawnUnits(UnitBelonging unitBelonging, UnitType[] units, Vector3 startPosition)
+        private UnitModel[] SpawnUnits(UnitBelonging unitBelonging, IEnumerable<UnitType> units, Vector3 startPosition)
         {
             var spawnedUnits = new List<UnitModel>();
-            for (int i = 0; i < units.Length; i++)
+            foreach (var unit in units)
             {
-                var spawnedUnit = SpawnUnit(unitBelonging, units[i], startPosition);
+                var spawnedUnit = SpawnUnit(unitBelonging, unit, startPosition);
                 spawnedUnits.Add(spawnedUnit);
             }
 
@@ -73,7 +76,7 @@ namespace UnfrozenTestWork
 
         private UnitModel SpawnUnit(UnitBelonging unitBelonging, UnitType unit, Vector3 position)
         {
-            UnitModel unitPrefab = UnitManager.Instance.GetUnitPrefab(unit);
+            UnitModel unitPrefab = UnitModelProvider.Instance.GetUnitPrefab(unit);
 
             if (unitPrefab == null)
             {
@@ -92,6 +95,7 @@ namespace UnfrozenTestWork
             spawnedUnit.Initialize(unitData);
             spawnedUnit.UnitSelected += _unitSelected;
             spawnedUnit.IsUnitSelectable = _isUnitSelectable;
+            spawnedUnit.IsUnitSelectableAsTarget = _isUnitSelectableAsTarget;
             BattleManager.Instance.BattleSpeedChange += spawnedUnit.OnBattleSpeedChange;
             return spawnedUnit;
         }

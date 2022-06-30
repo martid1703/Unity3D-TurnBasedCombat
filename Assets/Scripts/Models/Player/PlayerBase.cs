@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -14,13 +15,13 @@ namespace UnfrozenTestWork
         protected UnitModel _attackedUnit;
         protected PlayerTurnState State { get; private set; }
         protected BattleManager BattleManager { get; private set; }
-        protected UnitSelector UnitSelector { get; private set; }
+        protected UnitManager UnitManager { get; private set; }
 
         private void Awake()
         {
             State = PlayerTurnState.Wait;
             BattleManager = BattleManager.Instance;
-            UnitSelector = new UnitSelector();
+            UnitManager = new UnitManager();
         }
 
         public void SetState(PlayerTurnState state)
@@ -65,7 +66,7 @@ namespace UnfrozenTestWork
             while (true)
             {
                 var attackedUnits = BattleManager.EnemyUnits.ToArray();
-                if (!IsHuman)//in case we switch auto-mode
+                if (!IsHuman)//in case we switch auto-mode after player turn begins
                 {
                     yield return WaitAIDecision();
                     yield break;
@@ -75,13 +76,13 @@ namespace UnfrozenTestWork
 
                 if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Belonging != UnitBelonging.Player)
                 {
-                    UnitSelector.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
+                    UnitManager.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
                     yield break;
                 }
 
                 if (State == PlayerTurnState.SkipTurn)
                 {
-                    UnitSelector.DeselectUnits(attackedUnits);
+                    UnitManager.DeselectUnits(attackedUnits);
                     yield break;
                 }
 
@@ -95,18 +96,18 @@ namespace UnfrozenTestWork
             BattleManager.SetGameStatus(msg);
             yield return new WaitForSeconds(0.5f);
 
-            UnitModel[] attackedUnits;
+            List<UnitModel> attackedUnits;
 
             if (this is Player)
             {
-                attackedUnits = BattleManager.EnemyUnits.ToArray();
+                attackedUnits = BattleManager.EnemyUnits;
             }
             else
             {
-                attackedUnits = BattleManager.PlayerUnits.ToArray();
+                attackedUnits = BattleManager.PlayerUnits;
             }
 
-            _attackedUnit = SelectAttackedUnit(attackedUnits);
+            _attackedUnit = SelectAttackedUnit(attackedUnits.ToArray());
 
             var rnd = Random.Range(0, 100);
             if (rnd < 20)
@@ -120,13 +121,13 @@ namespace UnfrozenTestWork
 
             if (State == PlayerTurnState.TakeTurn && _attackedUnit != null)
             {
-                UnitSelector.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
+                UnitManager.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
                 yield break;
             }
 
             if (State == PlayerTurnState.SkipTurn)
             {
-                UnitSelector.DeselectUnits(attackedUnits);
+                UnitManager.DeselectUnits(attackedUnits);
                 yield break;
             }
         }

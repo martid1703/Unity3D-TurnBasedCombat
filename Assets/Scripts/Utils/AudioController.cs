@@ -21,12 +21,12 @@ namespace UnfrozenTestWork
 
         public void PlayAttack()
         {
-            _attackAudio.PlayOneShot(_stepAudio.clip);
+            _attackAudio.PlayOneShot(_attackAudio.clip);
         }
 
         public void PlayDamage()
         {
-            _damageAudio.PlayOneShot(_stepAudio.clip);
+            _damageAudio.PlayOneShot(_damageAudio.clip);
         }
     }
 }
