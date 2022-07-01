@@ -474,7 +474,8 @@ MonoBehaviour:
     initiative: 80
     type: 1
     unitBelonging: 0
-  IsSelected: 0
+  IsSelectedAsTarget: 0
+  IsSelectedAsAttacker: 0
 --- !u!114 &7143674558009318491
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -713,7 +714,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3474766521666972385, guid: 68e32f06f424138438cbe85b03350ff0, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3474766521666972385, guid: 68e32f06f424138438cbe85b03350ff0, type: 3}
       propertyPath: m_SizeDelta.y

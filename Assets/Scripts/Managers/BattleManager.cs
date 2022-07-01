@@ -44,6 +44,8 @@ namespace UnfrozenTestWork
         private UIManager _uiManager;
         private UnitSpawner _unitSpawner;
 
+
+        public bool IsAutoBattle { get; private set; }
         public Enemy Enemy { get; private set; }
         public Player Player { get; private set; }
         public Transform OverviewSpace => _overviewSpace;
@@ -73,7 +75,7 @@ namespace UnfrozenTestWork
                             _enemyUnitsContainer);
         }
 
-        public IEnumerator Restart(bool isNewGame)
+        public IEnumerator Restart()
         {
             yield return ValidateGameStartConditions();
 
@@ -86,13 +88,11 @@ namespace UnfrozenTestWork
             PlayerUnits = spawnResult.PlayerUnits.ToList();
             EnemyUnits = spawnResult.EnemyUnits.ToList();
 
-            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, spawnResult, _blur, _fade);
+            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, _blur, _fade, PlayerUnits, EnemyUnits);
 
-            yield return SwitchToOverview();
+            yield return SwitchToOverview(true);
 
             SetBattleManagerState(BattleManagerState.Free);
-
-            _uiManager.ShowInGameUI(isNewGame);
 
             StartCoroutine(StartGameCycle());
         }
@@ -110,7 +110,7 @@ namespace UnfrozenTestWork
                     yield break;
                 }
 
-                if (_turnLogicProvider.IsPlayerTurn())
+                if (IsPlayerTurn())
                 {
                     StartCoroutine(Player.TakeTurn());
                 }
@@ -121,6 +121,15 @@ namespace UnfrozenTestWork
 
                 yield return null;
             }
+        }
+
+        private bool IsPlayerTurn()
+        {
+            if (AttackingUnit == null || AttackingUnit.UnitData.Belonging != UnitBelonging.Player)
+            {
+                return false;
+            }
+            return true;
         }
 
         private IEnumerator ValidateGameStartConditions()
@@ -135,16 +144,28 @@ namespace UnfrozenTestWork
             }
         }
 
-        public void SwitchAutoBattleMode()
+        public void SetPlayerState(PlayerTurnState state)
         {
-            Player.IsHuman = !Player.IsHuman;
+            if (IsPlayerTurn())
+            {
+                Player.SetState(state);
+            }
+            else
+            {
+                Enemy.SetState(state);
+            }
+        }
+
+        public void SwitchAutoBattle()
+        {
+            IsAutoBattle = !IsAutoBattle;
         }
 
         public void DecrementUnits(UnitBelonging unitBelonging)
         {
             var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
             unitQtyChanger.Decrement(unitBelonging);
-            StartCoroutine(SwitchToOverview());
+            StartCoroutine(SwitchToOverview(false));
             OnBattleSpeedChange(_uiManager.InGameUI.BattleSpeedSlider.value);
         }
 
@@ -152,7 +173,7 @@ namespace UnfrozenTestWork
         {
             var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
             unitQtyChanger.Increment(unitBelonging);
-            StartCoroutine(SwitchToOverview());
+            StartCoroutine(SwitchToOverview(false));
             OnBattleSpeedChange(_uiManager.InGameUI.BattleSpeedSlider.value);
         }
 
@@ -179,18 +200,18 @@ namespace UnfrozenTestWork
 
         public IEnumerator SwitchToBattle(UnitModel attackingUnit, UnitModel attackedUnit)
         {
-            _stateSwitcher.SwitchToBattle(attackingUnit, attackedUnit);
             _uiManager.SwitchToBattleMode();
+            _stateSwitcher.SwitchToBattle(attackingUnit, attackedUnit);
             BattleState = BattleState.Battle;
             yield return SetupCamera();
         }
 
-        public IEnumerator SwitchToOverview()
+        public IEnumerator SwitchToOverview(bool isNewGame)
         {
+            _uiManager.SwitchToOverviewMode(isNewGame);
             _turnLogicProvider = new TurnLogicProvider(PlayerUnits, EnemyUnits, SetBattleManagerState, GameOver);
             _turnLogicProvider.CreateBattleQueue();
             _stateSwitcher.SwitchToOverview();
-            _uiManager.SwitchToOverviewMode();
             BattleState = BattleState.Overview;
             yield return SetupCamera();
         }
@@ -202,9 +223,9 @@ namespace UnfrozenTestWork
 
         public IEnumerator ReturnUnitsBack()
         {
+            _uiManager.SwitchToOverviewMode(false);
             BattleState = BattleState.Overview;
             _stateSwitcher.RevertUnitsBack(AttackingUnit, AttackedUnit);
-            _uiManager.SwitchToOverviewMode();
             yield return SetupCamera();
         }
 

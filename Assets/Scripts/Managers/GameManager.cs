@@ -13,17 +13,16 @@ namespace UnfrozenTestWork
 
         public DefaultGameSettings DefaultGameSettings { get; private set; }
 
-        public IEnumerator Restart(bool isNewGame)
+        public IEnumerator Restart()
         {
-            SetupPlayers(isNewGame);
-            _uiManager.HideGameOverUI();
-            yield return _battleManager.Restart(isNewGame);
+            SetupPlayers();
+            yield return _battleManager.Restart();
         }
 
         private void Start()
         {
-            DefaultGameSettings = new DefaultGameSettings(_battleManager.Player.IsHuman);
-            StartCoroutine(Restart(true));
+            DefaultGameSettings = new DefaultGameSettings(_battleManager.Player.IsHuman, _battleManager.Enemy.IsHuman);
+            StartCoroutine(Restart());
         }
 
         private void Update()
@@ -31,12 +30,16 @@ namespace UnfrozenTestWork
             TrackKeyboard();
         }
 
-        private void SetupPlayers(bool isNewGame)
+        public void SetupPlayers()
         {
-            if (!isNewGame)
+            if (_battleManager.IsAutoBattle)
             {
-                _battleManager.Player.IsHuman = DefaultGameSettings.PlayerIsHuman;
+                _battleManager.Player.IsHuman = false;
+                _battleManager.Enemy.IsHuman = false;
+                return;
             }
+            _battleManager.Player.IsHuman = DefaultGameSettings.PlayerIsHuman;
+            _battleManager.Enemy.IsHuman = DefaultGameSettings.EnemyIsHuman;
         }
 
         private void TrackKeyboard()
@@ -45,13 +48,11 @@ namespace UnfrozenTestWork
             {
                 if (!IsGameOnPause())
                 {
-                    _uiManager.HideInGameUI();
                     _uiManager.ShowGameOverUI("PAUSE...", true);
                     PauseGame(true);
                 }
                 else
                 {
-                    _uiManager.HideGameOverUI();
                     _uiManager.ShowInGameUI(false);
                     PauseGame(false);
                 }
@@ -59,12 +60,12 @@ namespace UnfrozenTestWork
 
             if (Input.GetKeyDown(KeyCode.A))
             {
-                _battleManager.Player.SetState(PlayerTurnState.TakeTurn);
+                _battleManager.SetPlayerState(PlayerTurnState.TakeTurn);
             }
 
             if (Input.GetKeyDown(KeyCode.S))
             {
-                _battleManager.Player.SetState(PlayerTurnState.SkipTurn);
+                _battleManager.SetPlayerState(PlayerTurnState.SkipTurn);
             }
         }
 

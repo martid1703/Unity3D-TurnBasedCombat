@@ -25,7 +25,7 @@ namespace UnfrozenTestWork
         private CursorMode _cursorMode = CursorMode.ForceSoftware;
         private Vector2 _cursorHotSpot = Vector2.zero;
 
-        public void SetupGameOverUI()
+        private void SetupGameOverUI()
         {
             GameOverUI.Quit.onClick.AddListener(() =>
             {
@@ -35,32 +35,32 @@ namespace UnfrozenTestWork
             GameOverUI.Restart.onClick.AddListener(() =>
             {
                 _gameManager.PauseGame(false);
-                StartCoroutine(_gameManager.Restart(true));
+                StartCoroutine(_gameManager.Restart());
             });
         }
 
-        public void SetupInGameUI(bool isNewGame)
+        private void SetupInGameUI(bool isNewGame)
         {
             InGameUI.Attack.onClick.AddListener(() =>
             {
-                _battleManager.Player.SetState(PlayerTurnState.TakeTurn);
+                _battleManager.SetPlayerState(PlayerTurnState.TakeTurn);
             });
 
             InGameUI.Skip.onClick.AddListener(() =>
             {
-                _battleManager.Player.SetState(PlayerTurnState.SkipTurn);
+                _battleManager.SetPlayerState(PlayerTurnState.SkipTurn);
             });
 
             InGameUI.AutoBattle.onClick.AddListener(() =>
             {
-                _battleManager.SwitchAutoBattleMode();
+                _battleManager.SwitchAutoBattle();
+                _gameManager.SetupPlayers();
             });
 
             InGameUI.BattleSpeedSlider.onValueChanged.AddListener((v) =>
             {
                 _battleManager.OnBattleSpeedChange(v);
             });
-
             if (isNewGame)
             {
                 InGameUI.BattleSpeedSlider.value = _gameManager.DefaultGameSettings.DefaultBattleSpeed;
@@ -102,20 +102,16 @@ namespace UnfrozenTestWork
             Cursor.SetCursor(_handCursor, _cursorHotSpot, _cursorMode);
         }
 
-        public void SwitchToOverviewMode()
+        public void SwitchToOverviewMode(bool isNewGame)
         {
-            InGameUI.SwitchToOverviewMode();
+            ShowInGameUI(isNewGame);
+            InGameUI.SwitchToOverviewMode(_battleManager.IsAutoBattle);
         }
 
         public void SwitchToBattleMode()
         {
             InGameUI.SwitchToBattleMode();
         }
-
-        // public void SwitchUIToAutoBattleMode(bool isOn)
-        // {
-        //     InGameUI.SwitchUIToBattleMode(isOn);
-        // }
 
         public void ShowGameOverUI(string msg, bool allowRestart)
         {
@@ -127,6 +123,7 @@ namespace UnfrozenTestWork
 
         private void ShowGameOverUI(bool allowRestart)
         {
+            HideInGameUI();
             SetupGameOverUI();
             GameOverUI.gameObject.SetActive(true);
             if (!allowRestart)
@@ -142,7 +139,11 @@ namespace UnfrozenTestWork
 
         public void ShowInGameUI(bool isNewGame)
         {
-            SetupInGameUI(isNewGame);
+            HideGameOverUI();
+            if (isNewGame)
+            {
+                SetupInGameUI(isNewGame);
+            }
             InGameUI.gameObject.SetActive(true);
         }
 

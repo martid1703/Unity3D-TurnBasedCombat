@@ -24,11 +24,12 @@ namespace UnfrozenTestWork
 
         private IEnumerator ScaleAndFit(Rect target, float speed = 10f)
         {
-            float _tolerance = 0.5f;
+            float tolerance = 0.01f;
+            float heightCorrection = 1.1f;
             var height = target.width / _camera.aspect;
-            var targetOrthographicSize = height / 2;
+            var targetOrthographicSize = height / 2 * heightCorrection;
 
-            while (Mathf.Abs(_camera.orthographicSize - targetOrthographicSize) > _tolerance || (Vector2)transform.position != target.center)
+            while (Mathf.Abs(_camera.orthographicSize - targetOrthographicSize) > tolerance || (Vector2)transform.position != target.center)
             {
                 float xNew = Mathf.Lerp(transform.position.x, target.center.x, Time.deltaTime * speed);
                 float yNew = Mathf.Lerp(transform.position.y, target.center.y, Time.deltaTime * speed);

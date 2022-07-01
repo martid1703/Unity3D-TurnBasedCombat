@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnfrozenTestWork
@@ -9,27 +10,22 @@ namespace UnfrozenTestWork
         private readonly RectTransform _battleSpace;
         private readonly Transform _blur;
         private readonly Transform _fade;
-        private readonly UnitModel[] _playerUnits;
-        private readonly UnitModel[] _enemyUnits;
+        private readonly List<UnitModel> _playerUnits;
+        private readonly List<UnitModel> _enemyUnits;
 
-        public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, UnitSpawnerResult unitSpawnerResult, Transform blur, Transform fade)
+        public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, Transform blur, Transform fade, List<UnitModel> playerUnits, List<UnitModel> enemyUnits)
         {
-            if (unitSpawnerResult is null)
-            {
-                throw new ArgumentNullException(nameof(unitSpawnerResult));
-            }
-
-            _overviewSpace = overviewSpace ?? throw new System.ArgumentNullException(nameof(overviewSpace));
-            _battleSpace = battleSpace ?? throw new System.ArgumentNullException(nameof(battleSpace));
-            _playerUnits = unitSpawnerResult.PlayerUnits ?? throw new System.ArgumentNullException(nameof(unitSpawnerResult));
-            _enemyUnits = unitSpawnerResult.EnemyUnits ?? throw new System.ArgumentNullException(nameof(unitSpawnerResult));
-            _blur = blur ?? throw new System.ArgumentNullException(nameof(blur));
+            _overviewSpace = overviewSpace ?? throw new ArgumentNullException(nameof(overviewSpace));
+            _battleSpace = battleSpace ?? throw new ArgumentNullException(nameof(battleSpace));
+            _blur = blur ?? throw new ArgumentNullException(nameof(blur));
             _fade = fade ?? throw new ArgumentNullException(nameof(fade));
+            _playerUnits = playerUnits ?? throw new ArgumentNullException(nameof(playerUnits));
+            _enemyUnits = enemyUnits ?? throw new ArgumentNullException(nameof(enemyUnits));
         }
 
         public void SwitchToOverview()
         {
-            UnitPositioner.Instance.PositionUnitsOverview(_playerUnits, _enemyUnits, _overviewSpace.rect);
+            UnitPositioner.Instance.PositionUnitsOverview(_playerUnits.ToArray(), _enemyUnits.ToArray(), _overviewSpace.rect);
             RemoveBackgroundBattleEffects();
         }
 

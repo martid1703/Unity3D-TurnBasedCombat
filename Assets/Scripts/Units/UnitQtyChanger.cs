@@ -55,7 +55,7 @@ namespace UnfrozenTestWork
                     {
                         return;
                     }
-                    unit = GetUnitToRemove(_playerUnits.ToArray());
+                    unit = GetUnitToRemove(_playerUnits);
                     _playerUnits.Remove(unit);
                     break;
                 case UnitBelonging.Enemy:
@@ -63,7 +63,7 @@ namespace UnfrozenTestWork
                     {
                         return;
                     }
-                    unit = GetUnitToRemove(_enemyUnits.ToArray());
+                    unit = GetUnitToRemove(_enemyUnits);
                     _enemyUnits.Remove(unit);
                     break;
                 default:
@@ -73,11 +73,10 @@ namespace UnfrozenTestWork
             unit.DestroySelf();
         }
 
-        private UnitModel GetUnitToRemove(UnitModel[] units)
+        private UnitModel GetUnitToRemove(IEnumerable<UnitModel> units)
         {
-            for (int i = 0; i < units.Length; i++)
+            foreach (var unit in units)
             {
-                var unit = units[i];
                 if (unit.IsSelectedAsTarget)
                 {
                     continue;

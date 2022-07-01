@@ -144,7 +144,7 @@ namespace UnfrozenTestWork
 
         private IEnumerator ShowDamagePopup(float damage, float health, float destroyTime)
         {
-            var popup = Instantiate(_popupPrefab, transform.position, Quaternion.identity);
+            var popup = Instantiate(_popupPrefab, transform.position, Quaternion.identity, transform);
             if (IsCriticalDamage(damage, health))
             {
                 Debug.Log($"Taking CRITICAL damage: {damage}. Current HP: {health}. Health remaining: {health - damage}.");

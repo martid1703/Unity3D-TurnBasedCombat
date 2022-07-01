@@ -44,25 +44,26 @@ namespace UnfrozenTestWork
             _gameStatus.text = message;
         }
 
-        public void SwitchToOverviewMode()
+        public void SwitchToOverviewMode(bool isAutoBattle)
         {
-            SwitchUIToBattleMode(false);
+            _gameStatus.gameObject.SetActive(true);
+            SwitchUIToAutoBattleMode(isAutoBattle);
         }
 
         public void SwitchToBattleMode()
         {
-            SwitchUIToBattleMode(true);
+            _gameStatus.gameObject.SetActive(false);
+            SwitchUIToAutoBattleMode(true);
         }
 
-        private void SwitchUIToBattleMode(bool isOn)
+        private void SwitchUIToAutoBattleMode(bool isAutoBattle)
         {
-            _gameStatus.gameObject.SetActive(!isOn);
-            Attack.interactable = !isOn;
-            Skip.interactable = !isOn;
-            AddPlayerUnits.interactable = !isOn;
-            RemovePlayerUnits.interactable = !isOn;
-            AddEnemyUnits.interactable = !isOn;
-            RemoveEnemyUnits.interactable = !isOn;
+            Attack.interactable = !isAutoBattle;
+            Skip.interactable = !isAutoBattle;
+            AddPlayerUnits.interactable = !isAutoBattle;
+            RemovePlayerUnits.interactable = !isAutoBattle;
+            AddEnemyUnits.interactable = !isAutoBattle;
+            RemoveEnemyUnits.interactable = !isAutoBattle;
         }
 
         private void OnDisable()

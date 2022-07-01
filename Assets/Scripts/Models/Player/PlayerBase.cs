@@ -65,7 +65,15 @@ namespace UnfrozenTestWork
         {
             while (true)
             {
-                var attackedUnits = BattleManager.EnemyUnits.ToArray();
+                List<UnitModel> attackedUnits;
+                if (this is Player)
+                {
+                    attackedUnits = BattleManager.EnemyUnits;
+                }
+                else
+                {
+                    attackedUnits = BattleManager.PlayerUnits;
+                }
                 if (!IsHuman)//in case we switch auto-mode after player turn begins
                 {
                     yield return WaitAIDecision();
@@ -74,7 +82,7 @@ namespace UnfrozenTestWork
 
                 _attackedUnit = BattleManager.AttackedUnit;
 
-                if (State == PlayerTurnState.TakeTurn && _attackedUnit != null && _attackedUnit.UnitData.Belonging != UnitBelonging.Player)
+                if (State == PlayerTurnState.TakeTurn && _attackedUnit != null)
                 {
                     UnitManager.DeselectUnitsExceptOne(attackedUnits, _attackedUnit);
                     yield break;

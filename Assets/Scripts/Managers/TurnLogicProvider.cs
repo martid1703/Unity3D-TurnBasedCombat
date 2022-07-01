@@ -25,14 +25,7 @@ namespace UnfrozenTestWork
             _updateBattleManagerState = updateBattleManagerState;
         }
 
-        public bool IsPlayerTurn()
-        {
-            if (_attackingUnit == null || _attackingUnit.UnitData.Belonging != UnitBelonging.Player)
-            {
-                return false;
-            }
-            return true;
-        }
+        
 
         public void CreateBattleQueue()
         {
