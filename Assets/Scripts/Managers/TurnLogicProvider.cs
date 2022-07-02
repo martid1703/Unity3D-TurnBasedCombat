@@ -7,31 +7,28 @@ namespace UnfrozenTestWork
     public class TurnLogicProvider
     {
         private Queue<UnitModel> _battleQueue;
-        private List<UnitModel> _playerUnits;
-        private List<UnitModel> _enemyUnits;
         private UnitModel _attackingUnit;
         private Action<UnitBelonging> _gameOver;
         private Action<BattleManagerState> _updateBattleManagerState;
+        private List<UnitModel> _playerUnits;
+        private List<UnitModel> _enemyUnits;
 
         public TurnLogicProvider(
-            List<UnitModel> playerUnits,
-            List<UnitModel> enemyUnits,
             Action<BattleManagerState> updateBattleManagerState,
             Action<UnitBelonging> gameOver)
         {
-            _playerUnits = playerUnits;
-            _enemyUnits = enemyUnits;
             _gameOver = gameOver;
             _updateBattleManagerState = updateBattleManagerState;
         }
 
-        
-
-        public void CreateBattleQueue()
+        public void CreateBattleQueue(List<UnitModel> playerUnits, List<UnitModel> enemyUnits)
         {
+            _playerUnits = playerUnits;
+            _enemyUnits = enemyUnits;
+
             var units = new List<UnitModel>();
-            units.AddRange(_playerUnits);
-            units.AddRange(_enemyUnits);
+            units.AddRange(playerUnits);
+            units.AddRange(enemyUnits);
             units.Sort(new UnitComparer());
 
             var battleQueue = new Queue<UnitModel>(units.Count);
@@ -45,7 +42,10 @@ namespace UnfrozenTestWork
 
         public UnitModel NextTurn(UnitModel attackedUnit)
         {
-            CheckIsAlive(attackedUnit);
+            if (attackedUnit != null)
+            {
+                CheckIsAlive(attackedUnit);
+            }
 
             if (CheckWinCondition(out UnitBelonging winner))
             {
@@ -54,6 +54,11 @@ namespace UnfrozenTestWork
                 return null;
             }
 
+            return GetAttackingUnit();
+        }
+
+        private UnitModel GetAttackingUnit()
+        {
             // On the first turn of the game attackingUnit is not set yet
             if (_attackingUnit != null)
             {
@@ -90,11 +95,6 @@ namespace UnfrozenTestWork
 
         private void CheckIsAlive(UnitModel unit)
         {
-            if (unit == null)
-            {
-                return;
-            }
-
             if (unit.IsAlive)
             {
                 return;
@@ -116,23 +116,22 @@ namespace UnfrozenTestWork
 
         private UnitModel GetNextAttackingUnit()
         {
-            UnitModel attackingUnit = null;
-            while (attackingUnit == null)
+            //UnitModel attackingUnit = null;
+            while (true)
             {
                 if (_battleQueue.Count == 0)
                 {
                     throw new InvalidOperationException("Cannot get next attaking unit because battle queue is empty.");
                 }
 
-                attackingUnit = _battleQueue.Dequeue();
+                var attackingUnit = _battleQueue.Dequeue();
                 if (!attackingUnit.IsAlive)
                 {
-                    attackingUnit = null;
+                    continue;
                 }
+                Debug.Log($"Next attacking unit is {attackingUnit}.");
+                return attackingUnit;
             }
-
-            Debug.Log($"Next attacking unit is {attackingUnit}.");
-            return attackingUnit;
         }
     }
 }

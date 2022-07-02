@@ -1,9 +1,10 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace UnfrozenTestWork
 {
-    public class GameManager : SingletonMonobehaviour<GameManager>
+    public class GameManager : MonoBehaviour
     {
         [SerializeField]
         private BattleManager _battleManager;
@@ -13,16 +14,17 @@ namespace UnfrozenTestWork
 
         public DefaultGameSettings DefaultGameSettings { get; private set; }
 
-        public IEnumerator Restart()
-        {
-            SetupPlayers();
-            yield return _battleManager.Restart();
-        }
-
         private void Start()
         {
             DefaultGameSettings = new DefaultGameSettings(_battleManager.Player.IsHuman, _battleManager.Enemy.IsHuman);
-            StartCoroutine(Restart());
+            SetupPlayers();
+            StartCoroutine(_battleManager.StartGame());
+        }
+
+        public void Restart()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            PauseGame(false);
         }
 
         private void Update()

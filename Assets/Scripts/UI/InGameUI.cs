@@ -16,7 +16,7 @@ namespace UnfrozenTestWork
         public Button Skip;
 
         [SerializeField]
-        public Button AutoBattle;
+        public Toggle AutoBattle;
 
         [SerializeField]
         public Button AddPlayerUnits;
@@ -70,7 +70,7 @@ namespace UnfrozenTestWork
         {
             Attack.onClick.RemoveAllListeners();
             Skip.onClick.RemoveAllListeners();
-            AutoBattle.onClick.RemoveAllListeners();
+            AutoBattle.onValueChanged.RemoveAllListeners();
             AddPlayerUnits.onClick.RemoveAllListeners();
             RemovePlayerUnits.onClick.RemoveAllListeners();
             AddEnemyUnits.onClick.RemoveAllListeners();

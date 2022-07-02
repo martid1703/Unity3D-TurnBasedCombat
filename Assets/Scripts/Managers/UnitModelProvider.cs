@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnfrozenTestWork
 {
-    public class UnitModelProvider : SingletonMonobehaviour<UnitModelProvider>
+    public class UnitModelProvider : MonoBehaviour
     {
         [SerializeField]
         private UnitReference[] _units;

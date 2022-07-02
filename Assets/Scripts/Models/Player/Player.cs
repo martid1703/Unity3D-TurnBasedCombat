@@ -6,8 +6,6 @@ namespace UnfrozenTestWork
     {
         public new IEnumerator TakeTurn()
         {
-            _attackingUnit = BattleManager.AttackingUnit;
-            UnitManager.DeselectUnitsExceptOne(BattleManager.PlayerUnits, _attackingUnit);
             yield return base.TakeTurn();
         }
     }

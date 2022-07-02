@@ -34,6 +34,21 @@ namespace UnfrozenTestWork
         public Func<UnitModel, bool> IsUnitSelectable;
         public Func<UnitModel, bool> IsUnitSelectableAsTarget;
 
+        public EventHandler UnitSelected;
+
+        public void SelectAsTarget()
+        {
+            IsSelectedAsTarget = true;
+            _unitSelectionDisplayer.SelectAsTarget();
+            UnitSelected?.Invoke(this, new EventArgs());
+        }
+
+        public void OnBattleSpeedChange(object sender, BattleSpeedEventArgs args)
+        {
+            _unitController.SetBattleSpeed(BattleSpeedConverter.GetAnimationSpeed(args.Speed));
+            UnitData.ChangeMoveSpeed(BattleSpeedConverter.GetUnitMoveSpeed(args.Speed));
+        }
+
         void OnMouseEnter()
         {
             if (!IsUnitSelectable(this) || IsSelectedAsTarget || IsSelectedAsAttacker)
@@ -69,20 +84,7 @@ namespace UnfrozenTestWork
             Destroy(transform.gameObject);
         }
 
-        public EventHandler UnitSelected;
-
-        public void SelectAsTarget()
-        {
-            IsSelectedAsTarget = true;
-            _unitSelectionDisplayer.SelectAsTarget();
-            UnitSelected?.Invoke(this, new EventArgs());
-        }
-
-        public void OnBattleSpeedChange(object sender, BattleSpeedEventArgs args)
-        {
-            _unitController.SetBattleSpeed(BattleSpeedConverter.GetAnimationSpeed(args.Speed));
-            UnitData.ChangeMoveSpeed(BattleSpeedConverter.GetUnitMoveSpeed(args.Speed));
-        }
+        
 
         public void SelectAsAttacker()
         {

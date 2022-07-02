@@ -57,9 +57,6 @@ namespace UnfrozenTestWork
                     unit.DestroySelf();
                 }
             }
-
-            playerUnits = new List<UnitModel>();
-            enemyUnits = new List<UnitModel>();
         }
     }
 }

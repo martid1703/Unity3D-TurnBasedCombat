@@ -9,7 +9,7 @@ namespace UnfrozenTestWork
 {
     [RequireComponent(typeof(Player))]
     [RequireComponent(typeof(Enemy))]
-    public class BattleManager : SingletonMonobehaviour<BattleManager>
+    public class BattleManager : MonoBehaviour
     {
         [SerializeField]
         private UnitType[] _playerUnitsPrefabs;
@@ -43,6 +43,8 @@ namespace UnfrozenTestWork
         private StateSwitcher _stateSwitcher;
         private UIManager _uiManager;
         private UnitSpawner _unitSpawner;
+        private float _battleSpeed;
+        private UnitModelProvider _unitModelProvider;
 
 
         public bool IsAutoBattle { get; private set; }
@@ -62,20 +64,25 @@ namespace UnfrozenTestWork
             _uiManager = FindObjectOfType<UIManager>();
             Player = GetComponent<Player>();
             Enemy = GetComponent<Enemy>();
+            _unitModelProvider = FindObjectOfType<UnitModelProvider>();
         }
 
         private void Start()
         {
             _unitSpawner = new UnitSpawner(
-                            _overviewSpace,
-                            OnUnitSelected,
-                            IsUnitSelectable,
-                            IsUnitSelectableAsTarget,
-                            _playerUnitsContainer,
-                            _enemyUnitsContainer);
+                _unitModelProvider,
+                _overviewSpace,
+                OnUnitSelected,
+                IsUnitSelectable,
+                IsUnitSelectableAsTarget,
+                _playerUnitsContainer,
+                _enemyUnitsContainer);
+
+            BattleSpeedChange += _unitSpawner.OnBattleSpeedChange;
+            _turnLogicProvider = new TurnLogicProvider(SetBattleManagerState, GameOver);
         }
 
-        public IEnumerator Restart()
+        public IEnumerator StartGame()
         {
             yield return ValidateGameStartConditions();
 
@@ -88,13 +95,15 @@ namespace UnfrozenTestWork
             PlayerUnits = spawnResult.PlayerUnits.ToList();
             EnemyUnits = spawnResult.EnemyUnits.ToList();
 
+            _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
+
             _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, _blur, _fade, PlayerUnits, EnemyUnits);
 
             yield return SwitchToOverview(true);
 
             SetBattleManagerState(BattleManagerState.Free);
 
-            StartCoroutine(StartGameCycle());
+            yield return StartGameCycle();
         }
 
         private IEnumerator StartGameCycle()
@@ -156,25 +165,26 @@ namespace UnfrozenTestWork
             }
         }
 
-        public void SwitchAutoBattle()
+        public void SwitchAutoBattle(bool value)
         {
-            IsAutoBattle = !IsAutoBattle;
+            IsAutoBattle = value;
         }
 
         public void DecrementUnits(UnitBelonging unitBelonging)
         {
             var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
             unitQtyChanger.Decrement(unitBelonging);
+            _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
             StartCoroutine(SwitchToOverview(false));
-            OnBattleSpeedChange(_uiManager.InGameUI.BattleSpeedSlider.value);
         }
 
         public void IncrementUnits(UnitBelonging unitBelonging)
         {
             var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
             unitQtyChanger.Increment(unitBelonging);
+            _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
+            OnBattleSpeedChange(_battleSpeed);
             StartCoroutine(SwitchToOverview(false));
-            OnBattleSpeedChange(_uiManager.InGameUI.BattleSpeedSlider.value);
         }
 
         private IEnumerator SetupCamera()
@@ -192,9 +202,10 @@ namespace UnfrozenTestWork
             }
         }
 
-        public event EventHandler<BattleSpeedEventArgs> BattleSpeedChange;
+        public EventHandler<BattleSpeedEventArgs> BattleSpeedChange;
         public void OnBattleSpeedChange(float speed)
         {
+            _battleSpeed = speed;
             BattleSpeedChange?.Invoke(this, new BattleSpeedEventArgs(speed));
         }
 
@@ -209,8 +220,6 @@ namespace UnfrozenTestWork
         public IEnumerator SwitchToOverview(bool isNewGame)
         {
             _uiManager.SwitchToOverviewMode(isNewGame);
-            _turnLogicProvider = new TurnLogicProvider(PlayerUnits, EnemyUnits, SetBattleManagerState, GameOver);
-            _turnLogicProvider.CreateBattleQueue();
             _stateSwitcher.SwitchToOverview();
             BattleState = BattleState.Overview;
             yield return SetupCamera();

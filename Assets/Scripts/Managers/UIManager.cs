@@ -34,8 +34,7 @@ namespace UnfrozenTestWork
 
             GameOverUI.Restart.onClick.AddListener(() =>
             {
-                _gameManager.PauseGame(false);
-                StartCoroutine(_gameManager.Restart());
+                _gameManager.Restart();
             });
         }
 
@@ -51,11 +50,16 @@ namespace UnfrozenTestWork
                 _battleManager.SetPlayerState(PlayerTurnState.SkipTurn);
             });
 
-            InGameUI.AutoBattle.onClick.AddListener(() =>
+            InGameUI.AutoBattle.onValueChanged.AddListener((v) =>
             {
-                _battleManager.SwitchAutoBattle();
+                _battleManager.SwitchAutoBattle(v);
                 _gameManager.SetupPlayers();
+                SwitchToOverviewMode(false);
             });
+            if (isNewGame)
+            {
+                InGameUI.AutoBattle.isOn = _gameManager.DefaultGameSettings.DefaultAutoBattle;
+            }
 
             InGameUI.BattleSpeedSlider.onValueChanged.AddListener((v) =>
             {

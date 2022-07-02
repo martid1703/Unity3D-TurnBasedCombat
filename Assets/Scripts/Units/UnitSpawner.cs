@@ -7,9 +7,10 @@ namespace UnfrozenTestWork
 {
     public class UnitSpawner
     {
+        private readonly UnitModelProvider _unitModelProvider;
         private Transform _overviewSpace;
-        private int _minInitiative = 50;
-        private int _maxInitiative = 100;// 100% is max value
+        private int _minInitiative = 10;
+        private int _maxInitiative = 100;
 
         private int _minHealth = 100;
         private int _maxHealth = 200;
@@ -19,6 +20,7 @@ namespace UnfrozenTestWork
         private float _moveSpeed = 5f;
 
         private readonly EventHandler _unitSelected;
+        private EventHandler<BattleSpeedEventArgs> _battleSpeedChange;
         private readonly Func<UnitModel, bool> _isUnitSelectable;
         private readonly Func<UnitModel, bool> _isUnitSelectableAsTarget;
 
@@ -26,6 +28,7 @@ namespace UnfrozenTestWork
         private Transform _enemyUnitsContainer;
 
         public UnitSpawner(
+            UnitModelProvider unitModelProvider,
             Transform overviewSpace,
             EventHandler unitSelected,
             Func<UnitModel, bool> isUnitSelectable,
@@ -33,12 +36,18 @@ namespace UnfrozenTestWork
             Transform playerUnitsContainer,
             Transform enemyUnitsContainer)
         {
+            _unitModelProvider = unitModelProvider;
             _overviewSpace = overviewSpace;
             _unitSelected = unitSelected;
             _isUnitSelectable = isUnitSelectable;
             _playerUnitsContainer = playerUnitsContainer;
             _enemyUnitsContainer = enemyUnitsContainer;
             _isUnitSelectableAsTarget = isUnitSelectableAsTarget;
+        }
+
+        public void OnBattleSpeedChange(object sender, BattleSpeedEventArgs args)
+        {
+            _battleSpeedChange?.Invoke(sender, args);
         }
 
         public UnitSpawnerResult Spawn(IEnumerable<UnitType> playerUnits, IEnumerable<UnitType> enemyUnits)
@@ -76,7 +85,7 @@ namespace UnfrozenTestWork
 
         private UnitModel SpawnUnit(UnitBelonging unitBelonging, UnitType unit, Vector3 position)
         {
-            UnitModel unitPrefab = UnitModelProvider.Instance.GetUnitPrefab(unit);
+            UnitModel unitPrefab = _unitModelProvider.GetUnitPrefab(unit);
 
             if (unitPrefab == null)
             {
@@ -96,7 +105,7 @@ namespace UnfrozenTestWork
             spawnedUnit.UnitSelected += _unitSelected;
             spawnedUnit.IsUnitSelectable = _isUnitSelectable;
             spawnedUnit.IsUnitSelectableAsTarget = _isUnitSelectableAsTarget;
-            BattleManager.Instance.BattleSpeedChange += spawnedUnit.OnBattleSpeedChange;
+            _battleSpeedChange += spawnedUnit.OnBattleSpeedChange;
             return spawnedUnit;
         }
 

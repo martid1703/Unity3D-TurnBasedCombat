@@ -15,13 +15,11 @@ namespace UnfrozenTestWork
         protected UnitModel _attackedUnit;
         protected PlayerTurnState State { get; private set; }
         protected BattleManager BattleManager { get; private set; }
-        protected UnitManager UnitManager { get; private set; }
 
         private void Awake()
         {
             State = PlayerTurnState.Wait;
-            BattleManager = BattleManager.Instance;
-            UnitManager = new UnitManager();
+            BattleManager = FindObjectOfType<BattleManager>();
         }
 
         public void SetState(PlayerTurnState state)
@@ -81,6 +79,7 @@ namespace UnfrozenTestWork
                 }
 
                 _attackedUnit = BattleManager.AttackedUnit;
+                _attackingUnit = BattleManager.AttackingUnit;
 
                 if (State == PlayerTurnState.TakeTurn && _attackedUnit != null)
                 {
@@ -102,7 +101,7 @@ namespace UnfrozenTestWork
         {
             var msg = $"Waiting AI decision...";
             BattleManager.SetGameStatus(msg);
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.2f);
 
             List<UnitModel> attackedUnits;
 
@@ -116,6 +115,7 @@ namespace UnfrozenTestWork
             }
 
             _attackedUnit = SelectAttackedUnit(attackedUnits.ToArray());
+            _attackingUnit = BattleManager.AttackingUnit;
 
             var rnd = Random.Range(0, 100);
             if (rnd < 20)

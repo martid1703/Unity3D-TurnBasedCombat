@@ -48,16 +48,25 @@ namespace UnfrozenTestWork
         private void RevertUnit(UnitModel unit)
         {
             UnitTransform unitTransform;
-            switch (unit.UnitData.Belonging)
+            try
             {
-                case UnitBelonging.Player:
-                    unitTransform = _unitPositionResult.PlayerUnitTransforms[unit];
-                    break;
-                case UnitBelonging.Enemy:
-                    unitTransform = _unitPositionResult.EnemyUnitTransforms[unit];
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Belonging));
+                switch (unit.UnitData.Belonging)
+                {
+                    case UnitBelonging.Player:
+                        unitTransform = _unitPositionResult.PlayerUnitTransforms[unit];
+                        break;
+                    case UnitBelonging.Enemy:
+                        unitTransform = _unitPositionResult.EnemyUnitTransforms[unit];
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Belonging));
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("Cannot find unit in unit position result.");
+                Debug.LogError(ex);
+                throw;
             }
 
             unit.transform.position = unitTransform.Position;
@@ -106,8 +115,29 @@ namespace UnfrozenTestWork
 
         private void Scale(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect playerFitInto, Rect enemyFitInto)
         {
-            Dictionary<UnitModel, UnitTransform> playerUnitPositionResult = GetUnitPositionResult(playerUnits, playerFitInto);
-            Dictionary<UnitModel, UnitTransform> enemyPositionResult = GetUnitPositionResult(enemyUnits, enemyFitInto);
+            Dictionary<UnitModel, UnitTransform> playerUnitPositionResult;
+            Dictionary<UnitModel, UnitTransform> enemyPositionResult;
+            try
+            {
+                playerUnitPositionResult = GetUnitPositionResult(playerUnits, playerFitInto);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("Scale: Cannot get unit position result.");
+                Debug.LogError(ex);
+                throw;
+            }
+
+            try
+            {
+                enemyPositionResult = GetUnitPositionResult(enemyUnits, enemyFitInto);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("Scale: Cannot get unit position result.");
+                Debug.LogError(ex);
+                throw;
+            }
 
             float smallestScale = _unitScaler.FindSmallestScale(playerUnitPositionResult, enemyPositionResult, playerFitInto, enemyFitInto, _spaceBetweenUnits);
             _unitScaler.ScaleUnits(playerUnits, smallestScale);

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace UnfrozenTestWork
 {
@@ -10,7 +9,6 @@ namespace UnfrozenTestWork
         private readonly UnitSpawner _unitSpawner;
         private List<UnitModel> _playerUnits;
         private List<UnitModel> _enemyUnits;
-
 
         public UnitQtyChanger(
             UnitSpawner unitSpawner,
@@ -24,11 +22,7 @@ namespace UnfrozenTestWork
 
         public void Increment(UnitBelonging unitBelonging)
         {
-            if (BattleManager.Instance.BattleState != BattleState.Overview)
-            {
-                return;
-            }
-
+            
             UnitType unitType;
             switch (unitBelonging)
             {
@@ -77,7 +71,7 @@ namespace UnfrozenTestWork
         {
             foreach (var unit in units)
             {
-                if (unit.IsSelectedAsTarget)
+                if (unit.IsSelectedAsTarget || unit.IsSelectedAsAttacker)
                 {
                     continue;
                 }
