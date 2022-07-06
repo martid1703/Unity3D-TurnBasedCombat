@@ -8,21 +8,24 @@ namespace UnfrozenTestWork
     {
         private readonly RectTransform _overviewSpace;
         private readonly RectTransform _battleSpace;
-        private readonly Transform _blur;
-        private readonly Transform _fade;
         private readonly List<UnitModel> _playerUnits;
         private readonly List<UnitModel> _enemyUnits;
 
         private UnitPositioner _unitPositioner;
+        private UIManager _uiManager;
 
-        public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, Transform blur, Transform fade, List<UnitModel> playerUnits, List<UnitModel> enemyUnits)
+        public StateSwitcher(
+            RectTransform overviewSpace,
+            RectTransform battleSpace,
+            List<UnitModel> playerUnits,
+            List<UnitModel> enemyUnits,
+            UIManager uiManager)
         {
             _overviewSpace = overviewSpace ?? throw new ArgumentNullException(nameof(overviewSpace));
             _battleSpace = battleSpace ?? throw new ArgumentNullException(nameof(battleSpace));
-            _blur = blur ?? throw new ArgumentNullException(nameof(blur));
-            _fade = fade ?? throw new ArgumentNullException(nameof(fade));
             _playerUnits = playerUnits ?? throw new ArgumentNullException(nameof(playerUnits));
             _enemyUnits = enemyUnits ?? throw new ArgumentNullException(nameof(enemyUnits));
+            _uiManager = uiManager ?? throw new ArgumentNullException(nameof(uiManager));
 
             _unitPositioner = new UnitPositioner();
         }
@@ -61,14 +64,12 @@ namespace UnfrozenTestWork
 
         private void AddBackgroundBattleEffects()
         {
-            _blur.gameObject.SetActive(true);
-            _fade.gameObject.SetActive(true);
+            _uiManager.AddBackgroundBattleEffects();
         }
 
         private void RemoveBackgroundBattleEffects()
         {
-            _blur.gameObject.SetActive(false);
-            _fade.gameObject.SetActive(false);
+            _uiManager.RemoveBackgroundBattleEffects();
         }
     }
 }

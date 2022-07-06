@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace UnfrozenTestWork
@@ -16,12 +17,6 @@ namespace UnfrozenTestWork
 
         [SerializeField]
         private UnitType[] _enemyUnitsPrefabs;
-
-        [SerializeField]
-        private Transform _blur;
-
-        [SerializeField]
-        private Transform _fade;
 
         [SerializeField]
         private RectTransform _battleSpace;
@@ -89,6 +84,8 @@ namespace UnfrozenTestWork
 
         public IEnumerator StartGame()
         {
+            yield return _uiManager.FadeScreen(false);
+
             yield return ValidateGameStartConditions();
 
             _gameOver = false;
@@ -103,9 +100,11 @@ namespace UnfrozenTestWork
             var battleQueue = _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
             yield return _battleQueuePresenter.AddUnitIcons(battleQueue);
 
-            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, _blur, _fade, PlayerUnits, EnemyUnits);
+            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits, EnemyUnits, _uiManager);
 
             yield return SwitchToOverview(true);
+
+            yield return _uiManager.FadeScreen(true);
 
             SetBattleManagerState(BattleManagerState.Free);
 
@@ -304,7 +303,7 @@ namespace UnfrozenTestWork
 
         public bool IsUnitSelectable(UnitModel unit)
         {
-            if (BattleState == BattleState.Battle)
+            if (BattleState == BattleState.Battle || EventSystem.current.IsPointerOverGameObject())
             {
                 return false;
             }
