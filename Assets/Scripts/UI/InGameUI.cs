@@ -19,9 +19,6 @@ namespace UnfrozenTestWork
         public Button Skip;
 
         [SerializeField]
-        public Toggle AutoBattle;
-
-        [SerializeField]
         public Button AddPlayerUnits;
 
         [SerializeField]
@@ -35,6 +32,13 @@ namespace UnfrozenTestWork
 
         [SerializeField]
         public Slider BattleSpeedSlider;
+
+        [SerializeField]
+        public Toggle IsHumanPlayer;
+
+        [SerializeField]
+        public Toggle IsHumanEnemy;
+
         private TMP_Text _gameStatus;
 
 
@@ -76,12 +80,13 @@ namespace UnfrozenTestWork
         {
             Attack.onClick.RemoveAllListeners();
             Skip.onClick.RemoveAllListeners();
-            AutoBattle.onValueChanged.RemoveAllListeners();
             AddPlayerUnits.onClick.RemoveAllListeners();
             RemovePlayerUnits.onClick.RemoveAllListeners();
             AddEnemyUnits.onClick.RemoveAllListeners();
             RemoveEnemyUnits.onClick.RemoveAllListeners();
             BattleSpeedSlider.onValueChanged.RemoveAllListeners();
+            IsHumanPlayer.onValueChanged.RemoveAllListeners();
+            IsHumanEnemy.onValueChanged.RemoveAllListeners();
         }
     }
 }

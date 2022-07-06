@@ -162,15 +162,24 @@ namespace UnfrozenTestWork
                 _battleManager.SetPlayerState(PlayerTurnState.SkipTurn);
             });
 
-            InGameUI.AutoBattle.onValueChanged.AddListener((v) =>
+            InGameUI.IsHumanPlayer.onValueChanged.AddListener((v) =>
             {
-                _battleManager.SwitchAutoBattle(v);
-                _gameManager.SetupPlayers();
-                SwitchToOverviewMode(false);
+                _battleManager.Player.IsHuman = v;
+                _battleManager.SwitchAutoBattle(!_battleManager.Player.IsHuman & !_battleManager.Enemy.IsHuman);
             });
             if (isNewGame)
             {
-                InGameUI.AutoBattle.isOn = _gameManager.DefaultGameSettings.DefaultAutoBattle;
+                InGameUI.IsHumanPlayer.isOn = _gameManager.DefaultGameSettings.PlayerIsHuman;
+            }
+
+            InGameUI.IsHumanEnemy.onValueChanged.AddListener((v) =>
+            {
+                _battleManager.Enemy.IsHuman = v;
+                _battleManager.SwitchAutoBattle(!_battleManager.Player.IsHuman & !_battleManager.Enemy.IsHuman);
+            });
+            if (isNewGame)
+            {
+                InGameUI.IsHumanEnemy.isOn = _gameManager.DefaultGameSettings.EnemyIsHuman;
             }
 
             InGameUI.BattleSpeedSlider.onValueChanged.AddListener((v) =>
