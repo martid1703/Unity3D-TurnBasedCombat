@@ -48,15 +48,17 @@ namespace UnfrozenTestWork
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+                if (_battleManager.IsGameOver)
+                {
+                    return;
+                }
                 if (!IsGameOnPause())
                 {
                     _uiManager.ShowGameOverUI("PAUSE...", true);
-                    PauseGame(true);
                 }
                 else
                 {
                     _uiManager.ShowInGameUI(false);
-                    PauseGame(false);
                 }
             }
 

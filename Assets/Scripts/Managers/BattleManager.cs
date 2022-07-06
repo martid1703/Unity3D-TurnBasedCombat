@@ -34,7 +34,7 @@ namespace UnfrozenTestWork
         private CameraController _cameraController;
         private BattleManagerState _battleManagerstate;
         private TurnLogicProvider _turnLogicProvider;
-        private bool _gameOver;
+        public bool IsGameOver { get; private set; }
         private StateSwitcher _stateSwitcher;
         private UIManager _uiManager;
         private UnitSpawner _unitSpawner;
@@ -88,7 +88,7 @@ namespace UnfrozenTestWork
 
             yield return ValidateGameStartConditions();
 
-            _gameOver = false;
+            IsGameOver = false;
 
             UnitManager.DestroyAllUnits(PlayerUnits, EnemyUnits);
 
@@ -120,7 +120,7 @@ namespace UnfrozenTestWork
                 AttackingUnit = _turnLogicProvider.NextTurn();
                 AttackedUnit = null;
 
-                if (_gameOver)
+                if (IsGameOver)
                 {
                     yield break;
                 }
@@ -350,7 +350,7 @@ namespace UnfrozenTestWork
         private void GameOver(UnitBelonging winner)
         {
             var msg = $"Game Over! \nWinner is {winner}.";
-            _gameOver = true;
+            IsGameOver = true;
             _uiManager.HideInGameUI();
             _uiManager.ShowGameOverUI(msg, true);
         }

@@ -98,6 +98,7 @@ namespace UnfrozenTestWork
 
         public void ShowGameOverUI(string msg, bool allowRestart)
         {
+            _gameManager.PauseGame(true);
             var msgbox = GameOverUI.transform.Find("Message");
             var tmp = msgbox.GetComponent<TMP_Text>();
             tmp.text = msg;
@@ -117,13 +118,14 @@ namespace UnfrozenTestWork
 
         public void HideGameOverUI()
         {
+            _gameManager.PauseGame(false);
             GameOverUI.gameObject.SetActive(false);
         }
 
         public void ShowInGameUI(bool isNewGame)
         {
             HideGameOverUI();
-            if (isNewGame)
+            if (InGameUI.gameObject.activeSelf == false)
             {
                 SetupInGameUI(isNewGame);
             }

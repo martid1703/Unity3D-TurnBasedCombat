@@ -1090,7 +1090,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8812984107468354832, guid: 85b1406196510cf4680d870921694e50, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -43.7505
+      value: -62.501
       objectReference: {fileID: 0}
     - target: {fileID: 8812984107468354832, guid: 85b1406196510cf4680d870921694e50, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1387,7 +1387,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6369122833268789346, guid: f1cacad0bed868e4a8f760d624181eab, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -43.7505
+      value: -62.501
       objectReference: {fileID: 0}
     - target: {fileID: 6369122833268789346, guid: f1cacad0bed868e4a8f760d624181eab, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -2272,7 +2272,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8812984107468354832, guid: 85b1406196510cf4680d870921694e50, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -43.7505
+      value: -62.501
       objectReference: {fileID: 0}
     - target: {fileID: 8812984107468354832, guid: 85b1406196510cf4680d870921694e50, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -3017,7 +3017,7 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 4
+  m_ChildAlignment: 7
   m_Spacing: 20
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
@@ -3053,6 +3053,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2123671645}
     m_Modifications:
+    - target: {fileID: 282952345132573573, guid: 8ac4e0de508859244877831a7b383661, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.b
+      value: 0.16920607
+      objectReference: {fileID: 0}
+    - target: {fileID: 282952345132573573, guid: 8ac4e0de508859244877831a7b383661, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.g
+      value: 0.9211946
+      objectReference: {fileID: 0}
+    - target: {fileID: 282952345132573573, guid: 8ac4e0de508859244877831a7b383661, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.r
+      value: 0.9245283
+      objectReference: {fileID: 0}
     - target: {fileID: 442642050978086938, guid: 8ac4e0de508859244877831a7b383661, type: 3}
       propertyPath: m_Name
       value: Toggle
@@ -3943,7 +3955,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6369122833268789346, guid: f1cacad0bed868e4a8f760d624181eab, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -43.7505
+      value: -62.501
       objectReference: {fileID: 0}
     - target: {fileID: 6369122833268789346, guid: f1cacad0bed868e4a8f760d624181eab, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
