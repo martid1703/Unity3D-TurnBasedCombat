@@ -11,5 +11,8 @@ namespace UnfrozenTestWork
 
         [SerializeField]
         public UnitModel UnitPrefab;
+
+        [SerializeField]
+        public Texture2D UnitIcon;
     }
 }

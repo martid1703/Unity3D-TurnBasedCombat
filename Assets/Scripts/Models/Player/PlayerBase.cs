@@ -101,7 +101,6 @@ namespace UnfrozenTestWork
         {
             var msg = $"Waiting AI decision...";
             BattleManager.SetGameStatus(msg);
-            yield return new WaitForSeconds(0.2f);
 
             List<UnitModel> attackedUnits;
 
@@ -152,6 +151,10 @@ namespace UnfrozenTestWork
         {
             var msg = $"Player takes his turn.";
             BattleManager.SetGameStatus(msg);
+            if (!IsHuman)
+            {
+                yield return new WaitForSeconds(1f);
+            }
             yield return BattleManager.SwitchToBattle(_attackingUnit, _attackedUnit);
             yield return _attackingUnit.TakeTurn(_attackedUnit);
         }
@@ -161,6 +164,10 @@ namespace UnfrozenTestWork
             var msg = $"Player skips his turn.";
             Debug.Log(msg);
             BattleManager.SetGameStatus(msg);
+            if (!IsHuman)
+            {
+                yield return new WaitForSeconds(1f);
+            }
             yield return _attackingUnit.SkipTurn();
         }
     }

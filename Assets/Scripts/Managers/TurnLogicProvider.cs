@@ -6,25 +6,35 @@ namespace UnfrozenTestWork
 {
     public class TurnLogicProvider
     {
-        private Queue<UnitModel> _battleQueue;
+        public Queue<UnitModel> _battleQueue;
         private UnitModel _attackingUnit;
         private Action<UnitBelonging> _gameOver;
         private Action<BattleManagerState> _updateBattleManagerState;
         private List<UnitModel> _playerUnits;
         private List<UnitModel> _enemyUnits;
+        private BattleQueuePresenter _battleQueuePresenter;
 
         public TurnLogicProvider(
             Action<BattleManagerState> updateBattleManagerState,
-            Action<UnitBelonging> gameOver)
+            Action<UnitBelonging> gameOver,
+            BattleQueuePresenter battleQueuePresenter)
         {
-            _gameOver = gameOver;
-            _updateBattleManagerState = updateBattleManagerState;
+            _gameOver = gameOver ?? throw new ArgumentNullException(nameof(gameOver));
+            _updateBattleManagerState = updateBattleManagerState ?? throw new ArgumentNullException(nameof(updateBattleManagerState));
+            _battleQueuePresenter = battleQueuePresenter ?? throw new ArgumentNullException(nameof(battleQueuePresenter));
         }
 
-        public void CreateBattleQueue(List<UnitModel> playerUnits, List<UnitModel> enemyUnits)
+        public Queue<UnitModel> CreateBattleQueue(List<UnitModel> playerUnits, List<UnitModel> enemyUnits)
         {
             _playerUnits = playerUnits;
             _enemyUnits = enemyUnits;
+
+            if (CheckWinCondition(out UnitBelonging winner))
+            {
+                Debug.Log("Win condition is met!");
+                _gameOver(winner);
+                return null;
+            }
 
             var units = new List<UnitModel>();
             units.AddRange(playerUnits);
@@ -38,15 +48,16 @@ namespace UnfrozenTestWork
             }
 
             _battleQueue = battleQueue;
+            return _battleQueue;
         }
 
-        public UnitModel NextTurn(UnitModel attackedUnit)
+        public void AddToBattleQueue(UnitModel unit)
         {
-            if (attackedUnit != null)
-            {
-                CheckIsAlive(attackedUnit);
-            }
+            _battleQueue.Enqueue(unit);
+        }
 
+        public UnitModel NextTurn()
+        {
             if (CheckWinCondition(out UnitBelonging winner))
             {
                 Debug.Log("Win condition is met!");
@@ -93,30 +104,8 @@ namespace UnfrozenTestWork
             return false;
         }
 
-        private void CheckIsAlive(UnitModel unit)
-        {
-            if (unit.IsAlive)
-            {
-                return;
-            }
-
-            switch (unit.UnitData.Belonging)
-            {
-                case UnitBelonging.Player:
-                    _playerUnits.Remove(unit);
-                    break;
-                case UnitBelonging.Enemy:
-                    _enemyUnits.Remove(unit);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Type));
-            }
-            unit.DestroySelf();
-        }
-
         private UnitModel GetNextAttackingUnit()
         {
-            //UnitModel attackingUnit = null;
             while (true)
             {
                 if (_battleQueue.Count == 0)

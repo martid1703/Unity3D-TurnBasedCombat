@@ -43,8 +43,9 @@ namespace UnfrozenTestWork
         private StateSwitcher _stateSwitcher;
         private UIManager _uiManager;
         private UnitSpawner _unitSpawner;
-        private float _battleSpeed;
         private UnitModelProvider _unitModelProvider;
+        private BattleQueuePresenter _battleQueuePresenter;
+        private float _battleSpeed;
 
 
         public bool IsAutoBattle { get; private set; }
@@ -65,6 +66,7 @@ namespace UnfrozenTestWork
             Player = GetComponent<Player>();
             Enemy = GetComponent<Enemy>();
             _unitModelProvider = FindObjectOfType<UnitModelProvider>();
+            _battleQueuePresenter = FindObjectOfType<BattleQueuePresenter>();
         }
 
         private void Start()
@@ -73,13 +75,16 @@ namespace UnfrozenTestWork
                 _unitModelProvider,
                 _overviewSpace,
                 OnUnitSelected,
+                OnUnitIsDead,
                 IsUnitSelectable,
                 IsUnitSelectableAsTarget,
                 _playerUnitsContainer,
-                _enemyUnitsContainer);
+                _enemyUnitsContainer,
+                OnUnitMouseOnExit
+                );
 
             BattleSpeedChange += _unitSpawner.OnBattleSpeedChange;
-            _turnLogicProvider = new TurnLogicProvider(SetBattleManagerState, GameOver);
+            _turnLogicProvider = new TurnLogicProvider(SetBattleManagerState, GameOver, _battleQueuePresenter);
         }
 
         public IEnumerator StartGame()
@@ -95,7 +100,8 @@ namespace UnfrozenTestWork
             PlayerUnits = spawnResult.PlayerUnits.ToList();
             EnemyUnits = spawnResult.EnemyUnits.ToList();
 
-            _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
+            var battleQueue = _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
+            yield return _battleQueuePresenter.AddUnitIcons(battleQueue);
 
             _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, _blur, _fade, PlayerUnits, EnemyUnits);
 
@@ -112,7 +118,8 @@ namespace UnfrozenTestWork
             {
                 yield return WaitBattleManagerState(BattleManagerState.Free);
 
-                AttackingUnit = _turnLogicProvider.NextTurn(AttackedUnit);
+                AttackingUnit = _turnLogicProvider.NextTurn();
+                AttackedUnit = null;
 
                 if (_gameOver)
                 {
@@ -121,12 +128,14 @@ namespace UnfrozenTestWork
 
                 if (IsPlayerTurn())
                 {
-                    StartCoroutine(Player.TakeTurn());
+                    yield return Player.TakeTurn();
                 }
                 else
                 {
-                    StartCoroutine(Enemy.TakeTurn());
+                    yield return Enemy.TakeTurn();
                 }
+
+                _battleQueuePresenter.TakeTurn(AttackingUnit);
 
                 yield return null;
             }
@@ -173,16 +182,18 @@ namespace UnfrozenTestWork
         public void DecrementUnits(UnitBelonging unitBelonging)
         {
             var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
-            unitQtyChanger.Decrement(unitBelonging);
-            _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
+            var unit = unitQtyChanger.Decrement(unitBelonging);
+            OnUnitIsDead(unit, new EventArgs());
+
             StartCoroutine(SwitchToOverview(false));
         }
 
         public void IncrementUnits(UnitBelonging unitBelonging)
         {
             var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
-            unitQtyChanger.Increment(unitBelonging);
-            _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
+            var unit = unitQtyChanger.Increment(unitBelonging);
+            _turnLogicProvider.AddToBattleQueue(unit);
+            _battleQueuePresenter.AddUnitIcon(unit);
             OnBattleSpeedChange(_battleSpeed);
             StartCoroutine(SwitchToOverview(false));
         }
@@ -267,13 +278,55 @@ namespace UnfrozenTestWork
             UnitManager.DeselectUnitsExceptOne(PlayerUnits, AttackedUnit);
         }
 
+        public void OnUnitIsDead(object sender, EventArgs args)
+        {
+            if (sender == null)
+            {
+                return;
+            }
+
+            var unit = sender as UnitModel;
+
+            switch (unit.UnitData.Belonging)
+            {
+                case UnitBelonging.Player:
+                    PlayerUnits.Remove(unit);
+                    break;
+                case UnitBelonging.Enemy:
+                    EnemyUnits.Remove(unit);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Type));
+            }
+            _battleQueuePresenter.RemoveUnitIcon(unit);
+            unit.Kill();
+        }
+
         public bool IsUnitSelectable(UnitModel unit)
         {
             if (BattleState == BattleState.Battle)
             {
                 return false;
             }
+
+            if (IsPlayerTurn() & unit.IsEnemy)
+            {
+                _uiManager.SetAttackCursor();
+            }
+            if (!IsPlayerTurn() & !unit.IsEnemy)
+            {
+                _uiManager.SetAttackCursor();
+            }
             return true;
+        }
+
+        public void OnUnitMouseOnExit(object sender, EventArgs args)
+        {
+            if (BattleState == BattleState.Battle)
+            {
+                return;
+            }
+            _uiManager.SetRegularCursor();
         }
 
         public bool IsUnitSelectableAsTarget(UnitModel unit)

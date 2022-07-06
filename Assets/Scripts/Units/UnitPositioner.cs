@@ -4,15 +4,14 @@ using UnityEngine;
 
 namespace UnfrozenTestWork
 {
-    public class UnitPositioner : SingletonBase<UnitPositioner>
+    public class UnitPositioner
     {
         private const string _overviewLayer = "UnitsOverview";
         private const string _battleLayer = "UnitsBattle";
 
         private readonly UnitScaler _unitScaler;
 
-        // need to keep these field unchanged for revert unit position
-        private static UnitPositionResult _unitPositionResult;
+        private UnitPositionResult _unitPositionResult;
 
         private float _spaceBetweenUnits;
 
@@ -37,7 +36,7 @@ namespace UnfrozenTestWork
         {
             if (_unitPositionResult == null)
             {
-                Debug.LogWarning("Cannot return unit to overview, because initial positions are not set.");
+                Debug.LogWarning("Cannot revert units, because initial positions are not set.");
                 return;
             }
 
@@ -47,6 +46,11 @@ namespace UnfrozenTestWork
 
         private void RevertUnit(UnitModel unit)
         {
+            if (unit == null)
+            {
+                return;
+            }
+
             UnitTransform unitTransform;
             try
             {

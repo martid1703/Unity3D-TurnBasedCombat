@@ -10,6 +10,9 @@ namespace UnfrozenTestWork
         public Transform GameStatus;
 
         [SerializeField]
+        public Transform BattleQueue;
+
+        [SerializeField]
         public Button Attack;
 
         [SerializeField]
@@ -34,6 +37,7 @@ namespace UnfrozenTestWork
         public Slider BattleSpeedSlider;
         private TMP_Text _gameStatus;
 
+
         private void Awake()
         {
             _gameStatus = GameStatus.GetComponentInChildren<TMP_Text>();
@@ -47,12 +51,14 @@ namespace UnfrozenTestWork
         public void SwitchToOverviewMode(bool isAutoBattle)
         {
             _gameStatus.gameObject.SetActive(true);
+            BattleQueue.gameObject.SetActive(true);
             SwitchUIToAutoBattleMode(isAutoBattle);
         }
 
         public void SwitchToBattleMode()
         {
             _gameStatus.gameObject.SetActive(false);
+            BattleQueue.gameObject.SetActive(false);
             SwitchUIToAutoBattleMode(true);
         }
 

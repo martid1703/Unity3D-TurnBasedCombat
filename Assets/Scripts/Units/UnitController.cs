@@ -137,8 +137,6 @@ namespace UnfrozenTestWork
             _healthBarController.SetReduceHPSpeed(BattleSpeedConverter.GetHPReduceSpeed(_battleSpeed));
             StartCoroutine(_healthBarController.TakeDamage(damage));
 
-
-
             yield return new WaitForSecondsRealtime(animationDuration);
         }
 

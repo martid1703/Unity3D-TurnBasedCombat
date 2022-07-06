@@ -46,7 +46,7 @@ namespace UnfrozenTestWork
             {
                 foreach (var unit in playerUnits)
                 {
-                    unit.DestroySelf();
+                    unit.Kill();
                 }
             }
 
@@ -54,7 +54,7 @@ namespace UnfrozenTestWork
             {
                 foreach (var unit in enemyUnits)
                 {
-                    unit.DestroySelf();
+                    unit.Kill();
                 }
             }
         }

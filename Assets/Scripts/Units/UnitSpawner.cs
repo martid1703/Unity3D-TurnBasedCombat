@@ -20,6 +20,9 @@ namespace UnfrozenTestWork
         private float _moveSpeed = 5f;
 
         private readonly EventHandler _unitSelected;
+        private readonly EventHandler _unitIsDead;
+        private readonly EventHandler _unitOnMouseExit;
+
         private EventHandler<BattleSpeedEventArgs> _battleSpeedChange;
         private readonly Func<UnitModel, bool> _isUnitSelectable;
         private readonly Func<UnitModel, bool> _isUnitSelectableAsTarget;
@@ -31,18 +34,22 @@ namespace UnfrozenTestWork
             UnitModelProvider unitModelProvider,
             Transform overviewSpace,
             EventHandler unitSelected,
+            EventHandler unitIsDead,
             Func<UnitModel, bool> isUnitSelectable,
             Func<UnitModel, bool> isUnitSelectableAsTarget,
             Transform playerUnitsContainer,
-            Transform enemyUnitsContainer)
+            Transform enemyUnitsContainer,
+            EventHandler unitOnMouseExit)
         {
             _unitModelProvider = unitModelProvider;
             _overviewSpace = overviewSpace;
             _unitSelected = unitSelected;
+            _unitIsDead = unitIsDead;
             _isUnitSelectable = isUnitSelectable;
             _playerUnitsContainer = playerUnitsContainer;
             _enemyUnitsContainer = enemyUnitsContainer;
             _isUnitSelectableAsTarget = isUnitSelectableAsTarget;
+            _unitOnMouseExit = unitOnMouseExit;
         }
 
         public void OnBattleSpeedChange(object sender, BattleSpeedEventArgs args)
@@ -59,11 +66,12 @@ namespace UnfrozenTestWork
             return new UnitSpawnerResult(spawnedPlayerUnits, spawnedEnemyUnits, new UnitModel[0]);
         }
 
-        public void AddUnit(UnitBelonging unitBelonging, UnitType unit, List<UnitModel> units)
+        public UnitModel AddUnit(UnitBelonging unitBelonging, UnitType unit, List<UnitModel> units)
         {
             var startPosition = GetStartPosition();
             var spawnedUnit = SpawnUnit(unitBelonging, unit, startPosition);
             units.Add(spawnedUnit);
+            return spawnedUnit;
         }
 
         private Vector3 GetStartPosition()
@@ -103,6 +111,8 @@ namespace UnfrozenTestWork
             UnitData unitData = GenerateUnitData(unitBelonging, unit);
             spawnedUnit.Initialize(unitData);
             spawnedUnit.UnitSelected += _unitSelected;
+            spawnedUnit.UnitIsDead += _unitIsDead;
+            spawnedUnit.UnitOnMouseExit += _unitOnMouseExit;
             spawnedUnit.IsUnitSelectable = _isUnitSelectable;
             spawnedUnit.IsUnitSelectableAsTarget = _isUnitSelectableAsTarget;
             _battleSpeedChange += spawnedUnit.OnBattleSpeedChange;

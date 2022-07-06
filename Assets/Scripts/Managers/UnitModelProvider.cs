@@ -24,5 +24,14 @@ namespace UnfrozenTestWork
             }
             return unitReference.UnitPrefab;
         }
+
+        public Texture2D GetUnitIconImage(UnitType unitType)
+        {
+            if (!_unitsDic.TryGetValue(unitType, out var unitReference))
+            {
+                throw new System.Exception($"Cannot find prefab for unit type: {unitType}.");
+            }
+            return unitReference.UnitIcon;
+        }
     }
 }

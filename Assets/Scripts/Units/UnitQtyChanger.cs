@@ -20,26 +20,27 @@ namespace UnfrozenTestWork
             _enemyUnits = enemyUnits;
         }
 
-        public void Increment(UnitBelonging unitBelonging)
+        public UnitModel Increment(UnitBelonging unitBelonging)
         {
-            
+            UnitModel unit;
             UnitType unitType;
             switch (unitBelonging)
             {
                 case UnitBelonging.Player:
                     unitType = _playerUnits.Last().UnitData.Type;
-                    _unitSpawner.AddUnit(unitBelonging, unitType, _playerUnits);
+                    unit = _unitSpawner.AddUnit(unitBelonging, unitType, _playerUnits);
                     break;
                 case UnitBelonging.Enemy:
                     unitType = _enemyUnits.Last().UnitData.Type;
-                    _unitSpawner.AddUnit(unitBelonging, unitType, _enemyUnits);
+                    unit = _unitSpawner.AddUnit(unitBelonging, unitType, _enemyUnits);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unitBelonging));
             }
+            return unit;
         }
 
-        public void Decrement(UnitBelonging unitBelonging)
+        public UnitModel Decrement(UnitBelonging unitBelonging)
         {
             UnitModel unit;
             switch (unitBelonging)
@@ -47,30 +48,31 @@ namespace UnfrozenTestWork
                 case UnitBelonging.Player:
                     if (_playerUnits.Count == 1)
                     {
-                        return;
+                        return null;
                     }
-                    unit = GetUnitToRemove(_playerUnits);
+                    unit = GetUnitToRemove(_playerUnits.ToArray());
                     _playerUnits.Remove(unit);
                     break;
                 case UnitBelonging.Enemy:
                     if (_enemyUnits.Count == 1)
                     {
-                        return;
+                        return null;
                     }
-                    unit = GetUnitToRemove(_enemyUnits);
+                    unit = GetUnitToRemove(_enemyUnits.ToArray());
                     _enemyUnits.Remove(unit);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unitBelonging));
             }
 
-            unit.DestroySelf();
+            return unit;
         }
 
-        private UnitModel GetUnitToRemove(IEnumerable<UnitModel> units)
+        private UnitModel GetUnitToRemove(UnitModel[] units)
         {
-            foreach (var unit in units)
+            for (int i = units.Length - 1; i >= 0; i--)
             {
+                var unit = units[i];
                 if (unit.IsSelectedAsTarget || unit.IsSelectedAsAttacker)
                 {
                     continue;

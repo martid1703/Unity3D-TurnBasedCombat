@@ -13,6 +13,8 @@ namespace UnfrozenTestWork
         private readonly List<UnitModel> _playerUnits;
         private readonly List<UnitModel> _enemyUnits;
 
+        private UnitPositioner _unitPositioner;
+
         public StateSwitcher(RectTransform overviewSpace, RectTransform battleSpace, Transform blur, Transform fade, List<UnitModel> playerUnits, List<UnitModel> enemyUnits)
         {
             _overviewSpace = overviewSpace ?? throw new ArgumentNullException(nameof(overviewSpace));
@@ -21,17 +23,19 @@ namespace UnfrozenTestWork
             _fade = fade ?? throw new ArgumentNullException(nameof(fade));
             _playerUnits = playerUnits ?? throw new ArgumentNullException(nameof(playerUnits));
             _enemyUnits = enemyUnits ?? throw new ArgumentNullException(nameof(enemyUnits));
+
+            _unitPositioner = new UnitPositioner();
         }
 
         public void SwitchToOverview()
         {
-            UnitPositioner.Instance.PositionUnitsOverview(_playerUnits.ToArray(), _enemyUnits.ToArray(), _overviewSpace.rect);
+            _unitPositioner.PositionUnitsOverview(_playerUnits.ToArray(), _enemyUnits.ToArray(), _overviewSpace.rect);
             RemoveBackgroundBattleEffects();
         }
 
         public void RevertUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
         {
-            UnitPositioner.Instance.RevertUnitsBack(attackingUnit, attackedUnit);
+            _unitPositioner.RevertUnitsBack(attackingUnit, attackedUnit);
             RemoveBackgroundBattleEffects();
         }
 
@@ -51,7 +55,7 @@ namespace UnfrozenTestWork
                 enemyUnits = new UnitModel[] { attackingUnit };
             }
 
-            UnitPositioner.Instance.PositionUnitsBattle(playerUnits, enemyUnits, _battleSpace.rect);
+            _unitPositioner.PositionUnitsBattle(playerUnits, enemyUnits, _battleSpace.rect);
             AddBackgroundBattleEffects();
         }
 

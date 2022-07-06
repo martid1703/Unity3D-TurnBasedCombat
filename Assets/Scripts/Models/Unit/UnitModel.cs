@@ -13,14 +13,13 @@ namespace UnfrozenTestWork
 
         public bool IsSelectedAsTarget;
         public bool IsSelectedAsAttacker;
-
+        public bool IsAlive => UnitData.Health > 0;
+        public bool IsEnemy => UnitData.Belonging == UnitBelonging.Enemy;
 
         private IUnitController _unitController;
         private UnitSelectionDisplayer _unitSelectionDisplayer;
         private BoxCollider2D _boxCollider2d;
 
-        public bool IsAlive => UnitData.Health > 0;
-        public bool IsEnemy => UnitData.Belonging == UnitBelonging.Enemy;
 
         void Awake()
         {
@@ -49,6 +48,7 @@ namespace UnfrozenTestWork
             UnitData.ChangeMoveSpeed(BattleSpeedConverter.GetUnitMoveSpeed(args.Speed));
         }
 
+
         void OnMouseEnter()
         {
             if (!IsUnitSelectable(this) || IsSelectedAsTarget || IsSelectedAsAttacker)
@@ -69,9 +69,12 @@ namespace UnfrozenTestWork
             SelectAsTarget();
         }
 
+        public EventHandler UnitOnMouseExit;
+
         void OnMouseExit()
         {
             _unitController.HideUnitInfo();
+            UnitOnMouseExit?.Invoke(this, new EventArgs());
             if (IsSelectedAsTarget || IsSelectedAsAttacker)
             {
                 return;
@@ -79,12 +82,12 @@ namespace UnfrozenTestWork
             _unitSelectionDisplayer.Deselect();
         }
 
-        public void DestroySelf()
+        public void Kill()
         {
+            UnitData.TakeDamage(UnitData.Health);
+            Deselect();
             Destroy(transform.gameObject);
         }
-
-        
 
         public void SelectAsAttacker()
         {
@@ -182,6 +185,8 @@ namespace UnfrozenTestWork
             return transform.position.x > target.transform.position.x;
         }
 
+        public event EventHandler UnitIsDead;
+
         public IEnumerator TakeDamage(int damage)
         {
             yield return _unitController.TakeDamage(damage, UnitData);
@@ -191,6 +196,7 @@ namespace UnfrozenTestWork
             if (!IsAlive)
             {
                 _unitController.Die();
+                UnitIsDead?.Invoke(this, new EventArgs());
                 yield break;
             }
 

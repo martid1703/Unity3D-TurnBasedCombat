@@ -114,6 +114,7 @@ namespace UnfrozenTestWork
 
         public void SwitchToBattleMode()
         {
+            SetRegularCursor();
             InGameUI.SwitchToBattleMode();
         }
 
