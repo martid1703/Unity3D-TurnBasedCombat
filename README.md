@@ -1,7 +1,7 @@
 ﻿# 2D turn based battle system
 ## This is a learning project implementing 2d turn based battle made in Unity
 Unit images/animations for miner unit are properties of Unfrozen Studio, unit images/animations for paladin unit are properties of the Spine example pack (Esoteric software).
-### Game executables are located in Build.zip
+### Game executables are located in PCBuild.zip
 
 <img src="README-screenshot.png" width="100%" height="100%">
 
