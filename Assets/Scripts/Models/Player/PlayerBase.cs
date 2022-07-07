@@ -56,7 +56,6 @@ namespace UnfrozenTestWork
             }
 
             SetState(PlayerTurnState.Wait);
-            BattleManager.SetBattleManagerState(BattleManagerState.Free);
         }
 
         private IEnumerator WaitHumanDecision()

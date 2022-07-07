@@ -52,11 +52,11 @@ namespace UnfrozenTestWork
             _gameStatus.text = message;
         }
 
-        public void SwitchToOverviewMode(bool isAutoBattle)
+        public void SwitchToOverviewMode()
         {
             _gameStatus.gameObject.SetActive(true);
             BattleQueue.gameObject.SetActive(true);
-            SwitchUIToAutoBattleMode(isAutoBattle);
+            SwitchUIToAutoBattleMode(false);
         }
 
         public void SwitchToBattleMode()
@@ -66,8 +66,10 @@ namespace UnfrozenTestWork
             SwitchUIToAutoBattleMode(true);
         }
 
-        private void SwitchUIToAutoBattleMode(bool isAutoBattle)
+        public void SwitchUIToAutoBattleMode(bool isAutoBattle)
         {
+            IsHumanPlayer1.interactable = !isAutoBattle;
+            IsHumanPlayer2.interactable = !isAutoBattle;
             Attack.interactable = !isAutoBattle;
             Skip.interactable = !isAutoBattle;
             AddPlayer1Units.interactable = !isAutoBattle;

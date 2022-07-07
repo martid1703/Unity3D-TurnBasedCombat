@@ -9,14 +9,12 @@ namespace UnfrozenTestWork
         public Queue<UnitModel> _battleQueue;
         private UnitModel _attackingUnit;
         private Action<UnitBelonging> _gameOver;
-        private Action<BattleManagerState> _updateBattleManagerState;
         private List<UnitModel> _player1Units;
         private List<UnitModel> _player2Units;
 
-        public TurnLogicProvider(Action<BattleManagerState> updateBattleManagerState, Action<UnitBelonging> gameOver)
+        public TurnLogicProvider(Action<UnitBelonging> gameOver)
         {
             _gameOver = gameOver ?? throw new ArgumentNullException(nameof(gameOver));
-            _updateBattleManagerState = updateBattleManagerState ?? throw new ArgumentNullException(nameof(updateBattleManagerState));
         }
 
         public Queue<UnitModel> CreateBattleQueue(List<UnitModel> player1Units, List<UnitModel> player2Units)
@@ -73,7 +71,6 @@ namespace UnfrozenTestWork
 
             _attackingUnit = GetNextAttackingUnit();
             _attackingUnit.SelectAsAttacker();
-            _updateBattleManagerState(BattleManagerState.Busy);
             return _attackingUnit;
         }
 

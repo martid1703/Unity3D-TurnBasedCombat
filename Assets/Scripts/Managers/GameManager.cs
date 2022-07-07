@@ -16,6 +16,7 @@ namespace UnfrozenTestWork
 
         private void Start()
         {
+            _uiManager.DisableUI();
             DefaultGameSettings = new DefaultGameSettings(_battleManager.Player1.IsHuman, _battleManager.Player2.IsHuman);
             SetupPlayers(DefaultGameSettings.DefaultAutoBattle);
             StartCoroutine(_battleManager.StartGame());
@@ -23,6 +24,7 @@ namespace UnfrozenTestWork
 
         public void Restart()
         {
+            _uiManager.DisableUI();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             PauseGame(false);
         }

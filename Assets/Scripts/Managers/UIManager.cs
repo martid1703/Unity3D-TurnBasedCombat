@@ -43,6 +43,12 @@ namespace UnfrozenTestWork
             _sceneFader = GetComponent<SceneFader>();
         }
 
+        public void DisableUI()
+        {
+            GameOverUI.gameObject.SetActive(false);
+            InGameUI.gameObject.SetActive(false);
+        }
+
         public IEnumerator FadeScreen(bool fadeIn)
         {
             if (fadeIn)
@@ -87,7 +93,7 @@ namespace UnfrozenTestWork
         public void SwitchToOverviewMode(bool isNewGame)
         {
             ShowInGameUI(isNewGame);
-            InGameUI.SwitchToOverviewMode(_battleManager.IsAutoBattle);
+            InGameUI.SwitchToOverviewMode();
         }
 
         public void SwitchToBattleMode()
@@ -128,8 +134,8 @@ namespace UnfrozenTestWork
             if (InGameUI.gameObject.activeSelf == false)
             {
                 SetupInGameUI(isNewGame);
+                InGameUI.gameObject.SetActive(true);
             }
-            InGameUI.gameObject.SetActive(true);
         }
 
         public void HideInGameUI()
@@ -165,7 +171,7 @@ namespace UnfrozenTestWork
             InGameUI.IsHumanPlayer1.onValueChanged.AddListener((v) =>
             {
                 _battleManager.Player1.IsHuman = v;
-                _battleManager.SwitchAutoBattle(!_battleManager.Player1.IsHuman & !_battleManager.Player2.IsHuman);
+                bool isAutoBattle = IsAutoBattle();
             });
             if (isNewGame)
             {
@@ -175,7 +181,7 @@ namespace UnfrozenTestWork
             InGameUI.IsHumanPlayer2.onValueChanged.AddListener((v) =>
             {
                 _battleManager.Player2.IsHuman = v;
-                _battleManager.SwitchAutoBattle(!_battleManager.Player1.IsHuman & !_battleManager.Player2.IsHuman);
+                bool isAutoBattle = IsAutoBattle();
             });
             if (isNewGame)
             {
@@ -210,6 +216,11 @@ namespace UnfrozenTestWork
            {
                _battleManager.DecrementUnits(UnitBelonging.Player2);
            });
+        }
+
+        private bool IsAutoBattle()
+        {
+            return !_battleManager.Player1.IsHuman & !_battleManager.Player2.IsHuman;
         }
     }
 }

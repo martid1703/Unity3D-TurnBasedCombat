@@ -32,7 +32,6 @@ namespace UnfrozenTestWork
 
 
         private CameraController _cameraController;
-        private BattleManagerState _battleManagerstate;
         private TurnLogicProvider _turnLogicProvider;
         public bool IsGameOver { get; private set; }
         private StateSwitcher _stateSwitcher;
@@ -79,7 +78,7 @@ namespace UnfrozenTestWork
                 );
 
             BattleSpeedChange += _unitSpawner.OnBattleSpeedChange;
-            _turnLogicProvider = new TurnLogicProvider(SetBattleManagerState, GameOver);
+            _turnLogicProvider = new TurnLogicProvider(GameOver);
         }
 
         public IEnumerator StartGame()
@@ -106,17 +105,13 @@ namespace UnfrozenTestWork
 
             yield return _uiManager.FadeScreen(true);
 
-            SetBattleManagerState(BattleManagerState.Free);
-
-            yield return StartGameCycle();
+            yield return RunGameCycle();
         }
 
-        private IEnumerator StartGameCycle()
+        private IEnumerator RunGameCycle()
         {
             while (true)
             {
-                yield return WaitBattleManagerState(BattleManagerState.Free);
-
                 AttackingUnit = _turnLogicProvider.NextTurn();
                 AttackedUnit = null;
 
@@ -125,7 +120,7 @@ namespace UnfrozenTestWork
                     yield break;
                 }
 
-                if (IsPlayerTurn())
+                if (IsPlayer1Turn())
                 {
                     yield return Player1.TakeTurn();
                 }
@@ -140,7 +135,7 @@ namespace UnfrozenTestWork
             }
         }
 
-        private bool IsPlayerTurn()
+        private bool IsPlayer1Turn()
         {
             if (AttackingUnit == null || AttackingUnit.UnitData.Belonging != UnitBelonging.Player1)
             {
@@ -164,7 +159,7 @@ namespace UnfrozenTestWork
 
         public void SetPlayerState(PlayerTurnState state)
         {
-            if (IsPlayerTurn())
+            if (IsPlayer1Turn())
             {
                 Player1.SetState(state);
             }
@@ -172,11 +167,6 @@ namespace UnfrozenTestWork
             {
                 Player2.SetState(state);
             }
-        }
-
-        public void SwitchAutoBattle(bool value)
-        {
-            IsAutoBattle = value;
         }
 
         public void DecrementUnits(UnitBelonging unitBelonging)
@@ -249,23 +239,6 @@ namespace UnfrozenTestWork
             yield return SetupCamera();
         }
 
-        private IEnumerator WaitBattleManagerState(BattleManagerState state)
-        {
-            Debug.Log($"BattleManagerState waits to enter free state.");
-            while (true)
-            {
-                if (_battleManagerstate != state)
-                {
-                    yield return new WaitForSeconds(0.1f);
-                }
-                else
-                {
-                    Debug.Log($"BattleManagerState is free now.");
-                    yield break;
-                }
-            }
-        }
-
         public void OnUnitSelected(object sender, EventArgs args)
         {
             AttackedUnit = sender as UnitModel;
@@ -309,11 +282,11 @@ namespace UnfrozenTestWork
                 return false;
             }
 
-            if (IsPlayerTurn() & unit.IsPlayer2)
+            if (IsPlayer1Turn() & unit.IsPlayer2)
             {
                 _uiManager.SetAttackCursor();
             }
-            if (!IsPlayerTurn() & !unit.IsPlayer2)
+            if (!IsPlayer1Turn() & !unit.IsPlayer2)
             {
                 _uiManager.SetAttackCursor();
             }
@@ -341,11 +314,6 @@ namespace UnfrozenTestWork
                 return false;
             }
             return true;
-        }
-
-        public void SetBattleManagerState(BattleManagerState state)
-        {
-            _battleManagerstate = state;
         }
 
         private void GameOver(UnitBelonging winner)
