@@ -6,6 +6,7 @@ namespace UnfrozenTestWork
     public enum UnitType
     {
         Paladin,
-        Miner
+        Miner,
+        MinerElite
     }
 }

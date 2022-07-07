@@ -80,6 +80,7 @@ namespace UnfrozenTestWork
 
         public void PauseGame(bool pause)
         {
+            _uiManager.SetRegularCursor();
             if (pause)
             {
                 Time.timeScale = 0f;
