@@ -64,13 +64,13 @@ namespace UnfrozenTestWork
             while (true)
             {
                 List<UnitModel> attackedUnits;
-                if (this is Player)
+                if (this is Player1)
                 {
-                    attackedUnits = BattleManager.EnemyUnits;
+                    attackedUnits = BattleManager.Player2Units;
                 }
                 else
                 {
-                    attackedUnits = BattleManager.PlayerUnits;
+                    attackedUnits = BattleManager.Player1Units;
                 }
                 if (!IsHuman)//in case we switch auto-mode after player turn begins
                 {
@@ -104,13 +104,13 @@ namespace UnfrozenTestWork
 
             List<UnitModel> attackedUnits;
 
-            if (this is Player)
+            if (this is Player1)
             {
-                attackedUnits = BattleManager.EnemyUnits;
+                attackedUnits = BattleManager.Player2Units;
             }
             else
             {
-                attackedUnits = BattleManager.PlayerUnits;
+                attackedUnits = BattleManager.Player1Units;
             }
 
             _attackedUnit = SelectAttackedUnit(attackedUnits.ToArray());
@@ -149,7 +149,7 @@ namespace UnfrozenTestWork
 
         protected IEnumerator PerformTurn()
         {
-            var msg = $"Player takes his turn.";
+            var msg = $"{GetName()} takes his turn.";
             BattleManager.SetGameStatus(msg);
             if (!IsHuman)
             {
@@ -161,7 +161,7 @@ namespace UnfrozenTestWork
 
         protected IEnumerator SkipTurn()
         {
-            var msg = $"Player skips his turn.";
+            var msg = $"{GetName()} skips his turn.";
             Debug.Log(msg);
             BattleManager.SetGameStatus(msg);
             if (!IsHuman)
@@ -169,6 +169,19 @@ namespace UnfrozenTestWork
                 yield return new WaitForSeconds(1f);
             }
             yield return _attackingUnit.SkipTurn();
+        }
+
+        private string GetName()
+        {
+            if (this is Player1)
+            {
+                return nameof(Player1);
+            }
+            else
+            {
+                return nameof(Player2);
+            }
+
         }
     }
 }

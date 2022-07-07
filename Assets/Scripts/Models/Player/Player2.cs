@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace UnfrozenTestWork
 {
-    public class Enemy : PlayerBase
+    public class Player2 : PlayerBase
     {
         public new IEnumerator TakeTurn()
         {

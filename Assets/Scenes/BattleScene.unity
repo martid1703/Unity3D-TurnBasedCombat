@@ -774,7 +774,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8750819721455324284, guid: 8ac4e0de508859244877831a7b383661, type: 3}
       propertyPath: m_Name
-      value: IsHumanEnemy
+      value: IsHumanPlayer2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ac4e0de508859244877831a7b383661, type: 3}
@@ -1165,7 +1165,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8750819721455324284, guid: 8ac4e0de508859244877831a7b383661, type: 3}
       propertyPath: m_Name
-      value: IsHumanPlayer
+      value: IsHumanPlayer1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ac4e0de508859244877831a7b383661, type: 3}
@@ -1845,7 +1845,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6369122833268789347, guid: f1cacad0bed868e4a8f760d624181eab, type: 3}
       propertyPath: m_Name
-      value: SetEnemyUnitsQty
+      value: SetPlayer2UnitsQty
       objectReference: {fileID: 0}
     - target: {fileID: 6369122833334161364, guid: f1cacad0bed868e4a8f760d624181eab, type: 3}
       propertyPath: m_PreferredWidth
@@ -1888,12 +1888,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00c57c59ed5f651429403f5005367764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerUnitsPrefabs: 00000000000000000000000000000000
-  _enemyUnitsPrefabs: 01000000020000000100000001000000
+  _player1UnitsPrefabs: 00000000000000000000000000000000
+  _player2UnitsPrefabs: 01000000020000000100000001000000
   _battleSpace: {fileID: 47108924}
   _overviewSpace: {fileID: 1742941187}
-  _playerUnitsContainer: {fileID: 1389547526}
-  _enemyUnitsContainer: {fileID: 1738113500}
+  _player1UnitsContainer: {fileID: 1389547526}
+  _player2UnitsContainer: {fileID: 1738113500}
 --- !u!4 &584130033
 Transform:
   m_ObjectHideFlags: 0
@@ -2871,7 +2871,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1389547526}
   m_Layer: 4
-  m_Name: PlayerUnits
+  m_Name: Player1Units
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2997,7 +2997,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1738113500}
   m_Layer: 4
-  m_Name: EnemyUnits
+  m_Name: Player2Units
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3312,13 +3312,13 @@ MonoBehaviour:
   BattleQueue: {fileID: 1355641696}
   Attack: {fileID: 1314471357}
   Skip: {fileID: 453577703}
-  AddPlayerUnits: {fileID: 962681729}
-  RemovePlayerUnits: {fileID: 449382286}
-  AddEnemyUnits: {fileID: 126399411}
-  RemoveEnemyUnits: {fileID: 129339149}
+  AddPlayer1Units: {fileID: 962681729}
+  RemovePlayer1Units: {fileID: 449382286}
+  AddPlayer2Units: {fileID: 126399411}
+  RemovePlayer2Units: {fileID: 129339149}
   BattleSpeedSlider: {fileID: 47009825}
-  IsHumanPlayer: {fileID: 987470654}
-  IsHumanEnemy: {fileID: 82855679}
+  IsHumanPlayer1: {fileID: 987470654}
+  IsHumanPlayer2: {fileID: 82855679}
 --- !u!1 &2104449036
 GameObject:
   m_ObjectHideFlags: 0
@@ -4217,7 +4217,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6369122833268789347, guid: f1cacad0bed868e4a8f760d624181eab, type: 3}
       propertyPath: m_Name
-      value: SetPlayerUnitsQty
+      value: SetPlayer1UnitsQty
       objectReference: {fileID: 0}
     - target: {fileID: 6369122833268789347, guid: f1cacad0bed868e4a8f760d624181eab, type: 3}
       propertyPath: m_IsActive

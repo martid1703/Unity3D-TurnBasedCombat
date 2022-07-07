@@ -7,17 +7,17 @@ namespace UnfrozenTestWork
     public class UnitQtyChanger
     {
         private readonly UnitSpawner _unitSpawner;
-        private List<UnitModel> _playerUnits;
-        private List<UnitModel> _enemyUnits;
+        private List<UnitModel> _player1Units;
+        private List<UnitModel> _player2Units;
 
         public UnitQtyChanger(
             UnitSpawner unitSpawner,
-            List<UnitModel> playerUnits,
-            List<UnitModel> enemyUnits)
+            List<UnitModel> player1Units,
+            List<UnitModel> player2Units)
         {
             _unitSpawner = unitSpawner;
-            _playerUnits = playerUnits;
-            _enemyUnits = enemyUnits;
+            _player1Units = player1Units;
+            _player2Units = player2Units;
         }
 
         public UnitModel Increment(UnitBelonging unitBelonging)
@@ -26,13 +26,13 @@ namespace UnfrozenTestWork
             UnitType unitType;
             switch (unitBelonging)
             {
-                case UnitBelonging.Player:
-                    unitType = _playerUnits.Last().UnitData.Type;
-                    unit = _unitSpawner.AddUnit(unitBelonging, unitType, _playerUnits);
+                case UnitBelonging.Player1:
+                    unitType = _player1Units.Last().UnitData.Type;
+                    unit = _unitSpawner.AddUnit(unitBelonging, unitType, _player1Units);
                     break;
-                case UnitBelonging.Enemy:
-                    unitType = _enemyUnits.Last().UnitData.Type;
-                    unit = _unitSpawner.AddUnit(unitBelonging, unitType, _enemyUnits);
+                case UnitBelonging.Player2:
+                    unitType = _player2Units.Last().UnitData.Type;
+                    unit = _unitSpawner.AddUnit(unitBelonging, unitType, _player2Units);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unitBelonging));
@@ -45,21 +45,21 @@ namespace UnfrozenTestWork
             UnitModel unit;
             switch (unitBelonging)
             {
-                case UnitBelonging.Player:
-                    if (_playerUnits.Count == 1)
+                case UnitBelonging.Player1:
+                    if (_player1Units.Count == 1)
                     {
                         return null;
                     }
-                    unit = GetUnitToRemove(_playerUnits.ToArray());
-                    _playerUnits.Remove(unit);
+                    unit = GetUnitToRemove(_player1Units.ToArray());
+                    _player1Units.Remove(unit);
                     break;
-                case UnitBelonging.Enemy:
-                    if (_enemyUnits.Count == 1)
+                case UnitBelonging.Player2:
+                    if (_player2Units.Count == 1)
                     {
                         return null;
                     }
-                    unit = GetUnitToRemove(_enemyUnits.ToArray());
-                    _enemyUnits.Remove(unit);
+                    unit = GetUnitToRemove(_player2Units.ToArray());
+                    _player2Units.Remove(unit);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unitBelonging));

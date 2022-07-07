@@ -14,7 +14,7 @@ namespace UnfrozenTestWork
         public bool IsSelectedAsTarget;
         public bool IsSelectedAsAttacker;
         public bool IsAlive => UnitData.Health > 0;
-        public bool IsEnemy => UnitData.Belonging == UnitBelonging.Enemy;
+        public bool IsPlayer2 => UnitData.Belonging == UnitBelonging.Player2;
 
         private IUnitController _unitController;
         private UnitSelectionDisplayer _unitSelectionDisplayer;
@@ -112,12 +112,12 @@ namespace UnfrozenTestWork
 
         private void ResetLookDirection()
         {
-            if (UnitData.Belonging == UnitBelonging.Player)
+            if (UnitData.Belonging == UnitBelonging.Player1)
             {
                 _unitController.SetLookDirection(Vector3.right);
             }
 
-            if (UnitData.Belonging == UnitBelonging.Enemy)
+            if (UnitData.Belonging == UnitBelonging.Player2)
             {
                 _unitController.SetLookDirection(Vector3.left);
             }

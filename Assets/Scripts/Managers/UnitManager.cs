@@ -12,7 +12,7 @@ namespace UnfrozenTestWork
         public void OnUnitMouseOver(object sender, EventArgs args)
         {
             var unit = sender as UnitModel;
-            if (unit.IsEnemy)
+            if (unit.IsPlayer2)
             {
                 _uiManager.SetAttackCursor();
                 return;
@@ -40,19 +40,19 @@ namespace UnfrozenTestWork
             }
         }
 
-        public static void DestroyAllUnits(IEnumerable<UnitModel> playerUnits, IEnumerable<UnitModel> enemyUnits)
+        public static void DestroyAllUnits(IEnumerable<UnitModel> player1Units, IEnumerable<UnitModel> player2Units)
         {
-            if (playerUnits != null)
+            if (player1Units != null)
             {
-                foreach (var unit in playerUnits)
+                foreach (var unit in player1Units)
                 {
                     unit.Kill();
                 }
             }
 
-            if (enemyUnits != null)
+            if (player2Units != null)
             {
-                foreach (var unit in enemyUnits)
+                foreach (var unit in player2Units)
                 {
                     unit.Kill();
                 }

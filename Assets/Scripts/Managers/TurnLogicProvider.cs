@@ -10,24 +10,19 @@ namespace UnfrozenTestWork
         private UnitModel _attackingUnit;
         private Action<UnitBelonging> _gameOver;
         private Action<BattleManagerState> _updateBattleManagerState;
-        private List<UnitModel> _playerUnits;
-        private List<UnitModel> _enemyUnits;
-        private BattleQueuePresenter _battleQueuePresenter;
+        private List<UnitModel> _player1Units;
+        private List<UnitModel> _player2Units;
 
-        public TurnLogicProvider(
-            Action<BattleManagerState> updateBattleManagerState,
-            Action<UnitBelonging> gameOver,
-            BattleQueuePresenter battleQueuePresenter)
+        public TurnLogicProvider(Action<BattleManagerState> updateBattleManagerState, Action<UnitBelonging> gameOver)
         {
             _gameOver = gameOver ?? throw new ArgumentNullException(nameof(gameOver));
             _updateBattleManagerState = updateBattleManagerState ?? throw new ArgumentNullException(nameof(updateBattleManagerState));
-            _battleQueuePresenter = battleQueuePresenter ?? throw new ArgumentNullException(nameof(battleQueuePresenter));
         }
 
-        public Queue<UnitModel> CreateBattleQueue(List<UnitModel> playerUnits, List<UnitModel> enemyUnits)
+        public Queue<UnitModel> CreateBattleQueue(List<UnitModel> player1Units, List<UnitModel> player2Units)
         {
-            _playerUnits = playerUnits;
-            _enemyUnits = enemyUnits;
+            _player1Units = player1Units;
+            _player2Units = player2Units;
 
             if (CheckWinCondition(out UnitBelonging winner))
             {
@@ -37,8 +32,8 @@ namespace UnfrozenTestWork
             }
 
             var units = new List<UnitModel>();
-            units.AddRange(playerUnits);
-            units.AddRange(enemyUnits);
+            units.AddRange(player1Units);
+            units.AddRange(player2Units);
             units.Sort(new UnitComparer());
 
             var battleQueue = new Queue<UnitModel>(units.Count);
@@ -84,21 +79,21 @@ namespace UnfrozenTestWork
 
         private bool CheckWinCondition(out UnitBelonging winner)
         {
-            winner = UnitBelonging.Player;
-            if (_playerUnits.Count == 0 & _enemyUnits.Count == 0)
+            winner = UnitBelonging.Player1;
+            if (_player1Units.Count == 0 & _player2Units.Count == 0)
             {
                 return true;
             }
 
-            if (_playerUnits.Count == 0)
+            if (_player1Units.Count == 0)
             {
-                winner = UnitBelonging.Enemy;
+                winner = UnitBelonging.Player2;
                 return true;
             }
 
-            if (_enemyUnits.Count == 0)
+            if (_player2Units.Count == 0)
             {
-                winner = UnitBelonging.Player;
+                winner = UnitBelonging.Player1;
                 return true;
             }
             return false;

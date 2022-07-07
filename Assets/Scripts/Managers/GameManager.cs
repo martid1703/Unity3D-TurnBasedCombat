@@ -16,7 +16,7 @@ namespace UnfrozenTestWork
 
         private void Start()
         {
-            DefaultGameSettings = new DefaultGameSettings(_battleManager.Player.IsHuman, _battleManager.Enemy.IsHuman);
+            DefaultGameSettings = new DefaultGameSettings(_battleManager.Player1.IsHuman, _battleManager.Player2.IsHuman);
             SetupPlayers(DefaultGameSettings.DefaultAutoBattle);
             StartCoroutine(_battleManager.StartGame());
         }
@@ -36,12 +36,12 @@ namespace UnfrozenTestWork
         {
             if (isAutoBattle)
             {
-                _battleManager.Player.IsHuman = false;
-                _battleManager.Enemy.IsHuman = false;
+                _battleManager.Player1.IsHuman = false;
+                _battleManager.Player2.IsHuman = false;
                 return;
             }
-            _battleManager.Player.IsHuman = _uiManager.InGameUI.IsHumanPlayer;
-            _battleManager.Enemy.IsHuman = _uiManager.InGameUI.IsHumanEnemy;
+            _battleManager.Player1.IsHuman = _uiManager.InGameUI.IsHumanPlayer1;
+            _battleManager.Player2.IsHuman = _uiManager.InGameUI.IsHumanPlayer2;
         }
 
         private void TrackKeyboard()

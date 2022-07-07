@@ -19,25 +19,25 @@ namespace UnfrozenTestWork
         public Button Skip;
 
         [SerializeField]
-        public Button AddPlayerUnits;
+        public Button AddPlayer1Units;
 
         [SerializeField]
-        public Button RemovePlayerUnits;
+        public Button RemovePlayer1Units;
 
         [SerializeField]
-        public Button AddEnemyUnits;
+        public Button AddPlayer2Units;
 
         [SerializeField]
-        public Button RemoveEnemyUnits;
+        public Button RemovePlayer2Units;
 
         [SerializeField]
         public Slider BattleSpeedSlider;
 
         [SerializeField]
-        public Toggle IsHumanPlayer;
+        public Toggle IsHumanPlayer1;
 
         [SerializeField]
-        public Toggle IsHumanEnemy;
+        public Toggle IsHumanPlayer2;
 
         private TMP_Text _gameStatus;
 
@@ -70,23 +70,23 @@ namespace UnfrozenTestWork
         {
             Attack.interactable = !isAutoBattle;
             Skip.interactable = !isAutoBattle;
-            AddPlayerUnits.interactable = !isAutoBattle;
-            RemovePlayerUnits.interactable = !isAutoBattle;
-            AddEnemyUnits.interactable = !isAutoBattle;
-            RemoveEnemyUnits.interactable = !isAutoBattle;
+            AddPlayer1Units.interactable = !isAutoBattle;
+            RemovePlayer1Units.interactable = !isAutoBattle;
+            AddPlayer2Units.interactable = !isAutoBattle;
+            RemovePlayer2Units.interactable = !isAutoBattle;
         }
 
         private void OnDisable()
         {
             Attack.onClick.RemoveAllListeners();
             Skip.onClick.RemoveAllListeners();
-            AddPlayerUnits.onClick.RemoveAllListeners();
-            RemovePlayerUnits.onClick.RemoveAllListeners();
-            AddEnemyUnits.onClick.RemoveAllListeners();
-            RemoveEnemyUnits.onClick.RemoveAllListeners();
+            AddPlayer1Units.onClick.RemoveAllListeners();
+            RemovePlayer1Units.onClick.RemoveAllListeners();
+            AddPlayer2Units.onClick.RemoveAllListeners();
+            RemovePlayer2Units.onClick.RemoveAllListeners();
             BattleSpeedSlider.onValueChanged.RemoveAllListeners();
-            IsHumanPlayer.onValueChanged.RemoveAllListeners();
-            IsHumanEnemy.onValueChanged.RemoveAllListeners();
+            IsHumanPlayer1.onValueChanged.RemoveAllListeners();
+            IsHumanPlayer2.onValueChanged.RemoveAllListeners();
         }
     }
 }

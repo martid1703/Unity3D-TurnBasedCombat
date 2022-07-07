@@ -13,7 +13,7 @@ Unit images/animations for miner unit are properties of Unfrozen Studio, unit im
 ## What is implemented:
 * turn based combat system
 
-    There are two players named "Player" and "Enemy". They can either attack or skip a turn.
+    There are two players named "Player1" and "Player2". They can either attack or skip a turn.
 Players can be controlled by Human or by AI, which is set with the respecitve "IsHuman" button.
 > At the moment AI is not implemented and is choosing attack or skip randomly.
 * Unit visuals
@@ -35,3 +35,4 @@ Units are added at the end of the battlequeue. Units count cannot go below 1, at
 
 ## Known issues:
 * Sounds for unit animations do not work well with spine animation events. May be because animations events are incorrect. This is why there's no sound for miner unit movement, and attack/damage sounds are called manually from controller.
+*  There's no proper run animation for miner unit in spine asset, so it uses some other animation instead.

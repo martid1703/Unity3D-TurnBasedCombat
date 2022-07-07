@@ -20,16 +20,16 @@ namespace UnfrozenTestWork
             _unitScaler = new UnitScaler();
         }
 
-        public void PositionUnitsOverview(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect fitInto, float spaceBetweenUnits = 0f)
+        public void PositionUnitsOverview(UnitModel[] player1Units, UnitModel[] player2Units, Rect fitInto, float spaceBetweenUnits = 0f)
         {
             _spaceBetweenUnits = spaceBetweenUnits;
-            _unitPositionResult = PerformPositioning(playerUnits, enemyUnits, fitInto, _overviewLayer);
+            _unitPositionResult = PerformPositioning(player1Units, player2Units, fitInto, _overviewLayer);
         }
 
-        public void PositionUnitsBattle(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect fitInto, float spaceBetweenUnits = 2f)
+        public void PositionUnitsBattle(UnitModel[] player1Units, UnitModel[] player2Units, Rect fitInto, float spaceBetweenUnits = 2f)
         {
             _spaceBetweenUnits = spaceBetweenUnits;
-            PerformPositioning(playerUnits, enemyUnits, fitInto, _battleLayer);
+            PerformPositioning(player1Units, player2Units, fitInto, _battleLayer);
         }
 
         public void RevertUnitsBack(UnitModel attackingUnit, UnitModel attackedUnit)
@@ -56,11 +56,11 @@ namespace UnfrozenTestWork
             {
                 switch (unit.UnitData.Belonging)
                 {
-                    case UnitBelonging.Player:
-                        unitTransform = _unitPositionResult.PlayerUnitTransforms[unit];
+                    case UnitBelonging.Player1:
+                        unitTransform = _unitPositionResult.Player1UnitTransforms[unit];
                         break;
-                    case UnitBelonging.Enemy:
-                        unitTransform = _unitPositionResult.EnemyUnitTransforms[unit];
+                    case UnitBelonging.Player2:
+                        unitTransform = _unitPositionResult.Player2UnitTransforms[unit];
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Belonging));
@@ -78,28 +78,28 @@ namespace UnfrozenTestWork
             ChangeSortingLayer(new UnitModel[] { unit }, _overviewLayer);
         }
 
-        private UnitPositionResult PerformPositioning(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect fitInto, string unitLayer)
+        private UnitPositionResult PerformPositioning(UnitModel[] player1Units, UnitModel[] player2Units, Rect fitInto, string unitLayer)
         {
-            var playerFitInto = GetPlayerFitInto(fitInto);
-            var enemyFitInto = GetEnemyFitInto(fitInto);
+            var player1FitInto = GetPlayer1FitInto(fitInto);
+            var player2FitInto = GetPlayer2FitInto(fitInto);
 
-            Scale(playerUnits, enemyUnits, playerFitInto, enemyFitInto);
-            UnitPositionResult unitPositionResult = PlaceUnits(playerUnits, enemyUnits, playerFitInto, enemyFitInto, unitLayer);
+            Scale(player1Units, player2Units, player1FitInto, player2FitInto);
+            UnitPositionResult unitPositionResult = PlaceUnits(player1Units, player2Units, player1FitInto, player2FitInto, unitLayer);
             return unitPositionResult;
         }
 
-        private UnitPositionResult PlaceUnits(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect playerFitInto, Rect enemyFitInto, string layerName)
+        private UnitPositionResult PlaceUnits(UnitModel[] player1Units, UnitModel[] player2Units, Rect player1FitInto, Rect player2FitInto, string layerName)
         {
-            Dictionary<UnitModel, UnitTransform> PlayerUnitTransforms = PlaceUnits(playerUnits, playerFitInto);
-            ChangeSortingLayer(playerUnits, layerName);
+            Dictionary<UnitModel, UnitTransform> Player1UnitTransforms = PlaceUnits(player1Units, player1FitInto);
+            ChangeSortingLayer(player1Units, layerName);
 
-            Dictionary<UnitModel, UnitTransform> EnemyUnitTransforms = PlaceUnits(enemyUnits, enemyFitInto);
-            ChangeSortingLayer(enemyUnits, layerName);
+            Dictionary<UnitModel, UnitTransform> Player2UnitTransforms = PlaceUnits(player2Units, player2FitInto);
+            ChangeSortingLayer(player2Units, layerName);
 
-            return new UnitPositionResult(PlayerUnitTransforms, EnemyUnitTransforms);
+            return new UnitPositionResult(Player1UnitTransforms, Player2UnitTransforms);
         }
 
-        private static Rect GetPlayerFitInto(Rect fitInto)
+        private static Rect GetPlayer1FitInto(Rect fitInto)
         {
             return new Rect(
                  fitInto.position.x,
@@ -108,7 +108,7 @@ namespace UnfrozenTestWork
                  fitInto.height);
         }
 
-        private static Rect GetEnemyFitInto(Rect fitInto)
+        private static Rect GetPlayer2FitInto(Rect fitInto)
         {
             return new Rect(
                  fitInto.position.x + fitInto.width / 2,
@@ -117,13 +117,13 @@ namespace UnfrozenTestWork
                  fitInto.height);
         }
 
-        private void Scale(UnitModel[] playerUnits, UnitModel[] enemyUnits, Rect playerFitInto, Rect enemyFitInto)
+        private void Scale(UnitModel[] player1Units, UnitModel[] player2Units, Rect player1FitInto, Rect player2FitInto)
         {
-            Dictionary<UnitModel, UnitTransform> playerUnitPositionResult;
-            Dictionary<UnitModel, UnitTransform> enemyPositionResult;
+            Dictionary<UnitModel, UnitTransform> player1UnitPositionResult;
+            Dictionary<UnitModel, UnitTransform> player2PositionResult;
             try
             {
-                playerUnitPositionResult = GetUnitPositionResult(playerUnits, playerFitInto);
+                player1UnitPositionResult = GetUnitPositionResult(player1Units, player1FitInto);
             }
             catch (System.Exception ex)
             {
@@ -134,7 +134,7 @@ namespace UnfrozenTestWork
 
             try
             {
-                enemyPositionResult = GetUnitPositionResult(enemyUnits, enemyFitInto);
+                player2PositionResult = GetUnitPositionResult(player2Units, player2FitInto);
             }
             catch (System.Exception ex)
             {
@@ -143,9 +143,9 @@ namespace UnfrozenTestWork
                 throw;
             }
 
-            float smallestScale = _unitScaler.FindSmallestScale(playerUnitPositionResult, enemyPositionResult, playerFitInto, enemyFitInto, _spaceBetweenUnits);
-            _unitScaler.ScaleUnits(playerUnits, smallestScale);
-            _unitScaler.ScaleUnits(enemyUnits, smallestScale);
+            float smallestScale = _unitScaler.FindSmallestScale(player1UnitPositionResult, player2PositionResult, player1FitInto, player2FitInto, _spaceBetweenUnits);
+            _unitScaler.ScaleUnits(player1Units, smallestScale);
+            _unitScaler.ScaleUnits(player2Units, smallestScale);
         }
 
         private void ChangeSortingLayer(UnitModel[] units, string layerName)
@@ -164,7 +164,7 @@ namespace UnfrozenTestWork
         {
             var unitsTransforms = new Dictionary<UnitModel, UnitTransform>();
 
-            float lastUnitPositionX = units[0].UnitData.Belonging == UnitBelonging.Player ? fitInto.center.x + fitInto.width / 2 : fitInto.center.x - fitInto.width / 2;
+            float lastUnitPositionX = units[0].UnitData.Belonging == UnitBelonging.Player1 ? fitInto.center.x + fitInto.width / 2 : fitInto.center.x - fitInto.width / 2;
 
             for (int i = 0; i < units.Length; i++)
             {
@@ -180,7 +180,7 @@ namespace UnfrozenTestWork
                     totalOffsetX = unitBoxCollider.size.x / 2 + prevUnitSize.x / 2 + _spaceBetweenUnits;
                 }
 
-                totalOffsetX = units[i].UnitData.Belonging == UnitBelonging.Player ? -totalOffsetX : totalOffsetX;
+                totalOffsetX = units[i].UnitData.Belonging == UnitBelonging.Player1 ? -totalOffsetX : totalOffsetX;
 
                 // box collider size and offset values are not affected by unit current scale, so need to adjust
                 totalOffsetX *= units[i].transform.localScale.x;

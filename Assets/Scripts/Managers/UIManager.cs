@@ -162,24 +162,24 @@ namespace UnfrozenTestWork
                 _battleManager.SetPlayerState(PlayerTurnState.SkipTurn);
             });
 
-            InGameUI.IsHumanPlayer.onValueChanged.AddListener((v) =>
+            InGameUI.IsHumanPlayer1.onValueChanged.AddListener((v) =>
             {
-                _battleManager.Player.IsHuman = v;
-                _battleManager.SwitchAutoBattle(!_battleManager.Player.IsHuman & !_battleManager.Enemy.IsHuman);
+                _battleManager.Player1.IsHuman = v;
+                _battleManager.SwitchAutoBattle(!_battleManager.Player1.IsHuman & !_battleManager.Player2.IsHuman);
             });
             if (isNewGame)
             {
-                InGameUI.IsHumanPlayer.isOn = _gameManager.DefaultGameSettings.PlayerIsHuman;
+                InGameUI.IsHumanPlayer1.isOn = _gameManager.DefaultGameSettings.Player1IsHuman;
             }
 
-            InGameUI.IsHumanEnemy.onValueChanged.AddListener((v) =>
+            InGameUI.IsHumanPlayer2.onValueChanged.AddListener((v) =>
             {
-                _battleManager.Enemy.IsHuman = v;
-                _battleManager.SwitchAutoBattle(!_battleManager.Player.IsHuman & !_battleManager.Enemy.IsHuman);
+                _battleManager.Player2.IsHuman = v;
+                _battleManager.SwitchAutoBattle(!_battleManager.Player1.IsHuman & !_battleManager.Player2.IsHuman);
             });
             if (isNewGame)
             {
-                InGameUI.IsHumanEnemy.isOn = _gameManager.DefaultGameSettings.EnemyIsHuman;
+                InGameUI.IsHumanPlayer2.isOn = _gameManager.DefaultGameSettings.Player2IsHuman;
             }
 
             InGameUI.BattleSpeedSlider.onValueChanged.AddListener((v) =>
@@ -191,24 +191,24 @@ namespace UnfrozenTestWork
                 InGameUI.BattleSpeedSlider.value = _gameManager.DefaultGameSettings.DefaultBattleSpeed;
             }
 
-            InGameUI.AddPlayerUnits.onClick.AddListener(() =>
+            InGameUI.AddPlayer1Units.onClick.AddListener(() =>
            {
-               _battleManager.IncrementUnits(UnitBelonging.Player);
+               _battleManager.IncrementUnits(UnitBelonging.Player1);
            });
 
-            InGameUI.RemovePlayerUnits.onClick.AddListener(() =>
+            InGameUI.RemovePlayer1Units.onClick.AddListener(() =>
            {
-               _battleManager.DecrementUnits(UnitBelonging.Player);
+               _battleManager.DecrementUnits(UnitBelonging.Player1);
            });
 
-            InGameUI.AddEnemyUnits.onClick.AddListener(() =>
+            InGameUI.AddPlayer2Units.onClick.AddListener(() =>
           {
-              _battleManager.IncrementUnits(UnitBelonging.Enemy);
+              _battleManager.IncrementUnits(UnitBelonging.Player2);
           });
 
-            InGameUI.RemoveEnemyUnits.onClick.AddListener(() =>
+            InGameUI.RemovePlayer2Units.onClick.AddListener(() =>
            {
-               _battleManager.DecrementUnits(UnitBelonging.Enemy);
+               _battleManager.DecrementUnits(UnitBelonging.Player2);
            });
         }
     }

@@ -8,15 +8,15 @@ using UnityEngine.SceneManagement;
 
 namespace UnfrozenTestWork
 {
-    [RequireComponent(typeof(Player))]
-    [RequireComponent(typeof(Enemy))]
+    [RequireComponent(typeof(Player1))]
+    [RequireComponent(typeof(Player2))]
     public class BattleManager : MonoBehaviour
     {
         [SerializeField]
-        private UnitType[] _playerUnitsPrefabs;
+        private UnitType[] _player1UnitsPrefabs;
 
         [SerializeField]
-        private UnitType[] _enemyUnitsPrefabs;
+        private UnitType[] _player2UnitsPrefabs;
 
         [SerializeField]
         private RectTransform _battleSpace;
@@ -25,10 +25,10 @@ namespace UnfrozenTestWork
         private RectTransform _overviewSpace;
 
         [SerializeField]
-        private Transform _playerUnitsContainer;
+        private Transform _player1UnitsContainer;
 
         [SerializeField]
-        private Transform _enemyUnitsContainer;
+        private Transform _player2UnitsContainer;
 
 
         private CameraController _cameraController;
@@ -44,12 +44,12 @@ namespace UnfrozenTestWork
 
 
         public bool IsAutoBattle { get; private set; }
-        public Enemy Enemy { get; private set; }
-        public Player Player { get; private set; }
+        public Player2 Player2 { get; private set; }
+        public Player1 Player1 { get; private set; }
         public Transform OverviewSpace => _overviewSpace;
         public BattleState BattleState { get; private set; }
-        public List<UnitModel> PlayerUnits { get; private set; }
-        public List<UnitModel> EnemyUnits { get; private set; }
+        public List<UnitModel> Player1Units { get; private set; }
+        public List<UnitModel> Player2Units { get; private set; }
         public UnitModel AttackingUnit { get; private set; }
         public UnitModel AttackedUnit { get; private set; }
 
@@ -58,8 +58,8 @@ namespace UnfrozenTestWork
             var _activeScene = SceneManager.GetActiveScene();
             _cameraController = SceneObjectsFinder.FindFirstInRoot<CameraController>(_activeScene);
             _uiManager = FindObjectOfType<UIManager>();
-            Player = GetComponent<Player>();
-            Enemy = GetComponent<Enemy>();
+            Player1 = GetComponent<Player1>();
+            Player2 = GetComponent<Player2>();
             _unitModelProvider = FindObjectOfType<UnitModelProvider>();
             _battleQueuePresenter = FindObjectOfType<BattleQueuePresenter>();
         }
@@ -73,13 +73,13 @@ namespace UnfrozenTestWork
                 OnUnitIsDead,
                 IsUnitSelectable,
                 IsUnitSelectableAsTarget,
-                _playerUnitsContainer,
-                _enemyUnitsContainer,
+                _player1UnitsContainer,
+                _player2UnitsContainer,
                 OnUnitMouseOnExit
                 );
 
             BattleSpeedChange += _unitSpawner.OnBattleSpeedChange;
-            _turnLogicProvider = new TurnLogicProvider(SetBattleManagerState, GameOver, _battleQueuePresenter);
+            _turnLogicProvider = new TurnLogicProvider(SetBattleManagerState, GameOver);
         }
 
         public IEnumerator StartGame()
@@ -90,17 +90,17 @@ namespace UnfrozenTestWork
 
             IsGameOver = false;
 
-            UnitManager.DestroyAllUnits(PlayerUnits, EnemyUnits);
+            UnitManager.DestroyAllUnits(Player1Units, Player2Units);
 
-            UnitSpawnerResult spawnResult = _unitSpawner.Spawn(_playerUnitsPrefabs, _enemyUnitsPrefabs);
+            UnitSpawnerResult spawnResult = _unitSpawner.Spawn(_player1UnitsPrefabs, _player2UnitsPrefabs);
 
-            PlayerUnits = spawnResult.PlayerUnits.ToList();
-            EnemyUnits = spawnResult.EnemyUnits.ToList();
+            Player1Units = spawnResult.Player1Units.ToList();
+            Player2Units = spawnResult.Player2Units.ToList();
 
-            var battleQueue = _turnLogicProvider.CreateBattleQueue(PlayerUnits, EnemyUnits);
+            var battleQueue = _turnLogicProvider.CreateBattleQueue(Player1Units, Player2Units);
             yield return _battleQueuePresenter.AddUnitIcons(battleQueue);
 
-            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, PlayerUnits, EnemyUnits, _uiManager);
+            _stateSwitcher = new StateSwitcher(_overviewSpace, _battleSpace, Player1Units, Player2Units, _uiManager);
 
             yield return SwitchToOverview(true);
 
@@ -127,11 +127,11 @@ namespace UnfrozenTestWork
 
                 if (IsPlayerTurn())
                 {
-                    yield return Player.TakeTurn();
+                    yield return Player1.TakeTurn();
                 }
                 else
                 {
-                    yield return Enemy.TakeTurn();
+                    yield return Player2.TakeTurn();
                 }
 
                 _battleQueuePresenter.TakeTurn(AttackingUnit);
@@ -142,7 +142,7 @@ namespace UnfrozenTestWork
 
         private bool IsPlayerTurn()
         {
-            if (AttackingUnit == null || AttackingUnit.UnitData.Belonging != UnitBelonging.Player)
+            if (AttackingUnit == null || AttackingUnit.UnitData.Belonging != UnitBelonging.Player1)
             {
                 return false;
             }
@@ -151,11 +151,12 @@ namespace UnfrozenTestWork
 
         private IEnumerator ValidateGameStartConditions()
         {
-            if (_playerUnitsPrefabs.Count() == 0 || _enemyUnitsPrefabs.Count() == 0)
+            if (_player1UnitsPrefabs.Count() == 0 || _player2UnitsPrefabs.Count() == 0)
             {
-                var msg = "Player or Enemy units are not set. Exiting...";
+                var msg = "Player1 or Player2 units are not set. Exiting...";
+                Debug.LogError(msg);
                 _uiManager.ShowGameOverUI(msg, false);
-                yield return new WaitForSeconds(3f);
+                yield return new WaitForSecondsRealtime(3f);
                 Quit();
                 yield break;
             }
@@ -165,11 +166,11 @@ namespace UnfrozenTestWork
         {
             if (IsPlayerTurn())
             {
-                Player.SetState(state);
+                Player1.SetState(state);
             }
             else
             {
-                Enemy.SetState(state);
+                Player2.SetState(state);
             }
         }
 
@@ -180,7 +181,7 @@ namespace UnfrozenTestWork
 
         public void DecrementUnits(UnitBelonging unitBelonging)
         {
-            var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
+            var unitQtyChanger = new UnitQtyChanger(_unitSpawner, Player1Units, Player2Units);
             var unit = unitQtyChanger.Decrement(unitBelonging);
             OnUnitIsDead(unit, new EventArgs());
 
@@ -189,7 +190,7 @@ namespace UnfrozenTestWork
 
         public void IncrementUnits(UnitBelonging unitBelonging)
         {
-            var unitQtyChanger = new UnitQtyChanger(_unitSpawner, PlayerUnits, EnemyUnits);
+            var unitQtyChanger = new UnitQtyChanger(_unitSpawner, Player1Units, Player2Units);
             var unit = unitQtyChanger.Increment(unitBelonging);
             _turnLogicProvider.AddToBattleQueue(unit);
             _battleQueuePresenter.AddUnitIcon(unit);
@@ -269,12 +270,12 @@ namespace UnfrozenTestWork
         {
             AttackedUnit = sender as UnitModel;
             Debug.Log($"Player selected unit to attack. Unit:{AttackedUnit}.");
-            if (AttackedUnit.IsEnemy)
+            if (AttackedUnit.IsPlayer2)
             {
-                UnitManager.DeselectUnitsExceptOne(EnemyUnits, AttackedUnit);
+                UnitManager.DeselectUnitsExceptOne(Player2Units, AttackedUnit);
                 return;
             }
-            UnitManager.DeselectUnitsExceptOne(PlayerUnits, AttackedUnit);
+            UnitManager.DeselectUnitsExceptOne(Player1Units, AttackedUnit);
         }
 
         public void OnUnitIsDead(object sender, EventArgs args)
@@ -288,11 +289,11 @@ namespace UnfrozenTestWork
 
             switch (unit.UnitData.Belonging)
             {
-                case UnitBelonging.Player:
-                    PlayerUnits.Remove(unit);
+                case UnitBelonging.Player1:
+                    Player1Units.Remove(unit);
                     break;
-                case UnitBelonging.Enemy:
-                    EnemyUnits.Remove(unit);
+                case UnitBelonging.Player2:
+                    Player2Units.Remove(unit);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unit.UnitData.Type));
@@ -308,11 +309,11 @@ namespace UnfrozenTestWork
                 return false;
             }
 
-            if (IsPlayerTurn() & unit.IsEnemy)
+            if (IsPlayerTurn() & unit.IsPlayer2)
             {
                 _uiManager.SetAttackCursor();
             }
-            if (!IsPlayerTurn() & !unit.IsEnemy)
+            if (!IsPlayerTurn() & !unit.IsPlayer2)
             {
                 _uiManager.SetAttackCursor();
             }

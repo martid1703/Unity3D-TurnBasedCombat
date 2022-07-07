@@ -2,7 +2,7 @@ namespace UnfrozenTestWork
 {
     public enum UnitBelonging
     {
-        Player,
-        Enemy
+        Player1,
+        Player2
     }
 }

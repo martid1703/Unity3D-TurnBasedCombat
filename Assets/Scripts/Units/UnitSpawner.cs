@@ -27,8 +27,8 @@ namespace UnfrozenTestWork
         private readonly Func<UnitModel, bool> _isUnitSelectable;
         private readonly Func<UnitModel, bool> _isUnitSelectableAsTarget;
 
-        private Transform _playerUnitsContainer;
-        private Transform _enemyUnitsContainer;
+        private Transform _player1UnitsContainer;
+        private Transform _player2UnitsContainer;
 
         public UnitSpawner(
             UnitModelProvider unitModelProvider,
@@ -37,8 +37,8 @@ namespace UnfrozenTestWork
             EventHandler unitIsDead,
             Func<UnitModel, bool> isUnitSelectable,
             Func<UnitModel, bool> isUnitSelectableAsTarget,
-            Transform playerUnitsContainer,
-            Transform enemyUnitsContainer,
+            Transform player1UnitsContainer,
+            Transform player2UnitsContainer,
             EventHandler unitOnMouseExit)
         {
             _unitModelProvider = unitModelProvider;
@@ -46,8 +46,8 @@ namespace UnfrozenTestWork
             _unitSelected = unitSelected;
             _unitIsDead = unitIsDead;
             _isUnitSelectable = isUnitSelectable;
-            _playerUnitsContainer = playerUnitsContainer;
-            _enemyUnitsContainer = enemyUnitsContainer;
+            _player1UnitsContainer = player1UnitsContainer;
+            _player2UnitsContainer = player2UnitsContainer;
             _isUnitSelectableAsTarget = isUnitSelectableAsTarget;
             _unitOnMouseExit = unitOnMouseExit;
         }
@@ -57,13 +57,13 @@ namespace UnfrozenTestWork
             _battleSpeedChange?.Invoke(sender, args);
         }
 
-        public UnitSpawnerResult Spawn(IEnumerable<UnitType> playerUnits, IEnumerable<UnitType> enemyUnits)
+        public UnitSpawnerResult Spawn(IEnumerable<UnitType> player1Units, IEnumerable<UnitType> player2Units)
         {
             var startPosition = GetStartPosition();
-            var spawnedPlayerUnits = SpawnUnits(UnitBelonging.Player, playerUnits, startPosition);
-            var spawnedEnemyUnits = SpawnUnits(UnitBelonging.Enemy, enemyUnits, startPosition);
+            var spawnedPlayer1Units = SpawnUnits(UnitBelonging.Player1, player1Units, startPosition);
+            var spawnedPlayer2Units = SpawnUnits(UnitBelonging.Player2, player2Units, startPosition);
 
-            return new UnitSpawnerResult(spawnedPlayerUnits, spawnedEnemyUnits, new UnitModel[0]);
+            return new UnitSpawnerResult(spawnedPlayer1Units, spawnedPlayer2Units, new UnitModel[0]);
         }
 
         public UnitModel AddUnit(UnitBelonging unitBelonging, UnitType unit, List<UnitModel> units)
@@ -100,7 +100,7 @@ namespace UnfrozenTestWork
                 throw new Exception($"Cannot find prefab for unit type - {unit}.");
             }
 
-            var unitParent = unitBelonging == UnitBelonging.Player ? _playerUnitsContainer : _enemyUnitsContainer;
+            var unitParent = unitBelonging == UnitBelonging.Player1 ? _player1UnitsContainer : _player2UnitsContainer;
 
             var spawnedUnit = GameObject.Instantiate(
                 unitPrefab,

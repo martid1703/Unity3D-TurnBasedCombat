@@ -8,8 +8,8 @@ namespace UnfrozenTestWork
     {
         private readonly RectTransform _overviewSpace;
         private readonly RectTransform _battleSpace;
-        private readonly List<UnitModel> _playerUnits;
-        private readonly List<UnitModel> _enemyUnits;
+        private readonly List<UnitModel> _player1Units;
+        private readonly List<UnitModel> _player2Units;
 
         private UnitPositioner _unitPositioner;
         private UIManager _uiManager;
@@ -17,14 +17,14 @@ namespace UnfrozenTestWork
         public StateSwitcher(
             RectTransform overviewSpace,
             RectTransform battleSpace,
-            List<UnitModel> playerUnits,
-            List<UnitModel> enemyUnits,
+            List<UnitModel> player1Units,
+            List<UnitModel> player2Units,
             UIManager uiManager)
         {
             _overviewSpace = overviewSpace ?? throw new ArgumentNullException(nameof(overviewSpace));
             _battleSpace = battleSpace ?? throw new ArgumentNullException(nameof(battleSpace));
-            _playerUnits = playerUnits ?? throw new ArgumentNullException(nameof(playerUnits));
-            _enemyUnits = enemyUnits ?? throw new ArgumentNullException(nameof(enemyUnits));
+            _player1Units = player1Units ?? throw new ArgumentNullException(nameof(player1Units));
+            _player2Units = player2Units ?? throw new ArgumentNullException(nameof(player2Units));
             _uiManager = uiManager ?? throw new ArgumentNullException(nameof(uiManager));
 
             _unitPositioner = new UnitPositioner();
@@ -32,7 +32,7 @@ namespace UnfrozenTestWork
 
         public void SwitchToOverview()
         {
-            _unitPositioner.PositionUnitsOverview(_playerUnits.ToArray(), _enemyUnits.ToArray(), _overviewSpace.rect);
+            _unitPositioner.PositionUnitsOverview(_player1Units.ToArray(), _player2Units.ToArray(), _overviewSpace.rect);
             RemoveBackgroundBattleEffects();
         }
 
@@ -44,21 +44,21 @@ namespace UnfrozenTestWork
 
         public void SwitchToBattle(UnitModel attackingUnit, UnitModel attackedUnit)
         {
-            UnitModel[] playerUnits;
-            UnitModel[] enemyUnits;
+            UnitModel[] player1Units;
+            UnitModel[] player2Units;
 
-            if (attackingUnit.UnitData.Belonging == UnitBelonging.Player)
+            if (attackingUnit.UnitData.Belonging == UnitBelonging.Player1)
             {
-                playerUnits = new UnitModel[] { attackingUnit };
-                enemyUnits = new UnitModel[] { attackedUnit };
+                player1Units = new UnitModel[] { attackingUnit };
+                player2Units = new UnitModel[] { attackedUnit };
             }
             else
             {
-                playerUnits = new UnitModel[] { attackedUnit };
-                enemyUnits = new UnitModel[] { attackingUnit };
+                player1Units = new UnitModel[] { attackedUnit };
+                player2Units = new UnitModel[] { attackingUnit };
             }
 
-            _unitPositioner.PositionUnitsBattle(playerUnits, enemyUnits, _battleSpace.rect);
+            _unitPositioner.PositionUnitsBattle(player1Units, player2Units, _battleSpace.rect);
             AddBackgroundBattleEffects();
         }
 

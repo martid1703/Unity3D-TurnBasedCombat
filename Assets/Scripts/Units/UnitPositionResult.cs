@@ -5,13 +5,13 @@ namespace UnfrozenTestWork
 {
     public class UnitPositionResult
     {
-        public Dictionary<UnitModel, UnitTransform> PlayerUnitTransforms { get; private set; }
-        public Dictionary<UnitModel, UnitTransform> EnemyUnitTransforms { get; private set; }
+        public Dictionary<UnitModel, UnitTransform> Player1UnitTransforms { get; private set; }
+        public Dictionary<UnitModel, UnitTransform> Player2UnitTransforms { get; private set; }
 
-        public UnitPositionResult(Dictionary<UnitModel, UnitTransform> playerUnitTransforms, Dictionary<UnitModel, UnitTransform> enemyUnitTransforms)
+        public UnitPositionResult(Dictionary<UnitModel, UnitTransform> player1UnitTransforms, Dictionary<UnitModel, UnitTransform> player2UnitTransforms)
         {
-            PlayerUnitTransforms = playerUnitTransforms ?? throw new ArgumentNullException(nameof(playerUnitTransforms));
-            EnemyUnitTransforms = enemyUnitTransforms ?? throw new ArgumentNullException(nameof(enemyUnitTransforms));
+            Player1UnitTransforms = player1UnitTransforms ?? throw new ArgumentNullException(nameof(player1UnitTransforms));
+            Player2UnitTransforms = player2UnitTransforms ?? throw new ArgumentNullException(nameof(player2UnitTransforms));
         }
     }
 }

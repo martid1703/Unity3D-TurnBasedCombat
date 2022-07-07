@@ -92,7 +92,7 @@ namespace UnfrozenTestWork
         private UnitIcon SetIconImage(UnitModel unit, UnitIcon unitIcon)
         {
             Texture2D unitImage = _unitModelProvider.GetUnitIconImage(unit.UnitData.Type);
-            if (unit.UnitData.Belonging == UnitBelonging.Player)
+            if (unit.UnitData.Belonging == UnitBelonging.Player1)
             {
                 unitIcon.GetComponent<Image>().color = Color.blue;
             }

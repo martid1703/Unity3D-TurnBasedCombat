@@ -15,19 +15,19 @@ namespace UnfrozenTestWork
         }
 
         public float FindSmallestScale(
-            Dictionary<UnitModel, UnitTransform> playerUnitPositionResult,
-            Dictionary<UnitModel, UnitTransform> enemyPositionResult,
+            Dictionary<UnitModel, UnitTransform> player1UnitPositionResult,
+            Dictionary<UnitModel, UnitTransform> player2UnitPositionResult,
             Rect playerFitInto,
             Rect enmemyFitInto,
             float spaceBetweenUnits)
         {
-            var playerUnitsRect = GetUnitsRect(playerUnitPositionResult, spaceBetweenUnits);
-            float playerScale = GetUnitScale(playerUnitsRect, playerFitInto);
+            var player1UnitsRect = GetUnitsRect(player1UnitPositionResult, spaceBetweenUnits);
+            float player1Scale = GetUnitScale(player1UnitsRect, playerFitInto);
 
-            var enemyUnitsRect = GetUnitsRect(enemyPositionResult, spaceBetweenUnits);
-            float enemyScale = GetUnitScale(enemyUnitsRect, enmemyFitInto);
+            var player2UnitsRect = GetUnitsRect(player2UnitPositionResult, spaceBetweenUnits);
+            float player2Scale = GetUnitScale(player2UnitsRect, enmemyFitInto);
 
-            float smallestScale = playerScale < enemyScale ? playerScale : enemyScale;
+            float smallestScale = player1Scale < player2Scale ? player1Scale : player2Scale;
             return smallestScale;
         }
 
